@@ -25,17 +25,19 @@ type ElmTooling = {
 
 **Required**
 
-A list of file paths, to the entrypoints of the project. Compiling all the entrypoints (and the files they import) should produce all compilation errors of the project.
+A list of file paths, to the entrypoints of the project. Compiling all the entrypoints (and the files they import) should produce all compilation errors of the project.\*
 
 File paths are always relative to the directory containing the `elm-tooling.json` file.
 
 File paths must start with `./` to make it clear that they are relative.
 
-File paths must use `/` as the directory separator. `\` is not a valid directory separator\*. Programs consuming file paths must convert `/` to `\` on Windows if needed.
+File paths must use `/` as the directory separator. `\` is not a valid directory separator\†. Programs consuming file paths must convert `/` to `\` on Windows if needed.
 
 The array must **not** be empty.
 
-(\*) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
+(\*) Excluding tests. I guess you could compile every .elm file (recursively?) in `tests/`. Or maybe it’s easier to just run the tests?
+
+(\†) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
 
 ### binaries
 
