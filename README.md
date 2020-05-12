@@ -6,7 +6,7 @@ There are currently **zero known tools** using this file.
 
 ## File location
 
-`elm-tooling.json` must be located next to a `elm.json`.
+`elm-tooling.json` must be located next to an `elm.json`.
 
 ## Shape
 
@@ -31,13 +31,13 @@ File paths are always relative to the directory containing the `elm-tooling.json
 
 File paths must start with `./` to make it clear that they are relative.
 
-File paths must use `/` as the directory separator. `\` is not a valid directory separator\†. Programs consuming file paths must convert `/` to `\` on Windows if needed.
+File paths must use `/` as the directory separator. `\` is not a valid directory separator†. Programs consuming file paths must convert `/` to `\` on Windows if needed.
 
 The array must **not** be empty.
 
 (\*) Excluding tests. I guess you could compile every .elm file (recursively?) in `tests/`. Or maybe it’s easier to just run the tests?
 
-(\†) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
+(†) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
 
 ### binaries
 
@@ -67,7 +67,7 @@ dir="${ELM_HOME:-$HOME/.elm}"
 binary="$dir/elm-tooling/$name$version"
 ```
 
-With the above example (and assuming that the `ELM_HOME` environment variable) the following two binaries should exist:
+With the above example (and assuming that the `ELM_HOME` environment variable is not set) the following two binaries should exist:
 
 - `~/.elm/elm-tooling/elm0.19.1`
 - `~/.elm/elm-tooling/elm-format0.8.3`
