@@ -97,18 +97,15 @@ The binaries must be located in a standard location: Inside `elm-tooling/` insid
 The location of a binary can be resolved like this in `sh`, `bash` and `zsh`:
 
 ```bash
-# Set `dir` to the value of the `ELM_HOME` environment variable, and default to
-# `~/.elm` if `ELM_HOME` is not set.
-dir="${ELM_HOME:-$HOME/.elm}"
-# Set `binary` to the above `dir`, plus `/elm-tooling/`, plus the name of the
-# binary, plus the version of the binary.
-binary="$dir/elm-tooling/$name$version"
+"${ELM_HOME:-$HOME/.elm}/elm-tooling/$name/$version/$name"
 ```
 
 With the above example (and assuming that the `ELM_HOME` environment variable is not set) the following two binaries should exist:
 
-- `~/.elm/elm-tooling/elm0.19.1`
-- `~/.elm/elm-tooling/elm-format0.8.3`
+- `~/.elm/elm-tooling/elm/0.19.1/elm`
+- `~/.elm/elm-tooling/elm-format/0.8.3/elm-format`
+
+An earlier version of this document stored all binaries in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`.
 
 Tools must use the specified binaries and must not fall back to any other binary if they are missing. Missing binaries must be an error, or (if appropriate, and with the user’s permission) cause a download of the binary. Downloads should have security in mind.
 
