@@ -2,7 +2,9 @@
 
 This is a proposal for an `elm-tooling.json` file, where unofficial Elm tools can collaborate on per-project configuration they need.
 
-There are currently **zero known tools** using this file.
+Known tools reading this file:
+
+- [elm-version](https://github.com/lydell/elm-version)
 
 ## File location
 
