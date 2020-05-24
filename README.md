@@ -94,20 +94,25 @@ For example, the following means that the project uses elm 0.19.1 and elm-format
 
 Each tool name must correspond to a single binary.
 
-The binaries must be located in a standard location: Inside `elm-tooling/` inside “Elm Home.” The Elm compiler stores downloaded packages and REPL history in a directory that I call “Elm Home.” The default location on Linux and macOS is `~/.elm/`. You can customize the location by setting the `ELM_HOME` environment variable. (I’m not sure how this works on Windows.) So the default location of binaries on Linux and macOS is `~/.elm/elm-tooling/`.
+The binaries must be located in a standard location: Inside `elm-tooling/` inside “Elm Home.” The Elm compiler stores downloaded packages and REPL history in a directory that I call “Elm Home.” The default location on Linux and macOS is `~/.elm/`, and on Windows it is `%APPDATA%\elm`. You can customize the location by setting the `ELM_HOME` environment variable.
 
-The location of a binary can be resolved like this in `sh`, `bash` and `zsh`:
+The location of a binary can be resolved like this on Linux and macOS in `sh`, `bash` and `zsh`:
 
 ```bash
 "${ELM_HOME:-$HOME/.elm}/elm-tooling/$name/$version/$name"
 ```
 
-With the above example (and assuming that the `ELM_HOME` environment variable is not set) the following two binaries should exist:
+With the above example (and assuming that the `ELM_HOME` environment variable is not set) the following two binaries should exist on Linux and macOS:
 
 - `~/.elm/elm-tooling/elm/0.19.1/elm`
 - `~/.elm/elm-tooling/elm-format/0.8.3/elm-format`
 
-An earlier version of this document stored all binaries in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`.
+On a typical Windows setup (with a user called “John”), they would be:
+
+- `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm\0.19.1\elm`
+- `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm-format\0.8.3\elm-format`
+
+An earlier version of this document stored all binaries in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several binaries per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
 
 Tools must use the specified binaries and must not fall back to any other binary if they are missing. Missing binaries must be an error, or (if appropriate, and with the user’s permission) cause a download of the binary. Downloads should have security in mind.
 
