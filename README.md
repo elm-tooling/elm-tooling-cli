@@ -61,7 +61,7 @@ File paths must use `/` as the directory separator. `\` is not a valid directory
 
 The array must **not** be empty.
 
-(\*) Excluding tests. Maybe it’s the easiest to run the tests? (Note: Tests are usually located in `tests/`, but can exist outside that folder.)
+(\*) Excluding tests. For most projects, you should be able to find compilation errors in tests by running `elm-test make`. If tests are located outside `tests/`, though, you would miss out on those. Maybe there should be a `"tests": ["./tests", "./somewhere-else"]` field? Then tools would know to run `elm-test make ./tests ./somewhere-else` to find all test compilation errors. It would also allow elm-test itself to default to `./tests` and `./somewhere-else` when running `elm-test` without arguments.
 
 (†) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
 
