@@ -4,6 +4,7 @@ This is a proposal for an `elm-tooling.json` file, where unofficial Elm tools ca
 
 Known tools reading this file:
 
+- [elm-tooling]
 - [elm-version](https://github.com/lydell/elm-version)
 
 ## File location
@@ -22,13 +23,17 @@ example-project
    └── Main.elm
 ```
 
-## Shape
+## Known fields
 
-`elm-tooling.json` must contain a JSON object, which matches this TypeScript type:
+`elm-tooling.json` must contain a JSON object. All fields are optional for maximum forwards and backwards compatibility as tools need more fields.
+
+Given all known fields, the object must match this TypeScript type:
 
 ```ts
+type NonEmptyArray<T> = [T, ...T[]];
+
 type ElmTooling = {
-  entrypoints: Array<string>;
+  entrypoints?: NonEmptyArray<string>;
   binaries?: {
     [name: string]: string;
   };
@@ -47,9 +52,9 @@ Example:
 }
 ```
 
-### entrypoints
+The [elm-tooling] CLI tool lets you validate an `elm-tooling.json` file according to all known fields in this spec.
 
-**Required**
+### entrypoints
 
 A list of file paths, to the Elm entrypoint files of the project (the ones with `main =` in them, basically). Compiling all the entrypoints (and the files they import) should produce all compilation errors (if any) of the project.\*
 
@@ -66,8 +71,6 @@ The array must **not** be empty.
 (†) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
 
 ### binaries
-
-**Optional**
 
 A mapping between Elm tool names and the version of the tool.
 
@@ -122,6 +125,48 @@ Note: Tools, such as elm-test, that require Node.js must be installed with `npm`
 
 If the `"binaries"` field is missing or empty, it means that the project wants to take advantage of other parts of `elm-tooling.json`, but isn’t ready to buy into `elm-tooling.json`’s way of handling binaries. For example, an existing project might want to use `"entrypoints"` but is fine with continuing to use `npm` to install Elm for the time being.
 
+## How to consume elm-tooling.json
+
+1. Find and read `elm-tooling.json`.\*
+2. If not found, abort.
+3. Parse the file as JSON.
+4. If there’s a JSON parse error, abort.
+5. If the result isn’t a JSON object, abort.
+6. If the JSON object does not contain the field(s) you need, abort.
+7. If the field(s) you need are invalid, abort.
+8. Success! Use the data from the field(s) you need.
+
+Any time you abort:
+
+- Treat it as an error if appropriate.
+- Log information and use a fallback otherwise. Don’t _silently_ ignore errors in `elm-tooling.json` – users want to know what mistakes they might have made:
+  - Not found: The user might have created their `elm-tooling.json` in the wrong place. But it might also mean that the user does not want to use `elm-tooling.json` (if your tool does not mandate it).
+  - JSON parse error/Not an object/Invalid fields: Always a mistake by the user.
+  - Missing fields: Means that the user has misspelled the field or forgotten to add it, or use `elm-tooling.json` only for some _other_ tool’s sake, not for _your_ tool (if your tool does not mandate it).
+
+It’s recommended to link to the [elm-tooling] CLI tool in error messages/logs or documentation as a tip on how to successfully create a valid `elm-tooling.json` file. The idea is that you could do as much parsing as makes sense for your tool, while the [elm-tooling] CLI could provide as user friendly validation as possible.
+
+(\*) It is up to you to find an `elm-tooling.json` file on disk and read it. The process should be similar to finding an `elm.json` file.
+
+### Example
+
+If you’re looking for entrypoints to a project, you could log one of these lines depending on what you find:
+
+1. “Find entrypoints: No elm-tooling.json found in […]. Defaulting to […]. See https://example.com/docs/entrypoints.html for more information.”
+2. “Find entrypoints: /Users/you/code/elm-tooling.json contains invalid JSON: […]. Defaulting to […]. See https://example.com/docs/entrypoints.html for more information.”
+3. “Find entrypoints: /Users/you/code/elm-tooling.json does not contain the `entrypoints` field. Defaulting to […]. See https://example.com/docs/entrypoints.html for more information.”
+4. “Find entrypoints: /Users/you/code/elm-tooling.json contains an invalid `entrypoints` field: […]. Defaulting to […]. See https://example.com/docs/entrypoints.html for more information.”
+5. “Find entrypoints: Using `entrypoints` from /Users/you/code/elm-tooling.json: […]. See https://example.com/docs/entrypoints.html for more information.”
+
+The above logs provide:
+
+- What the task/goal is: “Find entrypoints”.
+- What happened.
+- What actual value was eventually used (default value, or values from `elm-tooling.json`).
+- A link to documentation, explaining the feature in more depth and containing troubleshooting tips.
+
 ## License
 
 Public domain
+
+[elm-tooling]: https://github.com/lydell/elm-tooling.json/blob/master/cli
