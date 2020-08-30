@@ -44,7 +44,7 @@ Example:
 
 ```json
 {
-  "entrypoints": ["src/Main.elm"],
+  "entrypoints": ["./src/Main.elm"],
   "binaries": {
     "elm": "0.19.1",
     "elm-format": "0.8.3"
