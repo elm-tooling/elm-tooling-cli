@@ -1,3 +1,3 @@
-export default function download(_argv: Array<string>): void {
+export default function download(): void {
   process.exit(0);
 }

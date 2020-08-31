@@ -1,3 +1,3 @@
-export default function init(_argv: Array<string>): void {
+export default function init(): void {
   process.exit(0);
 }

@@ -1,3 +1,3 @@
-export default function validate(_argv: Array<string>): void {
+export default function validate(): void {
   process.exit(0);
 }
