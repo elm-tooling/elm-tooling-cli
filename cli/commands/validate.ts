@@ -1,3 +1,3 @@
-export default function validate(): void {
-  process.exit(0);
+export default async function validate(): Promise<number> {
+  return 0;
 }

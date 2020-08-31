@@ -1,3 +1,3 @@
-export default function download(): void {
-  process.exit(0);
+export default async function download(): Promise<number> {
+  return 0;
 }

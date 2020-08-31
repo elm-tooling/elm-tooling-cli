@@ -26,14 +26,14 @@ elm-tooling postinstall
   }
 `.trim();
 
-function run(argv: Array<string>) {
+async function run(argv: Array<string>): Promise<number> {
   // So far no command takes any further arguments.
   // Let each command handle this when needed.
   if (argv.length > 1) {
     process.stderr.write(
       `Expected no extra arguments but got: ${argv.slice(1).join(" ")}`
     );
-    process.exit(1);
+    return 1;
   }
 
   switch (argv[0]) {
@@ -41,28 +41,31 @@ function run(argv: Array<string>) {
     case "-h":
     case "--help":
       process.stdout.write(help + "\n");
-      process.exit(0);
+      return 0;
 
     case "init":
-      init();
-      break;
+      return await init();
 
     case "validate":
-      validate();
-      break;
+      return await validate();
 
     case "download":
-      download();
-      break;
+      return await download();
 
     case "postinstall":
-      postinstall();
-      break;
+      return await postinstall();
 
     default:
       process.stderr.write(`Unknown command: ${argv[0]}\n`);
-      process.exit(1);
+      return 1;
   }
 }
 
-run(process.argv.slice(2));
+run(process.argv.slice(2)).then(
+  (exitCode) => {
+    process.exit(exitCode);
+  },
+  (error: Error) => {
+    process.stderr.write(`Unexpected error:\n${error.stack || error.message}`);
+  }
+);

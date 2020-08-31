@@ -1,3 +1,3 @@
-export default function postinstall(): void {
-  process.exit(0);
+export default async function postinstall(): Promise<number> {
+  return 0;
 }
