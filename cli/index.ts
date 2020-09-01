@@ -39,7 +39,9 @@ async function run(argv: Array<string>): Promise<number> {
   switch (argv[0]) {
     case undefined:
     case "-h":
+    case "-help":
     case "--help":
+    case "help":
       console.log(help);
       return 0;
 
