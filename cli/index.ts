@@ -30,7 +30,7 @@ async function run(argv: Array<string>): Promise<number> {
   // So far no command takes any further arguments.
   // Let each command handle this when needed.
   if (argv.length > 1) {
-    process.stderr.write(
+    console.error(
       `Expected no extra arguments but got: ${argv.slice(1).join(" ")}`
     );
     return 1;
@@ -40,14 +40,14 @@ async function run(argv: Array<string>): Promise<number> {
     case undefined:
     case "-h":
     case "--help":
-      process.stdout.write(help + "\n");
+      console.log(help);
       return 0;
 
     case "init":
       return await init();
 
     case "validate":
-      return await validate();
+      return validate();
 
     case "download":
       return await download();
@@ -56,7 +56,7 @@ async function run(argv: Array<string>): Promise<number> {
       return await postinstall();
 
     default:
-      process.stderr.write(`Unknown command: ${argv[0]}\n`);
+      console.error(`Unknown command: ${argv[0]}`);
       return 1;
   }
 }
@@ -66,6 +66,6 @@ run(process.argv.slice(2)).then(
     process.exit(exitCode);
   },
   (error: Error) => {
-    process.stderr.write(`Unexpected error:\n${error.stack || error.message}`);
+    console.error(`Unexpected error:\n${error.stack || error.message}`);
   }
 );

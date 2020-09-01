@@ -18,7 +18,6 @@ module.exports = {
   },
   rules: {
     "@typescript-eslint/no-unused-vars": "off",
-    "no-console": "error",
     "no-fallthrough": "off",
     "simple-import-sort/sort": "error",
   },

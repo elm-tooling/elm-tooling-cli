@@ -2,12 +2,12 @@ import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
 
-import type { ElmTooling } from "../helpers/definition";
+import { ElmTooling, isRecord } from "../helpers/mixed";
 import { tools } from "../helpers/tools";
 
 export default async function init(): Promise<number> {
   if (fs.existsSync("elm-tooling.json")) {
-    process.stderr.write("elm-tooling.json already exists!\n");
+    console.error("elm-tooling.json already exists!");
     return 1;
   }
 
@@ -36,9 +36,7 @@ export default async function init(): Promise<number> {
       : { entrypoints: [entrypoints[0], ...entrypoints.slice(1)], ...common };
 
   fs.writeFileSync("elm-tooling.json", JSON.stringify(json, null, 2));
-  process.stderr.write(
-    "Created a sample elm-tooling.json\nEdit it as needed!\n"
-  );
+  console.error("Created a sample elm-tooling.json\nEdit it as needed!");
   return 0;
 }
 
@@ -77,7 +75,7 @@ async function tryGuessEntrypoints(): Promise<Array<string>> {
 function tryGetSourceDirectories(): Array<string> {
   const elmJson: unknown = JSON.parse(fs.readFileSync("elm.json", "utf8"));
 
-  if (!isObject(elmJson)) {
+  if (!isRecord(elmJson)) {
     throw new Error(
       `Expected elm.json to be a JSON object but got: ${JSON.stringify(
         elmJson
@@ -117,10 +115,6 @@ function tryGetSourceDirectories(): Array<string> {
         )}`
       );
   }
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function isMainFile(file: string): Promise<string | undefined> {
