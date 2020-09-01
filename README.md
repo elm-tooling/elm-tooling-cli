@@ -34,7 +34,7 @@ type NonEmptyArray<T> = [T, ...T[]];
 
 type ElmTooling = {
   entrypoints?: NonEmptyArray<string>;
-  binaries?: {
+  tools?: {
     [name: string]: string;
   };
 };
@@ -45,7 +45,7 @@ Example:
 ```json
 {
   "entrypoints": ["./src/Main.elm"],
-  "binaries": {
+  "tools": {
     "elm": "0.19.1",
     "elm-format": "0.8.3"
   }
@@ -70,7 +70,7 @@ The array must **not** be empty.
 
 (†) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
 
-### binaries
+### tools
 
 A mapping between Elm tool names and the version of the tool.
 
@@ -88,24 +88,22 @@ For example, the following means that the project uses elm 0.19.1 and elm-format
 
 ```json
 {
-  "binaries": {
+  "tools": {
     "elm": "0.19.1",
     "elm-format": "0.8.3"
   }
 }
 ```
 
-Each tool name must correspond to a single binary.
+The tools must be located in a standard location: Inside `elm-tooling/` inside “Elm Home.” The Elm compiler stores downloaded packages and REPL history in a directory that I call “Elm Home.” The default location on Linux and macOS is `~/.elm/`, and on Windows it is `%APPDATA%\elm`. You can customize the location by setting the `ELM_HOME` environment variable.
 
-The binaries must be located in a standard location: Inside `elm-tooling/` inside “Elm Home.” The Elm compiler stores downloaded packages and REPL history in a directory that I call “Elm Home.” The default location on Linux and macOS is `~/.elm/`, and on Windows it is `%APPDATA%\elm`. You can customize the location by setting the `ELM_HOME` environment variable.
-
-The location of a binary can be resolved like this on Linux and macOS in `sh`, `bash` and `zsh`:
+The location of a tool can be resolved like this on Linux and macOS in `sh`, `bash` and `zsh`:
 
 ```bash
 "${ELM_HOME:-$HOME/.elm}/elm-tooling/$name/$version/$name"
 ```
 
-With the above example (and assuming that the `ELM_HOME` environment variable is not set) the following two binaries should exist on Linux and macOS:
+With the above example (and assuming that the `ELM_HOME` environment variable is not set) the following two tools should exist on Linux and macOS:
 
 - `~/.elm/elm-tooling/elm/0.19.1/elm`
 - `~/.elm/elm-tooling/elm-format/0.8.3/elm-format`
@@ -115,15 +113,15 @@ On a typical Windows setup (with a user called “John”), they would be:
 - `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm\0.19.1\elm`
 - `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm-format\0.8.3\elm-format`
 
-An earlier version of this document stored all binaries in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several binaries per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
+An earlier version of this document stored all tools in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several binaries per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
 
-Tools must use the specified binaries and must not fall back to any other binary if they are missing. Missing binaries must be an error, or (if appropriate, and with the user’s permission) cause a download of the binary. Downloads should have security in mind.
+Consumers of `elm-tooling.json` must use the specified tools and must not use fallbacks if they are missing. Missing tools must be an error, or (if appropriate, and with the user’s permission) cause a download of the tool. Downloads should have security in mind.
 
-If a binary _could_ be specified in the `"binaries"` field but isn’t, it is up to the tool to choose what to do.
+If a tool _could_ be specified in the `"tools"` field but isn’t, it is up to the consumer to choose what to do.
 
-Note: Tools, such as elm-test, that require Node.js must be installed with `npm` via package.json and must **not** be specified in the `"binaries"` field.
+Note: Tools, such as elm-test, that require Node.js must be installed with `npm` via package.json and must **not** be specified in the `"tools"` field.
 
-If the `"binaries"` field is missing or empty, it means that the project wants to take advantage of other parts of `elm-tooling.json`, but isn’t ready to buy into `elm-tooling.json`’s way of handling binaries. For example, an existing project might want to use `"entrypoints"` but is fine with continuing to use `npm` to install Elm for the time being.
+If the `"tools"` field is missing or empty, it means that the project wants to take advantage of other parts of `elm-tooling.json`, but isn’t ready to buy into `elm-tooling.json`’s way of handling tool locations. For example, an existing project might want to use `"entrypoints"` but is fine with continuing to use `npm` to install Elm for the time being.
 
 ## How to consume elm-tooling.json
 

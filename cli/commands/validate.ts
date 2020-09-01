@@ -16,7 +16,7 @@ type Validator = (elmToolingPath: string, value: unknown) => Array<string>;
 
 const validatorsSafe: ValidatorsSafe = {
   entrypoints: validateEntrypoints,
-  binaries: validateBinaries,
+  tools: validateTools,
 };
 
 const validators: Validators = validatorsSafe;
@@ -61,7 +61,7 @@ function validateJson(elmToolingPath: string, json: unknown): Array<string> {
       ? validators[key]
       : undefined;
     return validator === undefined
-      ? `Unknown field: ${key}`
+      ? `${key}: Unknown field`
       : validator(elmToolingPath, value);
   });
 }
@@ -110,17 +110,14 @@ function validateEntrypoints(
   });
 }
 
-function validateBinaries(
-  _elmToolingPath: string,
-  value: unknown
-): Array<string> {
+function validateTools(_elmToolingPath: string, value: unknown): Array<string> {
   if (!isRecord(value)) {
-    return [`binaries: Expected an object but got: ${JSON.stringify(value)}`];
+    return [`tools: Expected an object but got: ${JSON.stringify(value)}`];
   }
 
   return Object.entries(value).flatMap(([name, version]) => {
     if (typeof version !== "string") {
-      return `binaries[${JSON.stringify(
+      return `tools[${JSON.stringify(
         name
       )}]: Expected a version as a string but got: ${JSON.stringify(version)}`;
     }
@@ -130,9 +127,9 @@ function validateBinaries(
       : undefined;
 
     return versions === undefined
-      ? `binaries[${JSON.stringify(name)}]: Unknown binary`
+      ? `tools[${JSON.stringify(name)}]: Unknown tool`
       : Object.prototype.hasOwnProperty.call(versions, version)
       ? []
-      : `binaries[${JSON.stringify(name)}]: Unknown version: ${version}`;
+      : `tools[${JSON.stringify(name)}]: Unknown version: ${version}`;
   });
 }

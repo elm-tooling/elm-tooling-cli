@@ -20,7 +20,7 @@ export default async function init(): Promise<number> {
   ]);
 
   const common: ElmTooling = {
-    binaries: Object.fromEntries(
+    tools: Object.fromEntries(
       Object.keys(tools)
         .sort()
         .map((name) => {

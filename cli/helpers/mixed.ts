@@ -5,7 +5,7 @@ export type NonEmptyArray<T> = [T, ...T[]];
 
 export type ElmTooling = {
   entrypoints?: NonEmptyArray<string>;
-  binaries?: {
+  tools?: {
     [name: string]: string;
   };
 };
