@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
 
-import type { ElmTooling, NonEmptyArray } from "../helpers/definition";
+import type { ElmTooling } from "../helpers/definition";
 import { tools } from "../helpers/tools";
 
 export default async function init(): Promise<number> {
@@ -11,11 +11,15 @@ export default async function init(): Promise<number> {
     return 1;
   }
 
-  const json: ElmTooling = {
-    // TODO: Should exclude entrypoints if package.
-    entrypoints: await tryGuessEntrypoints().catch(
-      (): NonEmptyArray<string> => ["./src/Main.elm"]
-    ),
+  // For packages, skip entrypoints.
+  // For applications, try to find .elm files with `main =` directly inside one
+  // of the "source-directories".
+  // If all detection fails, use a good guess.
+  const entrypoints = await tryGuessEntrypoints().catch(() => [
+    "./src/Main.elm",
+  ]);
+
+  const common: ElmTooling = {
     binaries: Object.fromEntries(
       Object.keys(tools)
         .sort()
@@ -26,6 +30,11 @@ export default async function init(): Promise<number> {
     ),
   };
 
+  const json: ElmTooling =
+    entrypoints.length === 0
+      ? common
+      : { entrypoints: [entrypoints[0], ...entrypoints.slice(1)], ...common };
+
   fs.writeFileSync("elm-tooling.json", JSON.stringify(json, null, 2));
   process.stderr.write(
     "Created a sample elm-tooling.json\nEdit it as needed!\n"
@@ -33,8 +42,13 @@ export default async function init(): Promise<number> {
   return 0;
 }
 
-async function tryGuessEntrypoints(): Promise<NonEmptyArray<string>> {
-  const files = tryGetSourceDirectories().flatMap((directory) =>
+async function tryGuessEntrypoints(): Promise<Array<string>> {
+  const sourceDirectories = tryGetSourceDirectories();
+  if (sourceDirectories.length === 0) {
+    return [];
+  }
+
+  const files = sourceDirectories.flatMap((directory) =>
     fs
       .readdirSync(directory, { encoding: "utf-8", withFileTypes: true })
       .filter((entry) => entry.isFile() && entry.name.endsWith(".elm"))
@@ -57,10 +71,10 @@ async function tryGuessEntrypoints(): Promise<NonEmptyArray<string>> {
     throw new Error("Expected at least 1 entrypoint but got 0.");
   }
 
-  return [entrypoints[0], ...entrypoints.slice(1)];
+  return entrypoints;
 }
 
-function tryGetSourceDirectories(): NonEmptyArray<string> {
+function tryGetSourceDirectories(): Array<string> {
   const elmJson: unknown = JSON.parse(fs.readFileSync("elm.json", "utf8"));
 
   if (!isObject(elmJson)) {
@@ -94,7 +108,7 @@ function tryGetSourceDirectories(): NonEmptyArray<string> {
     }
 
     case "package":
-      return ["src"];
+      return [];
 
     default:
       throw new Error(
