@@ -8,6 +8,8 @@ export type OS = {
   windows: Asset;
 };
 
+export type OSName = keyof OS;
+
 export type Asset = {
   hash: string;
   url: string;
