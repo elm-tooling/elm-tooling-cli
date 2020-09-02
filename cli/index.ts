@@ -24,6 +24,8 @@ elm-tooling postinstall
       "postinstall": "elm-tooling postinstall"
     }
   }
+
+Docs: https://github.com/lydell/elm-tooling.json/tree/master/cli
 `.trim();
 
 async function run(argv: Array<string>): Promise<number> {

@@ -54,8 +54,9 @@ export default function validate(): number {
     return 0;
   } else {
     for (const error of validationErrors) {
-      console.error(error);
+      console.error(`\n- ${error}`);
     }
+    console.error("\nDocs: https://github.com/lydell/elm-tooling.json");
     return 1;
   }
 }
