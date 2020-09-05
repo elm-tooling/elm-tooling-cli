@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import download from "./commands/download";
 import init from "./commands/init";
 import postinstall from "./commands/postinstall";
