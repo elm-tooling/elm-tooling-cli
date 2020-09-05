@@ -15,10 +15,6 @@ export const elmToolingInstallPath = path.join(elmHome, "elm-tooling");
 
 export type ParseResult =
   | {
-      tag: "OSNotSupported";
-      message: string;
-    }
-  | {
       tag: "ElmToolingJsonNotFound";
       message: string;
     }
@@ -58,14 +54,6 @@ export type Tool = {
 };
 
 export function findReadAndParseElmToolingJson(): ParseResult {
-  const osName = getOSName();
-  if (osName instanceof Error) {
-    return {
-      tag: "OSNotSupported",
-      message: osName.message,
-    };
-  }
-
   const elmToolingJsonPath = findClosestElmTooling();
   if (elmToolingJsonPath === undefined) {
     return {
@@ -111,9 +99,14 @@ export function findReadAndParseElmToolingJson(): ParseResult {
         result.entrypoints = parseEntrypoints(elmToolingJsonPath, value);
         break;
 
-      case "tools":
-        result.tools = parseTools(osName, value);
+      case "tools": {
+        const osName = getOSName();
+        result.tools =
+          osName instanceof Error
+            ? { tag: "Error", errors: [`tools: ${osName.message}`] }
+            : parseTools(osName, value);
         break;
+      }
 
       default:
         result.unknownFields.push(field);
@@ -124,7 +117,7 @@ export function findReadAndParseElmToolingJson(): ParseResult {
   return result;
 }
 
-function getOSName(): OSName | Error {
+export function getOSName(): OSName | Error {
   switch (process.platform) {
     case "linux":
       return "linux";

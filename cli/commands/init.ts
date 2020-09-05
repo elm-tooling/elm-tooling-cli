@@ -3,7 +3,8 @@ import * as path from "path";
 import * as readline from "readline";
 
 import { KNOWN_TOOLS } from "../helpers/known_tools";
-import { ElmTooling, isRecord } from "../helpers/mixed";
+import { ElmTooling, isRecord, NonEmptyArray } from "../helpers/mixed";
+import { getOSName } from "../helpers/parse";
 
 export default async function init(): Promise<number> {
   if (fs.existsSync("elm-tooling.json")) {
@@ -19,21 +20,25 @@ export default async function init(): Promise<number> {
     "./src/Main.elm",
   ]);
 
-  const common: ElmTooling = {
-    tools: Object.fromEntries(
-      Object.keys(KNOWN_TOOLS)
-        .sort()
-        .map((name) => {
-          const versions = Object.keys(KNOWN_TOOLS[name]);
-          return [name, versions[versions.length - 1]];
-        })
-    ),
-  };
+  const tools =
+    getOSName() instanceof Error
+      ? undefined
+      : Object.fromEntries(
+          Object.keys(KNOWN_TOOLS)
+            .sort()
+            .map((name) => {
+              const versions = Object.keys(KNOWN_TOOLS[name]);
+              return [name, versions[versions.length - 1]];
+            })
+        );
 
-  const json: ElmTooling =
-    entrypoints.length === 0
-      ? common
-      : { entrypoints: [entrypoints[0], ...entrypoints.slice(1)], ...common };
+  const json: ElmTooling = {
+    entrypoints:
+      entrypoints.length === 0
+        ? undefined
+        : (entrypoints as NonEmptyArray<string>),
+    tools: tools,
+  };
 
   fs.writeFileSync("elm-tooling.json", JSON.stringify(json, null, 2));
   console.error("Created a sample elm-tooling.json\nEdit it as needed!");
@@ -102,7 +107,7 @@ function tryGetSourceDirectories(): Array<string> {
           )}`
         );
       }
-      return [directories[0], ...directories.slice(1)];
+      return directories as NonEmptyArray<string>;
     }
 
     case "package":

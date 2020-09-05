@@ -14,10 +14,6 @@ export default async function download(): Promise<number> {
   const parseResult = findReadAndParseElmToolingJson();
 
   switch (parseResult.tag) {
-    case "OSNotSupported":
-      console.error(parseResult.message);
-      return 1;
-
     case "ElmToolingJsonNotFound":
       console.error(parseResult.message);
       return 1;
