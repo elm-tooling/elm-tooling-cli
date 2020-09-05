@@ -503,7 +503,9 @@ function extractFile({
       tar.on("error", (error: Error & { code?: string }) => {
         if (error.code === "ENOENT") {
           onError(
-            new Error(`'tar' must be installed globally.\n${error.message}`)
+            new Error(
+              `tar must be installed on your system and be in $PATH:\n${error.message}`
+            )
           );
         }
         onError(error);
