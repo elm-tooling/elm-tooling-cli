@@ -1,24 +1,8 @@
 {
-  "name": "elm-tooling",
-  "version": "1.0.0",
-  "author": "Simon Lydell",
-  "license": "MIT",
-  "description": "The CLI for elm-tooling.json",
-  "repository": "lydell/elm-tooling.json",
+  "private": true,
   "type": "commonjs",
-  "exports": {},
-  "bin": "./index.js",
-  "files": [
-    "build"
-  ],
-  "keywords": [
-    "elm",
-    "elm-tooling",
-    "elm-tooling.json"
-  ],
   "scripts": {
-    "test": "prettier --check . && eslint . && tsc",
-    "prepublishOnly": "npm test"
+    "test": "prettier --check . && eslint . && ts-node build.ts && tsc && node -e \"require('fs').unlinkSync('build/build.js')\""
   },
   "devDependencies": {
     "@types/node": "14.6.4",
