@@ -1,14 +1,14 @@
-export type Tools = Record<string, Versions>;
+export type KnownTools = Record<string, Versions>;
 
-export type Versions = Record<string, OS>;
+export type Versions = Record<string, OSAssets>;
 
-export type OS = {
+export type OSAssets = {
   linux: Asset;
   mac: Asset;
   windows: Asset;
 };
 
-export type OSName = keyof OS;
+export type OSName = keyof OSAssets;
 
 export type Asset = {
   hash: string;
@@ -18,7 +18,7 @@ export type Asset = {
 
 export type AssetType = "gz" | "tgz";
 
-export const tools: Tools = {
+export const KNOWN_TOOLS: KnownTools = {
   elm: {
     "0.19.0": {
       linux: {

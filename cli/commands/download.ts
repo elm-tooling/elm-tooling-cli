@@ -2,102 +2,80 @@ import * as childProcess from "child_process";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import * as https from "https";
-import * as os from "os";
 import * as path from "path";
 import * as readline from "readline";
 import type { Writable } from "stream";
 import * as zlib from "zlib";
 
-import { findClosestElmTooling, isRecord } from "../helpers/mixed";
-import { Asset, AssetType, OSName, tools } from "../helpers/tools";
+import type { AssetType } from "../helpers/known_tools";
+import { findReadAndParseElmToolingJson, Tool, Tools } from "../helpers/parse";
 
 export default async function download(): Promise<number> {
-  const osName = getOSName();
-  if (osName instanceof Error) {
-    console.error(osName.message);
-    return 1;
-  }
+  const parseResult = findReadAndParseElmToolingJson();
 
-  const elmToolingPath = findClosestElmTooling();
-  if (elmToolingPath === undefined) {
-    console.error("No elm-tooling.json found. To create one: elm-tooling init");
-    return 1;
-  }
+  switch (parseResult.tag) {
+    case "OSNotSupported":
+      console.error(parseResult.message);
+      return 1;
 
-  console.error(elmToolingPath);
+    case "ElmToolingJsonNotFound":
+      console.error(parseResult.message);
+      return 1;
 
-  let json: unknown = undefined;
-  try {
-    json = JSON.parse(fs.readFileSync(elmToolingPath, "utf-8"));
-  } catch (error) {
-    console.error(`Failed to read file as JSON:\n${(error as Error).message}`);
-    return 1;
-  }
+    case "ReadAsJsonObjectError":
+      console.error(parseResult.elmToolingJsonPath);
+      console.error(parseResult.message);
+      return 1;
 
-  if (!isRecord(json)) {
-    console.error(`Expected an object but got: ${JSON.stringify(json)}`);
-    return 1;
-  }
+    case "Parsed": {
+      console.error(parseResult.elmToolingJsonPath);
+      switch (parseResult.tools?.tag) {
+        case undefined:
+          console.error("tools: Missing. Nothing to download.");
+          return 0;
 
-  const tools = "tools" in json ? json.tools : {};
+        case "Error":
+          for (const error of parseResult.tools.errors) {
+            console.error(`\n- ${error}`);
+          }
+          console.error("\nDocs: https://github.com/lydell/elm-tooling.json");
+          return 1;
 
-  if (!isRecord(tools)) {
-    console.error(
-      `tools: Expected an object but got: ${JSON.stringify(json.tools)}`
-    );
-    return 1;
-  }
-
-  const [errors, assets] = stringPartition(
-    Object.entries(tools).map(([name, version]) => {
-      const asset = parseAsset(osName, name, version);
-      return typeof asset === "string"
-        ? `tools[${JSON.stringify(name)}]: ${asset}`
-        : asset;
-    })
-  );
-
-  if (errors.length > 0) {
-    for (const error of errors) {
-      console.error(`\n- ${error}`);
+        case "Parsed":
+          return await downloadTools(parseResult.tools.parsed);
+      }
     }
-    console.error("\nDocs: https://github.com/lydell/elm-tooling.json");
-    return 1;
   }
+}
 
-  if (assets.length === 0) {
-    console.error(
-      `tools: ${"tools" in json ? "Empty" : "Missing"}. Nothing to download.`
-    );
+async function downloadTools(tools: Tools): Promise<number> {
+  if (tools.existing.length === 0 && tools.missing.length === 0) {
+    console.error(`tools: Empty. Nothing to download.`);
     return 0;
   }
 
-  const elmHome = process.env.ELM_HOME || path.join(os.homedir(), ".elm");
-  const elmToolingDir = path.join(elmHome, "elm-tooling");
-  const needsDownload: Array<NamedAsset> = [];
-
-  for (const { name, version, asset } of assets) {
-    const binary = getBinaryPath(elmToolingDir, name, version);
-    if (fs.existsSync(binary)) {
-      console.error(`${name} ${version} already exists: ${binary}`);
-    } else {
-      fs.mkdirSync(path.dirname(binary), { recursive: true });
-      needsDownload.push({ name, version, asset });
-    }
+  for (const tool of tools.existing) {
+    console.error(
+      `${tool.name} ${tool.version} already exists: ${tool.absolutePath}`
+    );
   }
 
-  if (needsDownload.length === 0) {
+  if (tools.missing.length === 0) {
     return 0;
   }
 
-  const progresses: Array<number | string> = needsDownload.map(() => 0);
+  for (const tool of tools.missing) {
+    fs.mkdirSync(path.dirname(tool.absolutePath), { recursive: true });
+  }
+
+  const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
   const firstDrawTime = Date.now();
 
   const draw = () => {
     console.error(
-      needsDownload
+      tools.missing
         .map(({ name, version }, index) => {
-          const progress = progresses[index];
+          const progress = toolsProgress[index];
           return `${
             typeof progress === "string"
               ? progress.padEnd(4)
@@ -113,9 +91,9 @@ export default async function download(): Promise<number> {
   const redraw = ({ force = false } = {}) => {
     // Without this time thing, you’ll see the progress go up to 100% and then
     // back to 0% again when using curl. It reports the progress per request –
-    // even redirects.
+    // even redirects. Hopefully a redirect response usually finishes in 1 second.
     if (Date.now() - firstDrawTime > 1000 || force) {
-      readline.moveCursor(process.stderr, 0, -needsDownload.length);
+      readline.moveCursor(process.stderr, 0, -tools.missing.length);
       draw();
     }
   };
@@ -123,24 +101,14 @@ export default async function download(): Promise<number> {
   draw();
 
   const results = await Promise.all(
-    needsDownload.map(({ name, version, asset }, index) =>
-      downloadAndExtract(
-        elmToolingDir,
-        { name, version, asset },
-        (percentage) => {
-          progresses[index] = percentage;
-          redraw();
-        }
-      ).catch((error: Error) => {
-        progresses[index] = "ERR";
+    tools.missing.map((tool, index) =>
+      downloadAndExtract(tool, (percentage) => {
+        toolsProgress[index] = percentage;
         redraw();
-        return new Error(
-          downloadAndExtractError(
-            elmToolingDir,
-            { name, version, asset },
-            error
-          )
-        );
+      }).catch((error: Error) => {
+        toolsProgress[index] = "ERR";
+        redraw();
+        return new Error(downloadAndExtractError(tool, error));
       })
     )
   );
@@ -158,88 +126,15 @@ export default async function download(): Promise<number> {
   return downloadErrors.length === 0 ? 0 : 1;
 }
 
-type NamedAsset = {
-  name: string;
-  version: string;
-  asset: Asset;
-};
-
-function parseAsset(
-  osName: OSName,
-  name: string,
-  version: unknown
-): NamedAsset | string {
-  if (typeof version !== "string") {
-    return `Expected a version as a string but got: ${JSON.stringify(version)}`;
-  }
-
-  const versions = Object.prototype.hasOwnProperty.call(tools, name)
-    ? tools[name]
-    : undefined;
-
-  if (versions === undefined) {
-    return `Unknown tool`;
-  }
-
-  const os = Object.prototype.hasOwnProperty.call(versions, version)
-    ? versions[version]
-    : undefined;
-
-  if (os === undefined) {
-    return `Unknown version: ${version}`;
-  }
-
-  return { name, version, asset: os[osName] };
-}
-
-function getOSName(): OSName | Error {
-  switch (process.platform) {
-    case "linux":
-      return "linux";
-    case "darwin":
-      return "mac";
-    case "win32":
-      return "windows";
-    default:
-      return new Error(
-        `Sorry, your platform (${process.platform}) is not supported yet :(`
-      );
-  }
-}
-
-function stringPartition<T>(
-  items: Array<T | string>
-): [Array<string>, Array<T>] {
-  const errors: Array<string> = [];
-  const results: Array<T> = [];
-
-  for (const item of items) {
-    if (typeof item === "string") {
-      errors.push(item);
-    } else {
-      results.push(item);
-    }
-  }
-
-  return [errors, results];
-}
-
-function getBinaryPath(elmToolingPath: string, name: string, version: string) {
-  return path.join(elmToolingPath, name, version, name);
-}
-
 function downloadAndExtract(
-  elmToolingDir: string,
-  { name, version, asset }: NamedAsset,
+  tool: Tool,
   onProgress: (percentage: number) => void
 ): Promise<void> {
   return new Promise((resolve, reject): void => {
-    const binary = getBinaryPath(elmToolingDir, name, version);
-
     const removeExtractedBeforeReject = (error: Error): void => {
       extract.destroy();
       try {
-        fs.unlinkSync(binary);
+        fs.unlinkSync(tool.absolutePath);
         reject(error);
       } catch (removeErrorAny) {
         const removeError = removeErrorAny as Error & { code?: string };
@@ -254,15 +149,15 @@ function downloadAndExtract(
     const hash = crypto.createHash("sha256");
 
     const extract = extractFile({
-      assetType: asset.type,
-      file: binary,
+      assetType: tool.asset.type,
+      file: tool.absolutePath,
       onError: reject,
       onSuccess: resolve,
     });
 
     // Allow `onError` for `extract` to fire before starting to download.
     process.nextTick(() => {
-      downloadFile(asset.url, {
+      downloadFile(tool.asset.url, {
         onData: (chunk) => {
           hash.update(chunk);
           extract.write(chunk);
@@ -271,11 +166,11 @@ function downloadAndExtract(
         onError: removeExtractedBeforeReject,
         onSuccess: () => {
           const digest = hash.digest("hex");
-          if (digest === asset.hash) {
+          if (digest === tool.asset.hash) {
             extract.end();
           } else {
             removeExtractedBeforeReject(
-              new Error(hashMismatch(digest, asset.hash))
+              new Error(hashMismatch(digest, tool.asset.hash))
             );
           }
         },
@@ -284,17 +179,13 @@ function downloadAndExtract(
   });
 }
 
-function downloadAndExtractError(
-  elmToolingDir: string,
-  { name, version, asset }: NamedAsset,
-  error: Error
-) {
+function downloadAndExtractError(tool: Tool, error: Error) {
   return `
-${name} ${version}:
+${tool.name} ${tool.version}:
 ${indent(
   `
-< ${asset.url}
-> ${getBinaryPath(elmToolingDir, name, version)}
+< ${tool.asset.url}
+> ${tool.absolutePath}
 ${error.message}
   `.trim()
 )}

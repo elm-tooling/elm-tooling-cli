@@ -2,8 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
 
+import { KNOWN_TOOLS } from "../helpers/known_tools";
 import { ElmTooling, isRecord } from "../helpers/mixed";
-import { tools } from "../helpers/tools";
 
 export default async function init(): Promise<number> {
   if (fs.existsSync("elm-tooling.json")) {
@@ -21,10 +21,10 @@ export default async function init(): Promise<number> {
 
   const common: ElmTooling = {
     tools: Object.fromEntries(
-      Object.keys(tools)
+      Object.keys(KNOWN_TOOLS)
         .sort()
         .map((name) => {
-          const versions = Object.keys(tools[name]);
+          const versions = Object.keys(KNOWN_TOOLS[name]);
           return [name, versions[versions.length - 1]];
         })
     ),

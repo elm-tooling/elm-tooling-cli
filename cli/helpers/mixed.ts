@@ -24,3 +24,29 @@ export function findClosestElmTooling(
     ? undefined
     : findClosestElmTooling(path.dirname(dir));
 }
+
+export type Either<Left, Right> =
+  | { tag: "Left"; value: Left }
+  | { tag: "Right"; value: Right };
+
+export function partitionMap<T, Left, Right>(
+  items: Array<T>,
+  f: (item: T, index: number) => Either<Left, Right>
+): [Array<Left>, Array<Right>] {
+  const left: Array<Left> = [];
+  const right: Array<Right> = [];
+
+  for (const [index, item] of items.entries()) {
+    const either = f(item, index);
+    switch (either.tag) {
+      case "Left":
+        left.push(either.value);
+        break;
+      case "Right":
+        right.push(either.value);
+        break;
+    }
+  }
+
+  return [left, right];
+}

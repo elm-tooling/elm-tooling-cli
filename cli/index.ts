@@ -2,6 +2,7 @@ import download from "./commands/download";
 import init from "./commands/init";
 import postinstall from "./commands/postinstall";
 import validate from "./commands/validate";
+import { elmToolingInstallPath } from "./helpers/parse";
 
 const help = `
 elm-tooling init
@@ -11,7 +12,9 @@ elm-tooling validate
   Validate the closest elm-tooling.json
 
 elm-tooling download
-  Download the tools in the closest elm-tooling.json
+  Download the tools in the closest elm-tooling.json to:
+  ${elmToolingInstallPath}
+  (Set the ELM_HOME environment variable to customize.)
 
 elm-tooling postinstall
   Download the tools in the closest elm-tooling.json
