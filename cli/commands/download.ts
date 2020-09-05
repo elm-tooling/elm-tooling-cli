@@ -231,6 +231,7 @@ function downloadAndExtract(
     const binary = getBinaryPath(elmToolingDir, name, version);
 
     const removeExtractedBeforeReject = (error: Error): void => {
+      extract.destroy();
       try {
         fs.unlinkSync(binary);
         reject(error);
@@ -280,8 +281,8 @@ function downloadAndExtract(
 function hashMismatch(actual: string, expected: string) {
   return `
 Hash mismatch:
-Expected: ${expected}
-Actual:   ${actual}
+  Expected: ${expected}
+  Actual:   ${actual}
   `.trim();
 }
 
@@ -319,7 +320,7 @@ function downloadFile(
       onError(
         new Error(
           `${commandName} exited with non-zero exit code ${code}.\n${indent(
-            stderr
+            stderr.trim()
           )}`
         )
       );
@@ -488,7 +489,7 @@ function extractFile({
           onError(
             new Error(
               `tar exited with non-zero exit code ${code}:\n${indent(
-                tarStderr
+                tarStderr.trim()
               )}`
             )
           );
