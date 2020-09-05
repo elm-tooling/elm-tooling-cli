@@ -48,7 +48,7 @@ export default async function download(): Promise<number> {
     return 1;
   }
 
-  const [errors, assets] = partition(
+  const [errors, assets] = stringPartition(
     Object.entries(tools).map(([name, version]) => {
       const asset = parseAsset(osName, name, version);
       return typeof asset === "string"
@@ -72,18 +72,40 @@ export default async function download(): Promise<number> {
     return 0;
   }
 
-  const progresses = assets.map(() => 0);
+  const elmHome = process.env.ELM_HOME || path.join(os.homedir(), ".elm");
+  const elmToolingDir = path.join(elmHome, "elm-tooling");
+  const needsDownload: Array<NamedAsset> = [];
+
+  for (const { name, version, asset } of assets) {
+    const binary = getBinaryPath(elmToolingDir, name, version);
+    if (fs.existsSync(binary)) {
+      console.error(`Already exists: ${binary}`);
+    } else {
+      fs.mkdirSync(path.dirname(binary), { recursive: true });
+      needsDownload.push({ name, version, asset });
+    }
+  }
+
+  if (needsDownload.length === 0) {
+    return 0;
+  }
+
+  const progresses: Array<number | string> = needsDownload.map(() => 0);
   const firstDrawTime = Date.now();
 
   const draw = () => {
     console.error(
-      assets
-        .map(
-          ({ name, version }, index) =>
-            `${Math.round(progresses[index] * 100)
-              .toString()
-              .padStart(3)}% ${name} ${version}`
-        )
+      needsDownload
+        .map(({ name, version }, index) => {
+          const progress = progresses[index];
+          return `${
+            typeof progress === "string"
+              ? progress.padEnd(4)
+              : Math.round(progress * 100)
+                  .toString()
+                  .padStart(3) + "%"
+          } ${name} ${version}`;
+        })
         .join("\n")
     );
   };
@@ -93,29 +115,39 @@ export default async function download(): Promise<number> {
     // back to 0% again when using curl. It reports the progress per request –
     // even redirects.
     if (Date.now() - firstDrawTime > 1000 || force) {
-      readline.moveCursor(process.stderr, 0, -assets.length);
+      readline.moveCursor(process.stderr, 0, -needsDownload.length);
       draw();
     }
   };
 
   draw();
 
-  const [results, downloadErrors] = partition(
-    await Promise.all(
-      assets.map(({ name, version, asset }, index) =>
-        downloadAndExtract({ name, version, asset }, (percentage) => {
+  const results = await Promise.all(
+    needsDownload.map(({ name, version, asset }, index) =>
+      downloadAndExtract(
+        elmToolingDir,
+        { name, version, asset },
+        (percentage) => {
           progresses[index] = percentage;
           redraw();
-        }).catch(
-          (error: Error) => new Error(`${name} ${version}: ${error.message}`)
-        )
-      )
+        }
+      ).catch((error: Error) => {
+        progresses[index] = "ERR";
+        redraw();
+        return new Error(`${name} ${version}: ${error.message}`);
+      })
     )
   );
 
+  const downloadErrors = results.flatMap((result) =>
+    result instanceof Error ? result : []
+  );
+
   redraw({ force: true });
-  console.error(results);
-  console.error(downloadErrors);
+
+  for (const error of downloadErrors) {
+    console.error(error.message);
+  }
 
   return downloadErrors.length === 0 ? 0 : 1;
 }
@@ -169,7 +201,9 @@ function getOSName(): OSName | Error {
   }
 }
 
-function partition<T>(items: Array<T | string>): [Array<string>, Array<T>] {
+function stringPartition<T>(
+  items: Array<T | string>
+): [Array<string>, Array<T>] {
   const errors: Array<string> = [];
   const results: Array<T> = [];
 
@@ -184,21 +218,17 @@ function partition<T>(items: Array<T | string>): [Array<string>, Array<T>] {
   return [errors, results];
 }
 
+function getBinaryPath(elmToolingPath: string, name: string, version: string) {
+  return path.join(elmToolingPath, name, version, name);
+}
+
 function downloadAndExtract(
+  elmToolingDir: string,
   { name, version, asset }: NamedAsset,
   onProgress: (percentage: number) => void
-): Promise<string> {
+): Promise<void> {
   return new Promise((resolve, reject): void => {
-    const elmHome = process.env.ELM_HOME || path.join(os.homedir(), ".elm");
-    const dir = path.join(elmHome, "elm-tooling", name, version);
-    const binary = path.join(dir, name);
-
-    if (fs.existsSync(binary)) {
-      resolve(`Already exists: ${binary}`);
-      return;
-    }
-
-    fs.mkdirSync(dir, { recursive: true });
+    const binary = getBinaryPath(elmToolingDir, name, version);
 
     const removeExtractedBeforeReject = (error: Error): void => {
       try {
@@ -218,12 +248,9 @@ function downloadAndExtract(
 
     const extract = extractFile({
       assetType: asset.type,
-      dir,
-      name,
+      file: binary,
       onError: reject,
-      onSuccess: () => {
-        resolve("TODO all good");
-      },
+      onSuccess: resolve,
     });
 
     // Allow `onError` for `extract` to fire before starting to download.
@@ -287,12 +314,13 @@ function downloadFile(
     if (errored.includes(commandName)) {
       return;
     } else if (code === 0) {
-      fs.writeFileSync("stderr.txt", stderr);
       onSuccess();
     } else {
       onError(
         new Error(
-          `${commandName} exited with non-zero exit code ${code}.\n${stderr}`
+          `${commandName} exited with non-zero exit code ${code}.\n${indent(
+            stderr
+          )}`
         )
       );
     }
@@ -403,26 +431,25 @@ function downloadFileNative(
 
 function extractFile({
   assetType,
-  dir,
-  name,
+  file,
   onError,
   onSuccess,
 }: {
   assetType: AssetType;
-  dir: string;
-  name: string;
+  file: string;
   onError: (error: Error) => void;
   onSuccess: () => void;
 }): Writable {
   switch (assetType) {
     case "gz": {
       const gunzip = zlib.createGunzip();
-      const write = fs.createWriteStream(path.join(dir, name));
+      const write = fs.createWriteStream(file);
       gunzip.on("error", onError);
       write.on("error", onError);
       write.on("close", () => {
         try {
-          fs.chmodSync(path.join(dir, name), "755");
+          // Make executable: `chmod +x`.
+          fs.chmodSync(file, "755");
         } catch (error) {
           onError(error);
         }
@@ -432,7 +459,13 @@ function extractFile({
     }
 
     case "tgz": {
-      const tar = childProcess.spawn("tar", ["xf", "-", "-C", dir, name]);
+      const tar = childProcess.spawn("tar", [
+        "xf",
+        "-",
+        "-C",
+        path.dirname(file),
+        path.basename(file),
+      ]);
       let tarStderr = "";
 
       tar.on("error", (error: Error & { code?: string }) => {
@@ -454,7 +487,9 @@ function extractFile({
         } else {
           onError(
             new Error(
-              `tar exited with non-zero exit code ${code}:\n${tarStderr}`
+              `tar exited with non-zero exit code ${code}:\n${indent(
+                tarStderr
+              )}`
             )
           );
         }
@@ -463,4 +498,8 @@ function extractFile({
       return tar.stdin;
     }
   }
+}
+
+function indent(string: string): string {
+  return string.replace(/^/gm, "  ");
 }
