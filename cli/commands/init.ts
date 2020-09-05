@@ -62,16 +62,16 @@ async function tryGuessEntrypoints(): Promise<Array<string>> {
       .map((entry) => path.join(directory, entry.name))
   );
 
-  const results = await Promise.allSettled(files.map(isMainFile));
+  const results = await Promise.all(
+    files.map((file) =>
+      isMainFile(file).then(
+        (isMain) => (isMain ? file : new Error(`${file} is not a main file.`)),
+        (error: Error) => error
+      )
+    )
+  );
   const entrypoints = results
-    .flatMap((result) => {
-      switch (result.status) {
-        case "fulfilled":
-          return result.value ?? [];
-        case "rejected":
-          return [];
-      }
-    })
+    .flatMap((result) => (result instanceof Error ? [] : result))
     .sort();
 
   if (entrypoints.length === 0) {
@@ -126,7 +126,7 @@ function tryGetSourceDirectories(): Array<string> {
   }
 }
 
-function isMainFile(file: string): Promise<string | undefined> {
+function isMainFile(file: string): Promise<boolean> {
   return new Promise((resolve) => {
     let found = false;
     const rl = readline.createInterface({
@@ -142,7 +142,7 @@ function isMainFile(file: string): Promise<string | undefined> {
     });
 
     rl.once("close", () => {
-      resolve(found ? file : undefined);
+      resolve(found);
     });
   });
 }
