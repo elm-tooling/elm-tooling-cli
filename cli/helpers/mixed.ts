@@ -61,3 +61,15 @@ export function bold(string: string): string {
 export function dim(string: string): string {
   return NO_COLOR ? string : `\x1B[2m${string}${RESET_COLOR}`;
 }
+
+export function indent(string: string): string {
+  return string.replace(/^/gm, "    ");
+}
+
+export const elmToolingJsonDocumentationLink = `${dim(
+  "Documentation:"
+)}\n    https://github.com/lydell/elm-tooling.json`;
+
+export function printNumErrors(numErrors: number): string {
+  return `${bold(numErrors.toString())} error${numErrors === 1 ? "" : "s"}`;
+}

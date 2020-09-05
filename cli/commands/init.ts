@@ -3,12 +3,16 @@ import * as path from "path";
 import * as readline from "readline";
 
 import { KNOWN_TOOLS } from "../helpers/known_tools";
-import { ElmTooling, isRecord, NonEmptyArray } from "../helpers/mixed";
+import { bold, ElmTooling, isRecord, NonEmptyArray } from "../helpers/mixed";
 import { getOSName } from "../helpers/parse";
 
 export default async function init(): Promise<number> {
-  if (fs.existsSync("elm-tooling.json")) {
-    console.error("elm-tooling.json already exists!");
+  const absolutePath = path.resolve("elm-tooling.json");
+
+  console.error(bold(absolutePath));
+
+  if (fs.existsSync(absolutePath)) {
+    console.error("Already exists!");
     return 1;
   }
 
@@ -41,7 +45,7 @@ export default async function init(): Promise<number> {
   };
 
   fs.writeFileSync("elm-tooling.json", JSON.stringify(json, null, 2));
-  console.error("Created a sample elm-tooling.json\nEdit it as needed!");
+  console.error("Created! Open it in a text editor and have a look!");
   return 0;
 }
 

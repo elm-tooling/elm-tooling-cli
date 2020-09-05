@@ -8,7 +8,19 @@ import type { Writable } from "stream";
 import * as zlib from "zlib";
 
 import type { AssetType } from "../helpers/known_tools";
-import { findReadAndParseElmToolingJson, Tool, Tools } from "../helpers/parse";
+import {
+  bold,
+  dim,
+  elmToolingJsonDocumentationLink,
+  indent,
+  printNumErrors,
+} from "../helpers/mixed";
+import {
+  findReadAndParseElmToolingJson,
+  printFieldErrors,
+  Tool,
+  Tools,
+} from "../helpers/parse";
 
 export default async function download(): Promise<number> {
   const parseResult = findReadAndParseElmToolingJson();
@@ -19,23 +31,23 @@ export default async function download(): Promise<number> {
       return 1;
 
     case "ReadAsJsonObjectError":
-      console.error(parseResult.elmToolingJsonPath);
+      console.error(bold(parseResult.elmToolingJsonPath));
       console.error(parseResult.message);
       return 1;
 
     case "Parsed": {
-      console.error(parseResult.elmToolingJsonPath);
+      console.error(bold(parseResult.elmToolingJsonPath));
 
       switch (parseResult.tools?.tag) {
         case undefined:
-          console.error("tools: Missing. Nothing to download.");
+          console.error(`The "tools" field is missing. Nothing to download.`);
           return 0;
 
         case "Error":
-          for (const error of parseResult.tools.errors) {
-            console.error(`\n- ${error}`);
-          }
-          console.error("\nDocs: https://github.com/lydell/elm-tooling.json");
+          console.error("");
+          console.error(printFieldErrors(parseResult.tools.errors));
+          console.error("");
+          console.error(elmToolingJsonDocumentationLink);
           return 1;
 
         case "Parsed":
@@ -47,7 +59,7 @@ export default async function download(): Promise<number> {
 
 async function downloadTools(tools: Tools): Promise<number> {
   if (tools.existing.length === 0 && tools.missing.length === 0) {
-    console.error(`tools: Empty. Nothing to download.`);
+    console.error(`The "tools" field is empty. Nothing to download.`);
     return 0;
   }
 
@@ -71,15 +83,15 @@ async function downloadTools(tools: Tools): Promise<number> {
   const draw = () => {
     console.error(
       tools.missing
-        .map(({ name, version }, index) => {
+        .map((tool, index) => {
           const progress = toolsProgress[index];
-          return `${
+          const progressString =
             typeof progress === "string"
               ? progress.padEnd(4)
               : Math.round(progress * 100)
                   .toString()
-                  .padStart(3) + "%"
-          } ${name} ${version}`;
+                  .padStart(3) + "%";
+          return `${bold(progressString)} ${tool.name} ${tool.version}`;
         })
         .join("\n")
     );
@@ -103,7 +115,7 @@ async function downloadTools(tools: Tools): Promise<number> {
         toolsProgress[index] = percentage;
         redraw();
       }).catch((error: Error) => {
-        toolsProgress[index] = "ERR";
+        toolsProgress[index] = "ERR!";
         redraw();
         return new Error(downloadAndExtractError(tool, error));
       })
@@ -116,8 +128,14 @@ async function downloadTools(tools: Tools): Promise<number> {
 
   redraw({ force: true });
 
-  for (const error of downloadErrors) {
-    console.error(error.message);
+  if (downloadErrors.length > 0) {
+    console.error("");
+    console.error(
+      [
+        printNumErrors(downloadErrors.length),
+        ...downloadErrors.map((error) => error.message),
+      ].join("\n\n")
+    );
   }
 
   return downloadErrors.length === 0 ? 0 : 1;
@@ -178,11 +196,11 @@ function downloadAndExtract(
 
 function downloadAndExtractError(tool: Tool, error: Error) {
   return `
-${tool.name} ${tool.version}:
+${bold(`${tool.name} ${tool.version}`)}
 ${indent(
   `
-< ${tool.asset.url}
-> ${tool.absolutePath}
+${dim(`< ${tool.asset.url}`)}
+${dim(`> ${tool.absolutePath}`)}
 ${error.message}
   `.trim()
 )}
@@ -192,13 +210,9 @@ ${error.message}
 function hashMismatch(actual: string, expected: string) {
   return `
 Hash mismatch:
-  Expected: ${expected}
-  Actual:   ${actual}
+Expected: ${expected}
+Actual:   ${actual}
   `.trim();
-}
-
-function indent(string: string): string {
-  return string.replace(/^/gm, "  ");
 }
 
 function downloadFile(
@@ -232,7 +246,6 @@ function downloadFile(
     } else if (code === 0) {
       onSuccess();
     } else {
-      fs.writeFileSync("stderr.txt", stderr);
       onError(
         new Error(
           `${commandName} exited with non-zero exit code ${code}.\n${stderr

@@ -36,7 +36,7 @@ ${bold("Environment variables:")}
     ${bold("NO_COLOR")}
         Disable colored output.
 
-${bold("Docs:")}
+${bold("Documentation:")}
     https://github.com/lydell/elm-tooling.json/tree/master/cli
 `.trim();
 

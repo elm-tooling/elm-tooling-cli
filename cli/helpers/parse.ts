@@ -4,10 +4,13 @@ import * as path from "path";
 
 import { Asset, KNOWN_TOOLS, OSName } from "./known_tools";
 import {
+  bold,
   findClosestElmTooling,
+  indent,
   isRecord,
   NonEmptyArray,
   partitionMap,
+  printNumErrors,
 } from "./mixed";
 
 const elmHome = process.env.ELM_HOME || path.join(os.homedir(), ".elm");
@@ -32,8 +35,13 @@ export type ParseResult =
     };
 
 export type FieldResult<T> =
-  | { tag: "Error"; errors: NonEmptyArray<string> }
+  | { tag: "Error"; errors: NonEmptyArray<FieldError> }
   | { tag: "Parsed"; parsed: T };
+
+export type FieldError = {
+  path: Array<string | number>;
+  message: string;
+};
 
 export type Entrypoint = {
   relativePath: string;
@@ -90,15 +98,25 @@ export function findReadAndParseElmToolingJson(): ParseResult {
   for (const [field, value] of Object.entries(json)) {
     switch (field) {
       case "entrypoints":
-        result.entrypoints = parseEntrypoints(elmToolingJsonPath, value);
+        result.entrypoints = prefixFieldResult(
+          "entrypoints",
+          parseEntrypoints(elmToolingJsonPath, value)
+        );
         break;
 
       case "tools": {
         const osName = getOSName();
-        result.tools =
+        result.tools = prefixFieldResult(
+          "tools",
           osName instanceof Error
-            ? { tag: "Error", errors: [`tools: ${osName.message}`] }
-            : parseTools(osName, value);
+            ? {
+                tag: "Error" as const,
+                errors: [
+                  { path: [], message: osName.message },
+                ] as NonEmptyArray<FieldError>,
+              }
+            : parseTools(osName, value)
+        );
         break;
       }
 
@@ -123,6 +141,25 @@ export function getOSName(): OSName | Error {
       return new Error(
         `Sorry, your platform (${process.platform}) is not supported yet :(`
       );
+  }
+}
+
+function prefixFieldResult<T>(
+  prefix: string,
+  fieldResult: FieldResult<T>
+): FieldResult<T> {
+  switch (fieldResult.tag) {
+    case "Error":
+      return {
+        tag: "Error",
+        errors: fieldResult.errors.map(({ path, message }) => ({
+          path: [prefix, ...path],
+          message,
+        })) as NonEmptyArray<FieldError>,
+      };
+
+    case "Parsed":
+      return fieldResult;
   }
 }
 
@@ -161,7 +198,10 @@ function parseEntrypoints(
     return {
       tag: "Error",
       errors: [
-        `entrypoints: Expected an array but got: ${JSON.stringify(json)}`,
+        {
+          path: [],
+          message: `Expected an array but got: ${JSON.stringify(json)}`,
+        },
       ],
     };
   }
@@ -169,33 +209,38 @@ function parseEntrypoints(
   if (json.length === 0) {
     return {
       tag: "Error",
-      errors: [`entrypoints: Expected at least one entrypoint but got 0.`],
+      errors: [
+        {
+          path: [],
+          message: `Expected at least one entrypoint but got 0.`,
+        },
+      ],
     };
   }
 
   const [errors, entrypoints]: [
-    Array<[number, string]>,
+    Array<FieldError>,
     Array<Entrypoint>
   ] = partitionMap(json, (entrypoint, index) => {
     if (typeof entrypoint !== "string") {
       return {
         tag: "Left",
-        value: [
-          index,
-          `Expected a string but got: ${JSON.stringify(entrypoint)}`,
-        ],
+        value: {
+          path: [index],
+          message: `Expected a string but got: ${JSON.stringify(entrypoint)}`,
+        },
       };
     }
 
     if (!entrypoint.startsWith("./")) {
       return {
         tag: "Left",
-        value: [
-          index,
-          `Expected the string to start with "./" (to indicate that it is a relative path) but got: ${JSON.stringify(
+        value: {
+          path: [index],
+          message: `Expected the string to start with "./" (to indicate that it is a relative path) but got: ${JSON.stringify(
             entrypoint
           )}`,
-        ],
+        },
       };
     }
 
@@ -206,7 +251,10 @@ function parseEntrypoints(
 
     const exists = validateFileExists(absolutePath);
     if (exists.tag !== "Exists") {
-      return { tag: "Left", value: [index, exists.message] };
+      return {
+        tag: "Left",
+        value: { path: [index], message: exists.message },
+      };
     }
 
     return {
@@ -221,9 +269,7 @@ function parseEntrypoints(
   if (errors.length > 0) {
     return {
       tag: "Error",
-      errors: errors.map(
-        ([index, error]) => `entrypoints[${index}]: ${error}`
-      ) as NonEmptyArray<string>,
+      errors: errors as NonEmptyArray<FieldError>,
     };
   }
 
@@ -234,21 +280,28 @@ function parseTools(osName: OSName, json: unknown): FieldResult<Tools> {
   if (!isRecord(json)) {
     return {
       tag: "Error",
-      errors: [`tools: Expected an object but got: ${JSON.stringify(json)}`],
+      errors: [
+        {
+          path: [],
+          message: `Expected an object but got: ${JSON.stringify(json)}`,
+        },
+      ],
     };
   }
 
   const [errors, tools]: [
-    Array<[string, string]>,
+    Array<FieldError>,
     Array<[boolean, Tool]>
   ] = partitionMap(Object.entries(json), ([name, version]) => {
     if (typeof version !== "string") {
       return {
         tag: "Left",
-        value: [
-          name,
-          `Expected a version as a string but got: ${JSON.stringify(version)}`,
-        ],
+        value: {
+          path: [name],
+          message: `Expected a version as a string but got: ${JSON.stringify(
+            version
+          )}`,
+        },
       };
     }
 
@@ -257,7 +310,10 @@ function parseTools(osName: OSName, json: unknown): FieldResult<Tools> {
       : undefined;
 
     if (versions === undefined) {
-      return { tag: "Left", value: [name, `Unknown tool`] };
+      return {
+        tag: "Left",
+        value: { path: [name], message: `Unknown tool` },
+      };
     }
 
     const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
@@ -267,7 +323,7 @@ function parseTools(osName: OSName, json: unknown): FieldResult<Tools> {
     if (osAssets === undefined) {
       return {
         tag: "Left",
-        value: [name, `Unknown version: ${version}`],
+        value: { path: [name], message: `Unknown version: ${version}` },
       };
     }
 
@@ -294,16 +350,17 @@ function parseTools(osName: OSName, json: unknown): FieldResult<Tools> {
         };
 
       case "Error":
-        return { tag: "Left", value: [name, exists.message] };
+        return {
+          tag: "Left",
+          value: { path: [name], message: exists.message },
+        };
     }
   });
 
   if (errors.length > 0) {
     return {
       tag: "Error",
-      errors: errors.map(
-        ([name, error]) => `tools[${JSON.stringify(name)}]: ${error}`
-      ) as NonEmptyArray<string>,
+      errors: errors as NonEmptyArray<FieldError>,
     };
   }
 
@@ -325,4 +382,23 @@ function getToolAbsolutePath(
   version: string
 ) {
   return path.join(elmToolingInstallPath, name, version, name);
+}
+
+export function printFieldErrors(errors: Array<FieldError>): string {
+  return [
+    printNumErrors(errors.length),
+    ...errors.map(
+      (error) => `${bold(joinPath(error.path))}\n${indent(error.message)}`
+    ),
+  ].join("\n\n");
+}
+
+function joinPath(errorPath: Array<string | number>): string {
+  if (errorPath.length === 0) {
+    return "General";
+  }
+  const rest = errorPath
+    .slice(1)
+    .map((segment) => `[${JSON.stringify(segment)}]`);
+  return `${errorPath[0]}${rest.join("")}`;
 }

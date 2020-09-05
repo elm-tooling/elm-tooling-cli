@@ -1,10 +1,17 @@
 import * as path from "path";
 
-import type { NonEmptyArray } from "../helpers/mixed";
+import {
+  bold,
+  dim,
+  elmToolingJsonDocumentationLink,
+  NonEmptyArray,
+} from "../helpers/mixed";
 import {
   Entrypoint,
+  FieldError,
   FieldResult,
   findReadAndParseElmToolingJson,
+  printFieldErrors,
   Tools,
   validateFileExists,
 } from "../helpers/parse";
@@ -18,7 +25,7 @@ export default function validate(): number {
       return 1;
 
     case "ReadAsJsonObjectError":
-      console.error(parseResult.elmToolingJsonPath);
+      console.error(bold(parseResult.elmToolingJsonPath));
       console.error(parseResult.message);
       return 1;
 
@@ -30,7 +37,10 @@ export default function validate(): number {
         elmJsonExists.tag === "Exists"
           ? []
           : [
-              `elm.json: There should be an elm.json next to elm-tooling.json. ${elmJsonExists.message}`,
+              {
+                path: ["elm.json"],
+                message: `There should be an elm.json next to elm-tooling.json\n${elmJsonExists.message}`,
+              },
             ];
 
       const entrypointsErrors =
@@ -43,26 +53,32 @@ export default function validate(): number {
           ? { tag: "Error", errors: [] }
           : getToolsErrors(parseResult.tools);
 
-      const validationErrors = [
+      const validationErrors: Array<FieldError> = [
         ...elmJsonErrors,
-        ...parseResult.unknownFields.map((field) => `${field}: Unknown field`),
+        ...parseResult.unknownFields.map((field) => ({
+          path: [field],
+          message: `Unknown field`,
+        })),
         ...entrypointsErrors,
         ...toolsErrors.errors,
       ];
 
-      console.error(parseResult.elmToolingJsonPath);
+      console.error(bold(parseResult.elmToolingJsonPath));
 
       if (validationErrors.length === 0) {
         console.error("No errors found.");
         return 0;
       } else {
-        for (const error of validationErrors) {
-          console.error(`\n- ${error}`);
-        }
+        console.error("");
+        console.error(printFieldErrors(validationErrors));
         if (toolsErrors.tag === "Missing" && toolsErrors.errors.length > 0) {
-          console.error("\nTo download missing tools: elm-tooling download");
+          console.error("");
+          console.error(
+            `${dim("To download missing tools:")}\n    elm-tooling download`
+          );
         }
-        console.error("\nDocs: https://github.com/lydell/elm-tooling.json");
+        console.error("");
+        console.error(elmToolingJsonDocumentationLink);
         return 1;
       }
     }
@@ -71,7 +87,7 @@ export default function validate(): number {
 
 function getEntrypointsErrors(
   fieldResult: FieldResult<NonEmptyArray<Entrypoint>>
-): Array<string> {
+): Array<FieldError> {
   switch (fieldResult.tag) {
     case "Error":
       return fieldResult.errors;
@@ -82,8 +98,8 @@ function getEntrypointsErrors(
 }
 
 type ToolsErrors =
-  | { tag: "Error"; errors: NonEmptyArray<string> }
-  | { tag: "Missing"; errors: Array<string> };
+  | { tag: "Error"; errors: NonEmptyArray<FieldError> }
+  | { tag: "Missing"; errors: Array<FieldError> };
 
 function getToolsErrors(fieldResult: FieldResult<Tools>): ToolsErrors {
   switch (fieldResult.tag) {
@@ -93,10 +109,10 @@ function getToolsErrors(fieldResult: FieldResult<Tools>): ToolsErrors {
     case "Parsed":
       return {
         tag: "Missing",
-        errors: fieldResult.parsed.missing.map(
-          (tool) =>
-            `tools[${tool.name}]: File does not exist: ${tool.absolutePath}`
-        ),
+        errors: fieldResult.parsed.missing.map((tool) => ({
+          path: ["tools", tool.name],
+          message: `File does not exist: ${tool.absolutePath}`,
+        })),
       };
   }
 }
