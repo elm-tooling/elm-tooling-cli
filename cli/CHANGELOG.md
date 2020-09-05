@@ -1,3 +1,7 @@
+### Version 0.1.3 (2020-09-06)
+
+- Improved: `elm-tooling postinstall` now overwrites links like `npm` does.
+
 ### Version 0.1.2 (2020-09-06)
 
 - Fixed: Node.js 12 support.
