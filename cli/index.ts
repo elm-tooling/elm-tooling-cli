@@ -2,33 +2,42 @@ import download from "./commands/download";
 import init from "./commands/init";
 import postinstall from "./commands/postinstall";
 import validate from "./commands/validate";
+import { bold, dim } from "./helpers/mixed";
 import { elmToolingInstallPath } from "./helpers/parse";
 
 const help = `
-elm-tooling init
-  Create an elm-tooling.json in the current directory
+${bold("elm-tooling init")}
+    Create an elm-tooling.json in the current directory
 
-elm-tooling validate
-  Validate the closest elm-tooling.json
+${bold("elm-tooling validate")}
+    Validate the closest elm-tooling.json
 
-elm-tooling download
-  Download the tools in the closest elm-tooling.json to:
-  ${elmToolingInstallPath}
-  (Set the ELM_HOME environment variable to customize.)
+${bold("elm-tooling download")}
+    Download the tools in the closest elm-tooling.json to:
+    ${dim(elmToolingInstallPath)}
 
-elm-tooling postinstall
-  Download the tools in the closest elm-tooling.json
-  and create links to them in node_modules/.bin/
+${bold("elm-tooling postinstall")}
+    Download the tools in the closest elm-tooling.json
+    and create links to them in node_modules/.bin/
 
-  Add this to your package.json:
+    ${dim("Add this to your package.json:")}
 
-  {
-    "scripts": {
-      "postinstall": "elm-tooling postinstall"
-    }
-  }
+    ${dim(`{
+      "scripts": {
+        "postinstall": "elm-tooling postinstall"
+      }
+    }`)}
 
-Docs: https://github.com/lydell/elm-tooling.json/tree/master/cli
+${bold("Environment variables:")}
+    ${bold("ELM_HOME")}
+        Customize where tools will be downloaded.
+        The Elm compiler uses this variable too for where to store packages.
+
+    ${bold("NO_COLOR")}
+        Disable colored output.
+
+${bold("Docs:")}
+    https://github.com/lydell/elm-tooling.json/tree/master/cli
 `.trim();
 
 async function run(argv: Array<string>): Promise<number> {
