@@ -68,7 +68,7 @@ elm-tooling.json:
 +{
 +  "tools": {
 +    "elm": "0.19.1",
-+    "elm-format": "0.19.1"
++    "elm-format": "0.8.3"
 +  }
 +}
 ```
@@ -82,7 +82,7 @@ Thanks to the [postinstall] script shown in `package.json` above, `elm` and `elm
 
 The difference compared to installing the regular `elm` and `elm-format` packages are:
 
-- Faster initial installs. `elm-tooling` downloads all tools in parallel, the binary downloads for the regular `elm` and `elm-format` packages are serial.
+- Faster initial installs. `elm-tooling` downloads all tools in parallel, while the binary downloads for the regular `elm` and `elm-format` packages are serial.
 - Faster subsequent installs. Once you’ve downloaded one version of a tool once you never need to download it again. This works by saving the binaries in a shared location rather than locally in each project.
 - Less disk usage. Again, storing the binaries in a shared location saves tens of megabytes per project.
 - Less npm dependencies. The `elm` and `elm-format` npm packages depend on megabytes of dependencies. `elm-tooling` has no npm dependencies at all.
