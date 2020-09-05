@@ -1,8 +1,19 @@
 # elm-tooling CLI
 
-Coming soon™️!
+The CLI for [elm-tooling.json]. Create and validate `elm-tooling.json`. Install Elm tools.
 
-Ideas:
+## Installation
 
-- `elm-tooling validate path/to/elm-tooling.json`. Validate an `elm-tooling.json` file given all known fields.
-- `elm-tooling init`. Create an `elm-tooling.json`.
+```
+npm install --save-dev elm-tooling
+```
+
+```
+npx elm-tooling --help
+```
+
+## License
+
+[MIT](LICENSE).
+
+[elm-tooling.json]: https://github.com/lydell/elm-tooling.json
