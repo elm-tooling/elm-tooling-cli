@@ -209,7 +209,7 @@ ${error.message}
 
 function hashMismatch(actual: string, expected: string) {
   return `
-Hash mismatch:
+The downloaded file does not have the expected hash!
 Expected: ${expected}
 Actual:   ${actual}
   `.trim();
