@@ -25,6 +25,7 @@ export default async function download(): Promise<number> {
 
     case "Parsed": {
       console.error(parseResult.elmToolingJsonPath);
+
       switch (parseResult.tools?.tag) {
         case undefined:
           console.error("tools: Missing. Nothing to download.");

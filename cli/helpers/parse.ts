@@ -26,7 +26,6 @@ export type ParseResult =
   | {
       tag: "Parsed";
       elmToolingJsonPath: string;
-      warnings: Array<string>;
       unknownFields: Array<string>;
       entrypoints?: FieldResult<NonEmptyArray<Entrypoint>>;
       tools?: FieldResult<Tools>;
@@ -82,14 +81,9 @@ export function findReadAndParseElmToolingJson(): ParseResult {
     };
   }
 
-  const elmJsonExists = validateFileExists(
-    path.join(path.dirname(elmToolingJsonPath), "elm.json")
-  );
-
   const result: ParseResult = {
     tag: "Parsed",
     elmToolingJsonPath,
-    warnings: elmJsonExists.tag === "Exists" ? [] : [elmJsonExists.message],
     unknownFields: [],
   };
 
@@ -132,12 +126,12 @@ export function getOSName(): OSName | Error {
   }
 }
 
-type FileExists =
+export type FileExists =
   | { tag: "Exists" }
   | { tag: "DoesNotExist"; message: string }
   | { tag: "Error"; message: string };
 
-function validateFileExists(fullPath: string): FileExists {
+export function validateFileExists(fullPath: string): FileExists {
   try {
     const stats = fs.statSync(fullPath);
     if (!stats.isFile()) {

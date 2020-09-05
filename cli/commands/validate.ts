@@ -1,9 +1,12 @@
+import * as path from "path";
+
 import type { NonEmptyArray } from "../helpers/mixed";
 import {
   Entrypoint,
   FieldResult,
   findReadAndParseElmToolingJson,
   Tools,
+  validateFileExists,
 } from "../helpers/parse";
 
 export default function validate(): number {
@@ -20,21 +23,35 @@ export default function validate(): number {
       return 1;
 
     case "Parsed": {
-      console.error(parseResult.elmToolingJsonPath);
+      const elmJsonExists = validateFileExists(
+        path.join(path.dirname(parseResult.elmToolingJsonPath), "elm.json")
+      );
+      const elmJsonErrors =
+        elmJsonExists.tag === "Exists"
+          ? []
+          : [
+              `elm.json: There should be an elm.json next to elm-tooling.json. ${elmJsonExists.message}`,
+            ];
+
       const entrypointsErrors =
         parseResult.entrypoints === undefined
           ? []
           : getEntrypointsErrors(parseResult.entrypoints);
+
       const toolsErrors =
         parseResult.tools === undefined
           ? { tag: "Error", errors: [] }
           : getToolsErrors(parseResult.tools);
+
       const validationErrors = [
-        ...parseResult.warnings,
+        ...elmJsonErrors,
         ...parseResult.unknownFields.map((field) => `${field}: Unknown field`),
         ...entrypointsErrors,
         ...toolsErrors.errors,
       ];
+
+      console.error(parseResult.elmToolingJsonPath);
+
       if (validationErrors.length === 0) {
         console.error("No errors found.");
         return 0;
