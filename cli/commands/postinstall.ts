@@ -37,33 +37,18 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
   for (const tool of tools) {
     const linkPath = path.join(nodeModulesBinPath, tool.name);
 
+    // Just like npm, just overwrite whatever links are already in
+    // `node_modules/.bin/`. Most likely it’s either old links from for example
+    // the `elm` npm package, or links from previous runs of this script.
     try {
-      const target = fs.readlinkSync(linkPath);
-      if (target === tool.absolutePath) {
-        console.error(
-          `${bold(`${tool.name} ${tool.version}`)} link already exists: ${dim(
-            `${linkPath} -> ${target}`
-          )}`
-        );
-        continue;
-      } else {
-        console.error(wrongSymlinkError(linkPath, target, tool.absolutePath));
-        return 1;
-      }
+      fs.unlinkSync(linkPath);
     } catch (errorAny) {
       const error = errorAny as Error & { code?: string };
-      switch (error.code) {
-        case "ENOENT":
-          // Does not exist yet – move on.
-          break;
-        case "EINVAL":
-          console.error(
-            `${linkPath} already exists, but is not a link to ${tool.absolutePath}\n${error.message}\nRemove it and try again.`
-          );
-          return 1;
-        default:
-          console.error(`Failed to create ${linkPath}:\n${error.message}`);
-          return 1;
+      if (error.code !== "ENOENT") {
+        console.error(
+          `Failed to remove old link for ${tool.name} at ${linkPath}: ${error.message}`
+        );
+        return 1;
       }
     }
 
@@ -71,7 +56,9 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
       fs.symlinkSync(tool.absolutePath, linkPath);
     } catch (errorAny) {
       const error = errorAny as Error & { code?: number };
-      console.error(`Failed to create ${linkPath}: ${error.message}`);
+      console.error(
+        `Failed to create link for ${tool.name} at ${linkPath}: ${error.message}`
+      );
       return 1;
     }
 
@@ -83,13 +70,4 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
   }
 
   return 0;
-}
-
-function wrongSymlinkError(linkPath: string, actual: string, expected: string) {
-  return `
-${linkPath} already exists, but links to something else.
-Expected: ${expected}
-Actual:   ${actual}
-Remove it and try again.
-`.trim();
 }
