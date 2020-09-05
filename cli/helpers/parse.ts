@@ -5,7 +5,7 @@ import * as path from "path";
 import { Asset, KNOWN_TOOLS, OSName } from "./known_tools";
 import {
   bold,
-  findClosestElmTooling,
+  findClosest,
   indent,
   isRecord,
   NonEmptyArray,
@@ -61,7 +61,7 @@ export type Tool = {
 };
 
 export function findReadAndParseElmToolingJson(): ParseResult {
-  const elmToolingJsonPath = findClosestElmTooling();
+  const elmToolingJsonPath = findClosest("elm-tooling.json");
   if (elmToolingJsonPath === undefined) {
     return {
       tag: "ElmToolingJsonNotFound",

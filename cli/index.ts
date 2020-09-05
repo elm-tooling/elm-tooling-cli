@@ -65,8 +65,15 @@ async function run(argv: Array<string>): Promise<number> {
     case "validate":
       return validate();
 
-    case "download":
-      return await download();
+    case "download": {
+      const result = await download();
+      switch (result.tag) {
+        case "Exit":
+          return result.statusCode;
+        case "Success":
+          return 0;
+      }
+    }
 
     case "postinstall":
       return await postinstall();
@@ -82,6 +89,7 @@ run(process.argv.slice(2)).then(
     process.exit(exitCode);
   },
   (error: Error) => {
-    console.error(`Unexpected error:\n${error.stack || error.message}`);
+    console.error("Unexpected error", error);
+    process.exit(1);
   }
 );

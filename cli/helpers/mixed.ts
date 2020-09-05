@@ -14,15 +14,16 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function findClosestElmTooling(
+export function findClosest(
+  name: string,
   dir: string = process.cwd()
 ): string | undefined {
-  const file = path.join(dir, "elm-tooling.json");
+  const file = path.join(dir, name);
   return fs.existsSync(file)
     ? file
     : dir === path.parse(dir).root
     ? undefined
-    : findClosestElmTooling(path.dirname(dir));
+    : findClosest(name, path.dirname(dir));
 }
 
 export type Either<Left, Right> =

@@ -13,6 +13,7 @@ import {
   dim,
   elmToolingJsonDocumentationLink,
   indent,
+  NonEmptyArray,
   printNumErrors,
 } from "../helpers/mixed";
 import {
@@ -22,18 +23,22 @@ import {
   Tools,
 } from "../helpers/parse";
 
-export default async function download(): Promise<number> {
+type DownloadResult =
+  | { tag: "Exit"; statusCode: number }
+  | { tag: "Success"; tools: NonEmptyArray<Tool> };
+
+export default async function download(): Promise<DownloadResult> {
   const parseResult = findReadAndParseElmToolingJson();
 
   switch (parseResult.tag) {
     case "ElmToolingJsonNotFound":
       console.error(parseResult.message);
-      return 1;
+      return { tag: "Exit", statusCode: 1 };
 
     case "ReadAsJsonObjectError":
       console.error(bold(parseResult.elmToolingJsonPath));
       console.error(parseResult.message);
-      return 1;
+      return { tag: "Exit", statusCode: 1 };
 
     case "Parsed": {
       console.error(bold(parseResult.elmToolingJsonPath));
@@ -41,14 +46,14 @@ export default async function download(): Promise<number> {
       switch (parseResult.tools?.tag) {
         case undefined:
           console.error(`The "tools" field is missing. Nothing to download.`);
-          return 0;
+          return { tag: "Exit", statusCode: 0 };
 
         case "Error":
           console.error("");
           console.error(printFieldErrors(parseResult.tools.errors));
           console.error("");
           console.error(elmToolingJsonDocumentationLink);
-          return 1;
+          return { tag: "Exit", statusCode: 1 };
 
         case "Parsed":
           return await downloadTools(parseResult.tools.parsed);
@@ -57,20 +62,22 @@ export default async function download(): Promise<number> {
   }
 }
 
-async function downloadTools(tools: Tools): Promise<number> {
+async function downloadTools(tools: Tools): Promise<DownloadResult> {
   if (tools.existing.length === 0 && tools.missing.length === 0) {
     console.error(`The "tools" field is empty. Nothing to download.`);
-    return 0;
+    return { tag: "Exit", statusCode: 0 };
   }
 
   for (const tool of tools.existing) {
     console.error(
-      `${tool.name} ${tool.version} already exists: ${tool.absolutePath}`
+      `${bold(`${tool.name} ${tool.version}`)} already exists: ${dim(
+        tool.absolutePath
+      )}`
     );
   }
 
   if (tools.missing.length === 0) {
-    return 0;
+    return { tag: "Success", tools: tools.existing as NonEmptyArray<Tool> };
   }
 
   for (const tool of tools.missing) {
@@ -136,9 +143,13 @@ async function downloadTools(tools: Tools): Promise<number> {
         ...downloadErrors.map((error) => error.message),
       ].join("\n\n")
     );
+    return { tag: "Exit", statusCode: 1 };
   }
 
-  return downloadErrors.length === 0 ? 0 : 1;
+  return {
+    tag: "Success",
+    tools: [...tools.existing, ...tools.missing] as NonEmptyArray<Tool>,
+  };
 }
 
 function downloadAndExtract(
