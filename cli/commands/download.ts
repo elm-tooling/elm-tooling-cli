@@ -79,7 +79,7 @@ export default async function download(): Promise<number> {
   for (const { name, version, asset } of assets) {
     const binary = getBinaryPath(elmToolingDir, name, version);
     if (fs.existsSync(binary)) {
-      console.error(`Already exists: ${binary}`);
+      console.error(`${name} ${version} already exists: ${binary}`);
     } else {
       fs.mkdirSync(path.dirname(binary), { recursive: true });
       needsDownload.push({ name, version, asset });
@@ -134,7 +134,13 @@ export default async function download(): Promise<number> {
       ).catch((error: Error) => {
         progresses[index] = "ERR";
         redraw();
-        return new Error(`${name} ${version}: ${error.message}`);
+        return new Error(
+          downloadAndExtractError(
+            elmToolingDir,
+            { name, version, asset },
+            error
+          )
+        );
       })
     )
   );
@@ -278,12 +284,33 @@ function downloadAndExtract(
   });
 }
 
+function downloadAndExtractError(
+  elmToolingDir: string,
+  { name, version, asset }: NamedAsset,
+  error: Error
+) {
+  return `
+${name} ${version}:
+${indent(
+  `
+< ${asset.url}
+> ${getBinaryPath(elmToolingDir, name, version)}
+${error.message}
+  `.trim()
+)}
+  `.trim();
+}
+
 function hashMismatch(actual: string, expected: string) {
   return `
 Hash mismatch:
   Expected: ${expected}
   Actual:   ${actual}
   `.trim();
+}
+
+function indent(string: string): string {
+  return string.replace(/^/gm, "  ");
 }
 
 function downloadFile(
@@ -317,11 +344,13 @@ function downloadFile(
     } else if (code === 0) {
       onSuccess();
     } else {
+      fs.writeFileSync("stderr.txt", stderr);
       onError(
         new Error(
-          `${commandName} exited with non-zero exit code ${code}.\n${indent(
-            stderr.trim()
-          )}`
+          `${commandName} exited with non-zero exit code ${code}.\n${stderr
+            .trim()
+            // Remove curl’s progress bar remnants.
+            .replace(/^[\s#O=-]+/g, "")}`
         )
       );
     }
@@ -490,9 +519,7 @@ function extractFile({
         } else {
           onError(
             new Error(
-              `tar exited with non-zero exit code ${code}:\n${indent(
-                tarStderr.trim()
-              )}`
+              `tar exited with non-zero exit code ${code}:\n${tarStderr.trim()}`
             )
           );
         }
@@ -501,8 +528,4 @@ function extractFile({
       return tar.stdin;
     }
   }
-}
-
-function indent(string: string): string {
-  return string.replace(/^/gm, "  ");
 }
