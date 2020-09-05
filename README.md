@@ -2,10 +2,14 @@
 
 This is a proposal for an `elm-tooling.json` file, where unofficial Elm tools can collaborate on per-project configuration they need.
 
-Known tools reading this file:
+Known support:
 
-- [elm-tooling]
-- [elm-version](https://github.com/lydell/elm-version)
+| Name                  | `"entrypoints"` | `"tools"` | `node_modules/.bin/` |
+| --------------------- | :-------------: | :-------: | :------------------: |
+| [elm-language-server] |       ✅        |           |          ✅          |
+| [elm-tooling]         |       ✅        |    ✅     |          ✅          |
+
+Note: Anything that supports finding `elm` and `elm-format` in your local `node_modules/.bin/` folder can indirectly use the `"tools"` field via [elm-tooling postinstall].
 
 ## File location
 
@@ -78,7 +82,7 @@ By specifying versions _once\*_ in _one_ place…
 
 - …you can automatically get the correct elm and elm-format versions, in the terminal and in your editor (whichever editor it is)
 - …collaborators on your project can get the correct versions
-- …your CI and build pipeplines can get the correct versions
+- …your CI and build pipelines can get the correct versions
 
 (…with the help of tools that read `elm.tooling.json`.)
 
@@ -167,4 +171,6 @@ The above logs provide:
 
 Public domain
 
+[elm-language-server]: https://github.com/elm-tooling/elm-language-server
+[elm-tooling postinstall]: https://github.com/lydell/elm-tooling.json/blob/master/cli#elm-tooling-postinstall
 [elm-tooling]: https://github.com/lydell/elm-tooling.json/blob/master/cli

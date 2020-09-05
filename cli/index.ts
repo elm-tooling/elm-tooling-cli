@@ -7,7 +7,7 @@ import { elmToolingInstallPath } from "./helpers/parse";
 
 const help = `
 ${bold("elm-tooling init")}
-    Create an elm-tooling.json in the current directory
+    Create a sample elm-tooling.json in the current directory
 
 ${bold("elm-tooling validate")}
     Validate the closest elm-tooling.json
@@ -19,14 +19,6 @@ ${bold("elm-tooling download")}
 ${bold("elm-tooling postinstall")}
     Download the tools in the closest elm-tooling.json
     and create links to them in node_modules/.bin/
-
-    ${dim("Add this to your package.json:")}
-
-    ${dim(`{
-      "scripts": {
-        "postinstall": "elm-tooling postinstall"
-      }
-    }`)}
 
 ${bold("Environment variables:")}
     ${bold("ELM_HOME")}
