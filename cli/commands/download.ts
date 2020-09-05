@@ -448,12 +448,14 @@ function extractFile({
       gunzip.on("error", onError);
       write.on("error", onError);
       write.on("close", () => {
-        try {
-          // Make executable: `chmod +x`.
-          fs.chmodSync(file, "755");
-        } catch (error) {
-          onError(error);
-        }
+        // Make executable: `chmod +x`.
+        fs.chmod(file, "755", (error) => {
+          if (error === null) {
+            onSuccess();
+          } else {
+            onError(error);
+          }
+        });
       });
       gunzip.pipe(write);
       return gunzip;
