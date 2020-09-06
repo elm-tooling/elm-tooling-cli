@@ -404,7 +404,7 @@ function extractFile({
 
     case "tgz": {
       const tar = childProcess.spawn("tar", [
-        "xf",
+        "zxf",
         "-",
         "-C",
         path.dirname(file),
