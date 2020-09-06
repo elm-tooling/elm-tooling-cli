@@ -9,9 +9,8 @@ import { getOSName } from "../helpers/parse";
 export default async function init(): Promise<number> {
   const absolutePath = path.resolve("elm-tooling.json");
 
-  console.error(bold(absolutePath));
-
   if (fs.existsSync(absolutePath)) {
+    console.error(bold(absolutePath));
     console.error("Already exists!");
     return 1;
   }
@@ -45,7 +44,8 @@ export default async function init(): Promise<number> {
   };
 
   fs.writeFileSync("elm-tooling.json", JSON.stringify(json, null, 2));
-  console.error("Created! Open it in a text editor and have a look!");
+  console.log(bold(absolutePath));
+  console.log("Created! Open it in a text editor and have a look!");
   return 0;
 }
 

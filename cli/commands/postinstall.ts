@@ -16,8 +16,6 @@ export default async function postinstall(): Promise<number> {
 }
 
 function linkTools(tools: NonEmptyArray<Tool>): number {
-  console.error(bold("Links:"));
-
   const nodeModulesPath = findClosest("node_modules");
   if (nodeModulesPath === undefined) {
     console.error(
@@ -31,7 +29,7 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
     fs.mkdirSync(nodeModulesBinPath, { recursive: true });
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
-    console.error(`Failed to create ${nodeModulesBinPath}: ${error.message}`);
+    console.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
   }
 
   for (const tool of tools) {
@@ -46,7 +44,7 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
       const error = errorAny as Error & { code?: string };
       if (error.code !== "ENOENT") {
         console.error(
-          `Failed to remove old link for ${tool.name} at ${linkPath}: ${error.message}`
+          `Failed to remove old link for ${tool.name} at ${linkPath}:\n${error.message}`
         );
         return 1;
       }
@@ -57,12 +55,12 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
     } catch (errorAny) {
       const error = errorAny as Error & { code?: number };
       console.error(
-        `Failed to create link for ${tool.name} at ${linkPath}: ${error.message}`
+        `Failed to create link for ${tool.name} at ${linkPath}:\n${error.message}`
       );
       return 1;
     }
 
-    console.error(
+    console.log(
       `${bold(`${tool.name} ${tool.version}`)} link created: ${dim(
         `${linkPath} -> ${tool.absolutePath}`
       )}`

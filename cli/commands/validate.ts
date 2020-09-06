@@ -63,12 +63,12 @@ export default function validate(): number {
         ...toolsErrors.errors,
       ];
 
-      console.error(bold(parseResult.elmToolingJsonPath));
-
       if (validationErrors.length === 0) {
-        console.error("No errors found.");
+        console.log(bold(parseResult.elmToolingJsonPath));
+        console.log("No errors found.");
         return 0;
       } else {
+        console.error(bold(parseResult.elmToolingJsonPath));
         console.error("");
         console.error(printFieldErrors(validationErrors));
         if (toolsErrors.tag === "Missing" && toolsErrors.errors.length > 0) {

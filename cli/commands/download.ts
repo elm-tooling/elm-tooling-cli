@@ -41,14 +41,14 @@ export default async function download(): Promise<DownloadResult> {
       return { tag: "Exit", statusCode: 1 };
 
     case "Parsed": {
-      console.error(bold(parseResult.elmToolingJsonPath));
-
       switch (parseResult.tools?.tag) {
         case undefined:
-          console.error(`The "tools" field is missing. Nothing to download.`);
+          console.log(bold(parseResult.elmToolingJsonPath));
+          console.log(`The "tools" field is missing. Nothing to download.`);
           return { tag: "Exit", statusCode: 0 };
 
         case "Error":
+          console.error(bold(parseResult.elmToolingJsonPath));
           console.error("");
           console.error(printFieldErrors(parseResult.tools.errors));
           console.error("");
@@ -56,6 +56,7 @@ export default async function download(): Promise<DownloadResult> {
           return { tag: "Exit", statusCode: 1 };
 
         case "Parsed":
+          console.log(bold(parseResult.elmToolingJsonPath));
           return await downloadTools(parseResult.tools.parsed);
       }
     }
@@ -64,12 +65,12 @@ export default async function download(): Promise<DownloadResult> {
 
 async function downloadTools(tools: Tools): Promise<DownloadResult> {
   if (tools.existing.length === 0 && tools.missing.length === 0) {
-    console.error(`The "tools" field is empty. Nothing to download.`);
+    console.log(`The "tools" field is empty. Nothing to download.`);
     return { tag: "Exit", statusCode: 0 };
   }
 
   for (const tool of tools.existing) {
-    console.error(
+    console.log(
       `${bold(`${tool.name} ${tool.version}`)} already exists: ${dim(
         tool.absolutePath
       )}`
@@ -88,7 +89,7 @@ async function downloadTools(tools: Tools): Promise<DownloadResult> {
   const firstDrawTime = Date.now();
 
   const draw = () => {
-    console.error(
+    console.log(
       tools.missing
         .map((tool, index) => {
           const progress = toolsProgress[index];

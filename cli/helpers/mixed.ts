@@ -56,11 +56,11 @@ const NO_COLOR = "NO_COLOR" in process.env;
 const RESET_COLOR = "\x1B[0m";
 
 export function bold(string: string): string {
-  return NO_COLOR ? string : `\x1B[1m${string}${RESET_COLOR}`;
+  return NO_COLOR ? string : `${RESET_COLOR}\x1B[1m${string}${RESET_COLOR}`;
 }
 
 export function dim(string: string): string {
-  return NO_COLOR ? string : `\x1B[2m${string}${RESET_COLOR}`;
+  return NO_COLOR ? string : `${RESET_COLOR}\x1B[2m${string}${RESET_COLOR}`;
 }
 
 export function indent(string: string): string {
