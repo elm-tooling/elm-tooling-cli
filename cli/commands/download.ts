@@ -245,7 +245,8 @@ function downloadFile(
 
   const onStderr = (chunk: Buffer): void => {
     stderr += chunk.toString();
-    const matches = stderr.match(/\d+(?:\.\d+)?%/g) || [];
+    // Extract progress percentage from curl/wget.
+    const matches = stderr.match(/\d+(?:[.,]\d+)?%/g) || [];
     if (matches.length > 0) {
       onProgress(Math.min(1, parseFloat(matches[matches.length - 1]) / 100));
     }
