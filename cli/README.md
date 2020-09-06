@@ -54,7 +54,7 @@ This is basically a drop-in replacement for installing `elm` and `elm-format` wi
    "devDependencies": {
 -    "elm": "0.19.1",
 -    "elm-format": "0.8.3"
-+    "elm-tooling": "0.1.3"
++    "elm-tooling": "0.1.4"
    },
    "scripts": {
 +    "postinstall": "elm-tooling postinstall"
