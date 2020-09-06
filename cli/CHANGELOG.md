@@ -1,3 +1,9 @@
+### Version 0.1.5 (2020-09-06)
+
+- Added: Allow turning `elm-tooling postinstall` into a no-op by setting the `NO_ELM_TOOLING_POSTINSTALL` environment variable.
+- Improved: The tool now chooses between stdout and stderr more wisely, allowing you to pipe stdout to `/dev/null` for silent operation while still seeing unexpected errors on stderr.
+- Improved: Cleanup when download fails.
+
 ### Version 0.1.4 (2020-09-06)
 
 - Fixed: Extracting tar archives now works with GNU tar.

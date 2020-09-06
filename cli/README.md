@@ -57,7 +57,7 @@ This is basically a drop-in replacement for installing `elm` and `elm-format` wi
    "devDependencies": {
 -    "elm": "0.19.1",
 -    "elm-format": "0.8.3"
-+    "elm-tooling": "0.1.4"
++    "elm-tooling": "0.1.5"
    },
    "scripts": {
 +    "postinstall": "elm-tooling postinstall"
@@ -92,7 +92,7 @@ The difference compared to installing the regular `elm` and `elm-format` package
 
 Note: If you’re using `npm`’s [ignore-scripts] setting or the `--ignore-scripts` flag, that also means your _own_ `postinstall` script won’t run. Which means that you’ll have to remember to run `npm run postinstall` or `npx elm-tooling postinstall` yourself. `npm` tends to keep stuff in `node_modules/.bin/` even when running `npm ci` (which claims to remove `node_modules/` before installation), so it should hopefully not be too much of a hassle.
 
-Similarly, you can set the `NO_ELM_TOOLING_POSTINSTALL` environment variabe to turn `elm-tooling postinstall` into a no-op. This is useful if you need to `npm install` without running `elm-tooling postinstall`, but `npm install --ignore-scripts` disables too many scripts (such as those of dependencies).
+Similarly, you can set the `NO_ELM_TOOLING_POSTINSTALL` environment variable to turn `elm-tooling postinstall` into a no-op. This is useful if you need to `npm install` without running `elm-tooling postinstall`, but `npm install --ignore-scripts` disables too many scripts (such as those of dependencies).
 
 ## License
 
