@@ -43,7 +43,7 @@ export default async function init(): Promise<number> {
     tools: tools,
   };
 
-  fs.writeFileSync("elm-tooling.json", JSON.stringify(json, null, 2));
+  fs.writeFileSync("elm-tooling.json", JSON.stringify(json, null, 2) + "\n");
   console.log(bold(absolutePath));
   console.log("Created! Open it in a text editor and have a look!");
   return 0;
