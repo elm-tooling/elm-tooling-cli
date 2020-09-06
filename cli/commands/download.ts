@@ -420,7 +420,10 @@ function extractFile({
       return gunzip;
     }
 
-    case "tgz": {
+    // GNU tar does not support zip files, but only Windows uses zip files and
+    // Windows comes with BSD tar which does support them.
+    case "tgz":
+    case "zip": {
       const tar = childProcess.spawn("tar", [
         "zxf",
         "-",

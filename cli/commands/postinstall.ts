@@ -56,6 +56,7 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
     }
 
     try {
+      // This fails with EPERM on Windows without "junction".
       fs.symlinkSync(tool.absolutePath, linkPath, "junction");
     } catch (errorAny) {
       const error = errorAny as Error & { code?: number };

@@ -337,11 +337,18 @@ function parseTools(osName: OSName, json: unknown): FieldResult<Tools> {
       };
     }
 
+    const asset = osAssets[osName];
+
     const tool: Tool = {
       name,
       version,
-      absolutePath: getToolAbsolutePath(elmToolingInstallPath, name, version),
-      asset: osAssets[osName],
+      absolutePath: getToolAbsolutePath(
+        elmToolingInstallPath,
+        name,
+        version,
+        asset.fileName
+      ),
+      asset,
     };
 
     const exists = validateFileExists(tool.absolutePath);
@@ -389,9 +396,10 @@ function parseTools(osName: OSName, json: unknown): FieldResult<Tools> {
 function getToolAbsolutePath(
   elmToolingInstallPath: string,
   name: string,
-  version: string
+  version: string,
+  fileName: string
 ) {
-  return path.join(elmToolingInstallPath, name, version, name);
+  return path.join(elmToolingInstallPath, name, version, fileName);
 }
 
 export function printFieldErrors(errors: Array<FieldError>): string {
