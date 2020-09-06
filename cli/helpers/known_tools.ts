@@ -36,8 +36,10 @@ export const KNOWN_TOOLS: KnownTools = {
         type: "gz",
       },
       windows: {
-        hash: "TODO",
-        url: "TODO",
+        hash:
+          "d1bf666298cbe3c5447b9ca0ea608552d750e5d232f9845c2af11907b654903b",
+        url:
+          "https://github.com/elm/compiler/releases/download/0.19.1/binary-for-windows-64-bit.gz",
         type: "gz",
       },
     },
@@ -57,8 +59,10 @@ export const KNOWN_TOOLS: KnownTools = {
         type: "gz",
       },
       windows: {
-        hash: "TODO",
-        url: "TODO",
+        hash:
+          "d1bf666298cbe3c5447b9ca0ea608552d750e5d232f9845c2af11907b654903b",
+        url:
+          "https://github.com/elm/compiler/releases/download/0.19.1/binary-for-windows-64-bit.gz",
         type: "gz",
       },
     },
@@ -80,9 +84,11 @@ export const KNOWN_TOOLS: KnownTools = {
         type: "tgz",
       },
       windows: {
-        hash: "TODO",
-        url: "TODO",
-        type: "tgz",
+        hash:
+          "29b8989918e5804b538c411a92f3da8d15337ec28003b033b3be0de2d2d636d2",
+        url:
+          "https://github.com/avh4/elm-format/releases/download/0.8.1/elm-format-0.8.1-win-i386.zip",
+        type: "tgz", // TODO
       },
     },
     "0.8.2": {
@@ -101,9 +107,11 @@ export const KNOWN_TOOLS: KnownTools = {
         type: "tgz",
       },
       windows: {
-        hash: "TODO",
-        url: "TODO",
-        type: "tgz",
+        hash:
+          "5009fd26b59a785738dd82c8d90ea8fd0bb7fe65fbd562097d906ee04061ef7f",
+        url:
+          "https://github.com/avh4/elm-format/releases/download/0.8.2/elm-format-0.8.2-win-i386.zip",
+        type: "tgz", // TODO
       },
     },
     "0.8.3": {
@@ -122,9 +130,11 @@ export const KNOWN_TOOLS: KnownTools = {
         type: "tgz",
       },
       windows: {
-        hash: "TODO",
-        url: "TODO",
-        type: "tgz",
+        hash:
+          "da9c013e27faccd14d6395db638af111097f171a45705a8978a28e30c115778f",
+        url:
+          "https://github.com/avh4/elm-format/releases/download/0.8.3/elm-format-0.8.3-win-i386.zip",
+        type: "tgz", // TODO
       },
     },
   },

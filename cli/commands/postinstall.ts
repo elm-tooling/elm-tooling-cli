@@ -56,7 +56,7 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
     }
 
     try {
-      fs.symlinkSync(tool.absolutePath, linkPath);
+      fs.symlinkSync(tool.absolutePath, linkPath, "junction");
     } catch (errorAny) {
       const error = errorAny as Error & { code?: number };
       console.error(

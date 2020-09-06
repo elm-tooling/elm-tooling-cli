@@ -4,7 +4,7 @@ import * as readline from "readline";
 
 import { KNOWN_TOOLS } from "../helpers/known_tools";
 import { bold, ElmTooling, isRecord, NonEmptyArray } from "../helpers/mixed";
-import { getOSName } from "../helpers/parse";
+import { getOSName, isWindows } from "../helpers/parse";
 
 export default async function init(): Promise<number> {
   const absolutePath = path.resolve("elm-tooling.json");
@@ -70,8 +70,15 @@ async function tryGuessEntrypoints(): Promise<Array<string>> {
       )
     )
   );
+
   const entrypoints = results
-    .flatMap((result) => (result instanceof Error ? [] : result))
+    .flatMap((result) =>
+      result instanceof Error
+        ? []
+        : isWindows
+        ? `./${result.replace(/\\/g, "/")}`
+        : `./${result}`
+    )
     .sort();
 
   if (entrypoints.length === 0) {

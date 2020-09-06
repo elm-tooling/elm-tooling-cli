@@ -13,7 +13,17 @@ import {
   printNumErrors,
 } from "./mixed";
 
-const elmHome = process.env.ELM_HOME || path.join(os.homedir(), ".elm");
+export const isWindows = process.platform === "win32";
+
+const elmHome =
+  process.env.ELM_HOME ||
+  (isWindows
+    ? path.join(
+        process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"),
+        "elm"
+      )
+    : path.join(os.homedir(), ".elm"));
+
 export const elmToolingInstallPath = path.join(elmHome, "elm-tooling");
 
 export type ParseResult =
