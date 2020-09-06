@@ -18,6 +18,7 @@ import {
 } from "../helpers/mixed";
 import {
   findReadAndParseElmToolingJson,
+  isWindows,
   printFieldErrors,
   Tool,
   Tools,
@@ -427,21 +428,24 @@ function extractFile({
         path.dirname(file),
         path.basename(file),
       ]);
-      let tarStderr = "";
+      let stderr = "";
 
       tar.on("error", (error: Error & { code?: string }) => {
         if (error.code === "ENOENT") {
           onError(
             new Error(
-              `tar must be installed on your system and be in $PATH:\n${error.message}`
+              `tar must be installed on your system and be in ${
+                isWindows ? "%PATH%" : "$PATH"
+              }:\n${error.message}`
             )
           );
+        } else {
+          onError(error);
         }
-        onError(error);
       });
 
       tar.stderr.on("data", (chunk: Buffer) => {
-        tarStderr += chunk.toString();
+        stderr += chunk.toString();
       });
 
       tar.on("close", (code) => {
@@ -451,7 +455,7 @@ function extractFile({
           onError(
             new Error(
               `tar exited with non-zero exit code ${code}:\n${
-                tarStderr.trim() || EMPTY_STDERR
+                stderr.trim() || EMPTY_STDERR
               }`
             )
           );
