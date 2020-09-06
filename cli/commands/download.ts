@@ -23,6 +23,8 @@ import {
   Tools,
 } from "../helpers/parse";
 
+const EMPTY_STDERR = dim("(empty stderr)");
+
 type DownloadResult =
   | { tag: "Exit"; statusCode: number }
   | { tag: "Success"; tools: NonEmptyArray<Tool> };
@@ -158,8 +160,10 @@ function downloadAndExtract(
   onProgress: (percentage: number) => void
 ): Promise<void> {
   return new Promise((resolve, reject): void => {
-    const removeExtractedBeforeReject = (error: Error): void => {
+    const removeExtractedAndReject = (error: Error): void => {
+      hash.destroy();
       extract.destroy();
+      download.kill();
       try {
         fs.unlinkSync(tool.absolutePath);
         reject(error);
@@ -178,30 +182,27 @@ function downloadAndExtract(
     const extract = extractFile({
       assetType: tool.asset.type,
       file: tool.absolutePath,
-      onError: reject,
+      onError: removeExtractedAndReject,
       onSuccess: resolve,
     });
 
-    // Allow `onError` for `extract` to fire before starting to download.
-    process.nextTick(() => {
-      downloadFile(tool.asset.url, {
-        onData: (chunk) => {
-          hash.update(chunk);
-          extract.write(chunk);
-        },
-        onProgress,
-        onError: removeExtractedBeforeReject,
-        onSuccess: () => {
-          const digest = hash.digest("hex");
-          if (digest === tool.asset.hash) {
-            extract.end();
-          } else {
-            removeExtractedBeforeReject(
-              new Error(hashMismatch(digest, tool.asset.hash))
-            );
-          }
-        },
-      });
+    const download = downloadFile(tool.asset.url, {
+      onData: (chunk) => {
+        hash.update(chunk);
+        extract.write(chunk);
+      },
+      onProgress,
+      onError: removeExtractedAndReject,
+      onSuccess: () => {
+        const digest = hash.digest("hex");
+        if (digest === tool.asset.hash) {
+          extract.end();
+        } else {
+          removeExtractedAndReject(
+            new Error(hashMismatch(digest, tool.asset.hash))
+          );
+        }
+      },
     });
   });
 }
@@ -240,7 +241,7 @@ function downloadFile(
     onError: (error: Error & { code?: string }) => void;
     onSuccess: () => void;
   }
-): void {
+): { kill: () => void } {
   let stderr = "";
   const errored: Array<string> = [];
 
@@ -261,16 +262,19 @@ function downloadFile(
     } else {
       onError(
         new Error(
-          `${commandName} exited with non-zero exit code ${code}.\n${stderr
-            .trim()
-            // Remove curl’s progress bar remnants.
-            .replace(/^[\s#O=-]+/g, "")}`
+          `${commandName} exited with non-zero exit code ${code}:\n${
+            stderr
+              .trim()
+              // Remove curl’s progress bar remnants.
+              .replace(/^[\s#O=-]+/g, "") || EMPTY_STDERR
+          }`
         )
       );
     }
   };
 
   const curl = childProcess.spawn("curl", ["-#fL", url]);
+  let toKill: { kill: () => void } = curl;
   curl.stdout.on("data", onData);
   curl.stderr.on("data", onStderr);
   curl.on("close", onClose("curl"));
@@ -279,6 +283,7 @@ function downloadFile(
     errored.push("curl");
     if (error.code === "ENOENT") {
       const wget = childProcess.spawn("wget", ["-O", "-", url]);
+      toKill = wget;
       wget.stdout.on("data", onData);
       wget.stderr.on("data", onStderr);
       wget.on("close", onClose("wget"));
@@ -286,7 +291,7 @@ function downloadFile(
       wget.on("error", (error: Error & { code?: string }) => {
         errored.push("wget");
         if (error.code === "ENOENT") {
-          downloadFileNative(url, {
+          toKill = downloadFileNative(url, {
             onData,
             onProgress,
             onError,
@@ -300,6 +305,8 @@ function downloadFile(
       onError(error);
     }
   });
+
+  return toKill;
 }
 
 function downloadFileNative(
@@ -316,7 +323,13 @@ function downloadFileNative(
     onSuccess: () => void;
   },
   maxRedirects = 50 // This is curl’s default.
-) {
+): { kill: () => void } {
+  let kill = {
+    kill: () => {
+      request.destroy();
+    },
+  };
+
   const request = https.get(url, (response) => {
     switch (response.statusCode) {
       case 302: {
@@ -326,7 +339,7 @@ function downloadFileNative(
         } else if (maxRedirects <= 0) {
           onError(new Error(`Too many redirects.`));
         } else {
-          downloadFileNative(
+          kill = downloadFileNative(
             redirect,
             {
               onData,
@@ -371,6 +384,8 @@ function downloadFileNative(
   });
 
   request.on("error", onError);
+
+  return kill;
 }
 
 function extractFile({
@@ -435,7 +450,9 @@ function extractFile({
         } else {
           onError(
             new Error(
-              `tar exited with non-zero exit code ${code}:\n${tarStderr.trim()}`
+              `tar exited with non-zero exit code ${code}:\n${
+                tarStderr.trim() || EMPTY_STDERR
+              }`
             )
           );
         }
