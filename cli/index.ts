@@ -27,6 +27,9 @@ ${bold("Environment variables:")}
         Customize where tools will be downloaded.
         The Elm compiler uses this variable too for where to store packages.
 
+    ${bold("NO_ELM_TOOLING_POSTINSTALL")}
+        Disable the postinstall command.
+
     ${bold("NO_COLOR")}
         Disable colored output.
 

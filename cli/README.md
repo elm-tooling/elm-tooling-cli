@@ -41,6 +41,8 @@ Download the [tools] in the closest `elm-tooling.json`.
 
 This command just downloads stuff from the Internet and shoves it into a folder (basically, `~/.elm/elm-tooling/`). It does not provide you with an easy way to run the tools or anything. It’s up to other programs to support the shared location of binaries. But you can use `elm-tooling postinstall` to piggy-back on the well-supported `npm` ecosystem.
 
+As mentioned in [tools], you can set `ELM_HOME` environment variable to customize where tools will be downloaded. The Elm compiler uses this variable too for where to store packages.
+
 ### elm-tooling postinstall
 
 Download the [tools] in the closest `elm-tooling.json` and create links to them in `node_modules/.bin/`.
@@ -88,7 +90,9 @@ The difference compared to installing the regular `elm` and `elm-format` package
 - Less disk usage. Again, storing the binaries in a shared location saves tens of megabytes per project.
 - Less npm dependencies. The `elm` and `elm-format` npm packages depend on megabytes of dependencies. `elm-tooling` has no npm dependencies at all.
 
-Note: If you’re using `npm`’s [ignore-scripts] feature, that also means your _own_ `postinstall` script won’t run. Which means that you’ll have to remember to run `npm run postinstall` or `npx elm-tooling postinstall` yourself.
+Note: If you’re using `npm`’s [ignore-scripts] setting or the `--ignore-scripts` flag, that also means your _own_ `postinstall` script won’t run. Which means that you’ll have to remember to run `npm run postinstall` or `npx elm-tooling postinstall` yourself. `npm` tends to keep stuff in `node_modules/.bin/` even when running `npm ci` (which claims to remove `node_modules/` before installation), so it should hopefully not be too much of a hassle.
+
+Similarly, you can set the `NO_ELM_TOOLING_POSTINSTALL` environment variabe to turn `elm-tooling postinstall` into a no-op. This is useful if you need to `npm install` without running `elm-tooling postinstall`, but `npm install --ignore-scripts` disables too many scripts (such as those of dependencies).
 
 ## License
 

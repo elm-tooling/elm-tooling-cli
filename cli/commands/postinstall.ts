@@ -6,7 +6,12 @@ import type { Tool } from "../helpers/parse";
 import download from "./download";
 
 export default async function postinstall(): Promise<number> {
+  if ("NO_ELM_TOOLING_POSTINSTALL" in process.env) {
+    return 0;
+  }
+
   const result = await download();
+
   switch (result.tag) {
     case "Exit":
       return result.statusCode;
