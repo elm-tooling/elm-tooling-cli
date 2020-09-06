@@ -51,6 +51,7 @@ This is basically a drop-in replacement for installing `elm` and `elm-format` wi
 
 ```diff
  {
+   "name": "my-package",
    "devDependencies": {
 -    "elm": "0.19.1",
 -    "elm-format": "0.8.3"
