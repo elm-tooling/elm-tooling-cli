@@ -3,15 +3,16 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import * as pkgAny from "./package-real.json";
-
-const PKG = pkgAny as Package;
 const DIR = __dirname;
 const BUILD = path.join(DIR, "build");
 
 type Package = {
   version: string;
 };
+
+const PKG = JSON.parse(
+  fs.readFileSync(path.join(DIR, "package-real.json"), "utf8")
+) as Package;
 
 type FileToCopy = {
   src: string;
