@@ -4,7 +4,6 @@ import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
 import * as readline from "readline";
-import type { Writable } from "stream";
 import * as zlib from "zlib";
 
 import type { AssetType } from "../helpers/known_tools";
@@ -162,10 +161,10 @@ function downloadAndExtract(
 ): Promise<void> {
   return new Promise((resolve, reject): void => {
     const removeExtractedAndReject = (error: Error): void => {
-      hash.destroy();
-      extract.destroy();
-      download.kill();
       try {
+        hash.destroy();
+        extract.destroy();
+        download.kill();
         fs.unlinkSync(tool.absolutePath);
         reject(error);
       } catch (removeErrorAny) {
@@ -173,7 +172,7 @@ function downloadAndExtract(
         if (removeError.code === "ENOENT") {
           reject(error);
         } else {
-          reject(new Error(`${error.message}\n${removeError.message}`));
+          reject(new Error(`${error.message}\n\n${removeError.message}`));
         }
       }
     };
@@ -307,7 +306,7 @@ function downloadFile(
     }
   });
 
-  return toKill;
+  return { kill: () => toKill.kill() };
 }
 
 function downloadFileNative(
@@ -325,11 +324,7 @@ function downloadFileNative(
   },
   maxRedirects = 50 // This is curl’s default.
 ): { kill: () => void } {
-  let kill = {
-    kill: () => {
-      request.destroy();
-    },
-  };
+  let toKill = { kill: () => request.destroy() };
 
   const request = https.get(url, (response) => {
     switch (response.statusCode) {
@@ -340,7 +335,7 @@ function downloadFileNative(
         } else if (maxRedirects <= 0) {
           onError(new Error(`Too many redirects.`));
         } else {
-          kill = downloadFileNative(
+          toKill = downloadFileNative(
             redirect,
             {
               onData,
@@ -386,8 +381,14 @@ function downloadFileNative(
 
   request.on("error", onError);
 
-  return kill;
+  return { kill: () => toKill.kill() };
 }
+
+type MiniWritable = {
+  destroy: () => void;
+  write: (chunk: Buffer) => void;
+  end: () => void;
+};
 
 function extractFile({
   assetType,
@@ -399,7 +400,7 @@ function extractFile({
   file: string;
   onError: (error: Error) => void;
   onSuccess: () => void;
-}): Writable {
+}): MiniWritable {
   switch (assetType) {
     case "gz": {
       const gunzip = zlib.createGunzip();
@@ -420,52 +421,130 @@ function extractFile({
       return gunzip;
     }
 
-    // GNU tar does not support zip files, but only Windows uses zip files and
-    // Windows comes with BSD tar which does support them.
     case "tgz":
+      return extractTar({ input: "-", file, onError, onSuccess });
+
+    // GNU tar does not support zip files, but only Windows uses zip files and
+    // Windows comes with BSD tar which does support them. This could have used
+    // the exact same code as for `tgz`, but it somehow fails on Windows:
+    // https://stackoverflow.com/questions/63783342/windows-using-tar-to-unzip-zip-from-stdin-works-in-terminal-but-not-in-node-js
+    // Workaround: Save the zip to disk, extract it and remove the zip again.
     case "zip": {
-      const tar = childProcess.spawn("tar", [
-        "zxf",
-        "-",
-        "-C",
-        path.dirname(file),
-        path.basename(file),
-      ]);
-      let stderr = "";
+      const temp = `${file}.zip`;
+      const write = fs.createWriteStream(temp);
+      let toDestroy: MiniWritable = write;
 
-      tar.on("error", (error: Error & { code?: string }) => {
-        if (error.code === "ENOENT") {
-          onError(
-            new Error(
-              `tar must be installed on your system and be in ${
-                isWindows ? "%PATH%" : "$PATH"
-              }:\n${error.message}`
-            )
-          );
-        } else {
-          onError(error);
+      let cleanup = (): Error | undefined => {
+        // If the caller runs `.destroy()` after we’ve already run `cleanup`,
+        // don’t run the cleanup process again: If the cleanup succeeded there’s
+        // nothing to clean; if it failed, running it again will just fail
+        // again.
+        cleanup = () => undefined;
+        try {
+          fs.unlinkSync(temp);
+          return undefined;
+        } catch (errorAny) {
+          const error = errorAny as Error & { code?: string };
+          return error.code === "ENOENT" ? undefined : error;
         }
+      };
+
+      write.on("error", onError);
+
+      write.on("close", () => {
+        toDestroy = extractTar({
+          input: temp,
+          file,
+          onError: (error) => {
+            const cleanupError = cleanup();
+            onError(
+              cleanupError === undefined
+                ? error
+                : new Error(`${error.message}\n\n${cleanupError.message}`)
+            );
+          },
+          onSuccess: () => {
+            const cleanupError = cleanup();
+            if (cleanupError === undefined) {
+              onSuccess();
+            } else {
+              onError(cleanupError);
+            }
+          },
+        });
       });
 
-      tar.stderr.on("data", (chunk: Buffer) => {
-        stderr += chunk.toString();
-      });
-
-      tar.on("close", (code) => {
-        if (code === 0) {
-          onSuccess();
-        } else {
-          onError(
-            new Error(
-              `tar exited with non-zero exit code ${code}:\n${
-                stderr.trim() || EMPTY_STDERR
-              }`
-            )
-          );
-        }
-      });
-
-      return tar.stdin;
+      return {
+        destroy: () => {
+          toDestroy.destroy();
+          const cleanupError = cleanup();
+          if (cleanupError !== undefined) {
+            // If cleanup fails, throw the error just like `.destroy()` can.
+            throw cleanupError;
+          }
+        },
+        write: (chunk) => write.write(chunk),
+        end: () => write.end(),
+      };
     }
   }
+}
+
+function extractTar({
+  input,
+  file,
+  onError,
+  onSuccess,
+}: {
+  input: string;
+  file: string;
+  onError: (error: Error) => void;
+  onSuccess: () => void;
+}): MiniWritable {
+  const tar = childProcess.spawn("tar", [
+    "zxf",
+    input,
+    "-C",
+    path.dirname(file),
+    path.basename(file),
+  ]);
+  let stderr = "";
+
+  tar.on("error", (error: Error & { code?: string }) => {
+    if (error.code === "ENOENT") {
+      onError(
+        new Error(
+          `tar must be installed on your system and be in ${
+            isWindows ? "%PATH%" : "$PATH"
+          }:\n${error.message}`
+        )
+      );
+    } else {
+      onError(error);
+    }
+  });
+
+  tar.stderr.on("data", (chunk: Buffer) => {
+    stderr += chunk.toString();
+  });
+
+  tar.on("close", (code) => {
+    if (code === 0) {
+      onSuccess();
+    } else {
+      onError(
+        new Error(
+          `tar exited with non-zero exit code ${code}:\n${
+            stderr.trim() || EMPTY_STDERR
+          }`
+        )
+      );
+    }
+  });
+
+  return {
+    destroy: () => tar.kill(),
+    write: (chunk) => tar.stdin.write(chunk),
+    end: () => tar.stdin.end(),
+  };
 }
