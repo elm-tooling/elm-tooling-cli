@@ -14,13 +14,10 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function findClosest(
-  name: string,
-  dir: string = process.cwd()
-): string | undefined {
-  const file = path.join(dir, name);
-  return fs.existsSync(file)
-    ? file
+export function findClosest(name: string, dir: string): string | undefined {
+  const entry = path.join(dir, name);
+  return fs.existsSync(entry)
+    ? entry
     : dir === path.parse(dir).root
     ? undefined
     : findClosest(name, path.dirname(dir));
@@ -71,7 +68,7 @@ export function indent(string: string): string {
 
 export const elmToolingJsonDocumentationLink = `${dim(
   "Documentation:"
-)}\n    https://github.com/lydell/elm-tooling.json`;
+)}\n${indent("https://github.com/lydell/elm-tooling.json")}`;
 
 export function printNumErrors(numErrors: number): string {
   return `${bold(numErrors.toString())} error${numErrors === 1 ? "" : "s"}`;

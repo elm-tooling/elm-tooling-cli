@@ -6,8 +6,8 @@ import { KNOWN_TOOLS } from "../helpers/known_tools";
 import { bold, ElmTooling, isRecord, NonEmptyArray } from "../helpers/mixed";
 import { getOSName, isWindows } from "../helpers/parse";
 
-export default async function init(): Promise<number> {
-  const absolutePath = path.resolve("elm-tooling.json");
+export default async function init(cwd: string): Promise<number> {
+  const absolutePath = path.join(cwd, "elm-tooling.json");
 
   if (fs.existsSync(absolutePath)) {
     console.error(bold(absolutePath));
@@ -19,9 +19,15 @@ export default async function init(): Promise<number> {
   // For applications, try to find .elm files with `main =` directly inside one
   // of the "source-directories".
   // If all detection fails, use a good guess.
-  const entrypoints = await tryGuessEntrypoints().catch(() => [
-    "./src/Main.elm",
-  ]);
+  const entrypoints = await tryGuessEntrypoints(cwd).then(
+    (paths) =>
+      paths.map((file) => {
+        const relative = path.relative(path.dirname(absolutePath), file);
+        const normalized = isWindows ? relative.replace(/\\/g, "/") : relative;
+        return `./${normalized}`;
+      }),
+    () => ["./src/Main.elm"]
+  );
 
   const tools =
     getOSName() instanceof Error
@@ -43,14 +49,14 @@ export default async function init(): Promise<number> {
     tools: tools,
   };
 
-  fs.writeFileSync("elm-tooling.json", JSON.stringify(json, null, 2) + "\n");
+  fs.writeFileSync(absolutePath, JSON.stringify(json, null, 2) + "\n");
   console.log(bold(absolutePath));
   console.log("Created! Open it in a text editor and have a look!");
   return 0;
 }
 
-async function tryGuessEntrypoints(): Promise<Array<string>> {
-  const sourceDirectories = tryGetSourceDirectories();
+async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
+  const sourceDirectories = tryGetSourceDirectories(cwd);
   if (sourceDirectories.length === 0) {
     return [];
   }
@@ -72,13 +78,7 @@ async function tryGuessEntrypoints(): Promise<Array<string>> {
   );
 
   const entrypoints = results
-    .flatMap((result) =>
-      result instanceof Error
-        ? []
-        : isWindows
-        ? `./${result.replace(/\\/g, "/")}`
-        : `./${result}`
-    )
+    .flatMap((result) => (result instanceof Error ? [] : result))
     .sort();
 
   if (entrypoints.length === 0) {
@@ -88,8 +88,9 @@ async function tryGuessEntrypoints(): Promise<Array<string>> {
   return entrypoints;
 }
 
-function tryGetSourceDirectories(): Array<string> {
-  const elmJson: unknown = JSON.parse(fs.readFileSync("elm.json", "utf8"));
+function tryGetSourceDirectories(cwd: string): Array<string> {
+  const elmJsonPath = path.join(cwd, "elm.json");
+  const elmJson: unknown = JSON.parse(fs.readFileSync(elmJsonPath, "utf8"));
 
   if (!isRecord(elmJson)) {
     throw new Error(
@@ -109,7 +110,9 @@ function tryGetSourceDirectories(): Array<string> {
         );
       }
       const directories = elmJson["source-directories"].flatMap((item) =>
-        typeof item === "string" ? item : []
+        typeof item === "string"
+          ? path.resolve(path.dirname(elmJsonPath), item)
+          : []
       );
       if (directories.length === 0) {
         throw new Error(

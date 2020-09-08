@@ -7,7 +7,7 @@ import validate from "./commands/validate";
 import { bold, dim } from "./helpers/mixed";
 import { elmToolingInstallPath } from "./helpers/parse";
 
-const help = () =>
+const help = (cwd: string): string =>
   `
 ${bold("elm-tooling init")}
     Create a sample elm-tooling.json in the current directory
@@ -17,7 +17,7 @@ ${bold("elm-tooling validate")}
 
 ${bold("elm-tooling download")}
     Download the tools in the closest elm-tooling.json to:
-    ${dim(elmToolingInstallPath)}
+    ${dim(elmToolingInstallPath(cwd))}
 
 ${bold("elm-tooling postinstall")}
     Download the tools in the closest elm-tooling.json
@@ -38,7 +38,7 @@ ${bold("Documentation:")}
     https://github.com/lydell/elm-tooling.json/tree/master/cli
 `.trim();
 
-async function run(argv: Array<string>): Promise<number> {
+async function run(argv: Array<string>, cwd: string): Promise<number> {
   // So far no command takes any further arguments.
   // Let each command handle this when needed.
   if (argv.length > 1) {
@@ -54,17 +54,17 @@ async function run(argv: Array<string>): Promise<number> {
     case "-help":
     case "--help":
     case "help":
-      console.log(help());
+      console.log(help(cwd));
       return 0;
 
     case "init":
-      return await init();
+      return await init(cwd);
 
     case "validate":
-      return validate();
+      return validate(cwd);
 
     case "download": {
-      const result = await download();
+      const result = await download(cwd);
       switch (result.tag) {
         case "Exit":
           return result.statusCode;
@@ -74,7 +74,7 @@ async function run(argv: Array<string>): Promise<number> {
     }
 
     case "postinstall":
-      return await postinstall();
+      return await postinstall(cwd);
 
     default:
       console.error(`Unknown command: ${argv[0]}`);
@@ -82,7 +82,7 @@ async function run(argv: Array<string>): Promise<number> {
   }
 }
 
-run(process.argv.slice(2)).then(
+run(process.argv.slice(2), process.cwd()).then(
   (exitCode) => {
     process.exit(exitCode);
   },

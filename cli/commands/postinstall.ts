@@ -11,23 +11,23 @@ import {
 import { isWindows, Tool } from "../helpers/parse";
 import download from "./download";
 
-export default async function postinstall(): Promise<number> {
+export default async function postinstall(cwd: string): Promise<number> {
   if ("NO_ELM_TOOLING_POSTINSTALL" in process.env) {
     return 0;
   }
 
-  const result = await download();
+  const result = await download(cwd);
 
   switch (result.tag) {
     case "Exit":
       return result.statusCode;
     case "Success":
-      return linkTools(result.tools);
+      return linkTools(cwd, result.tools);
   }
 }
 
-function linkTools(tools: NonEmptyArray<Tool>): number {
-  const nodeModulesPath = findClosest("node_modules");
+function linkTools(cwd: string, tools: NonEmptyArray<Tool>): number {
+  const nodeModulesPath = findClosest("node_modules", cwd);
   if (nodeModulesPath === undefined) {
     console.error(
       "No node_modules/ folder found. Install your npm dependencies before running this script."

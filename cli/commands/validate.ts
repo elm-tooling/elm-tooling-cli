@@ -4,6 +4,7 @@ import {
   bold,
   dim,
   elmToolingJsonDocumentationLink,
+  indent,
   NonEmptyArray,
 } from "../helpers/mixed";
 import {
@@ -16,8 +17,8 @@ import {
   validateFileExists,
 } from "../helpers/parse";
 
-export default function validate(): number {
-  const parseResult = findReadAndParseElmToolingJson();
+export default function validate(cwd: string): number {
+  const parseResult = findReadAndParseElmToolingJson(cwd);
 
   switch (parseResult.tag) {
     case "ElmToolingJsonNotFound":
@@ -74,7 +75,9 @@ export default function validate(): number {
         if (toolsErrors.tag === "Missing" && toolsErrors.errors.length > 0) {
           console.error("");
           console.error(
-            `${dim("To download missing tools:")}\n    elm-tooling download`
+            `${dim("To download missing tools:")}\n${indent(
+              "elm-tooling download"
+            )}`
           );
         }
         console.error("");

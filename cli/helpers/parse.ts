@@ -15,18 +15,18 @@ import {
 
 export const isWindows = process.platform === "win32";
 
-const elmHome =
-  process.env.ELM_HOME ||
-  (isWindows
-    ? path.join(
-        process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"),
-        "elm"
-      )
-    : path.join(os.homedir(), ".elm"));
+export function elmToolingInstallPath(cwd: string): string {
+  const elmHome =
+    process.env.ELM_HOME ||
+    (isWindows
+      ? path.join(
+          process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"),
+          "elm"
+        )
+      : path.join(os.homedir(), ".elm"));
 
-export const elmToolingInstallPath = path.resolve(
-  path.join(elmHome, "elm-tooling")
-);
+  return path.join(path.resolve(cwd, elmHome), "elm-tooling");
+}
 
 export type ParseResult =
   | {
@@ -72,8 +72,8 @@ export type Tool = {
   asset: Asset;
 };
 
-export function findReadAndParseElmToolingJson(): ParseResult {
-  const elmToolingJsonPath = findClosest("elm-tooling.json");
+export function findReadAndParseElmToolingJson(cwd: string): ParseResult {
+  const elmToolingJsonPath = findClosest("elm-tooling.json", cwd);
   if (elmToolingJsonPath === undefined) {
     return {
       tag: "ElmToolingJsonNotFound",
@@ -127,7 +127,7 @@ export function findReadAndParseElmToolingJson(): ParseResult {
                   { path: [], message: osName.message },
                 ] as NonEmptyArray<FieldError>,
               }
-            : parseTools(osName, value)
+            : parseTools(cwd, osName, value)
         );
         break;
       }
@@ -288,7 +288,11 @@ function parseEntrypoints(
   return { tag: "Parsed", parsed: entrypoints as NonEmptyArray<Entrypoint> };
 }
 
-function parseTools(osName: OSName, json: unknown): FieldResult<Tools> {
+function parseTools(
+  cwd: string,
+  osName: OSName,
+  json: unknown
+): FieldResult<Tools> {
   if (!isRecord(json)) {
     return {
       tag: "Error",
@@ -345,7 +349,7 @@ function parseTools(osName: OSName, json: unknown): FieldResult<Tools> {
       name,
       version,
       absolutePath: getToolAbsolutePath(
-        elmToolingInstallPath,
+        elmToolingInstallPath(cwd),
         name,
         version,
         asset.fileName

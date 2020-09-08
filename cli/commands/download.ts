@@ -30,8 +30,8 @@ type DownloadResult =
   | { tag: "Exit"; statusCode: number }
   | { tag: "Success"; tools: NonEmptyArray<Tool> };
 
-export default async function download(): Promise<DownloadResult> {
-  const parseResult = findReadAndParseElmToolingJson();
+export default async function download(cwd: string): Promise<DownloadResult> {
+  const parseResult = findReadAndParseElmToolingJson(cwd);
 
   switch (parseResult.tag) {
     case "ElmToolingJsonNotFound":
