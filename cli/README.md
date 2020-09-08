@@ -122,7 +122,7 @@ The difference compared to installing the regular `elm` and `elm-format` package
 
 2. Create an `elm-tooling.json`: `npx elm-tooling init`
 
-3. Edit `elm-tooling.json`. For example, if you previously installed `elm` and `elm-format` using `npm`, copy their versions from `package.json` to `elm-tooling.json`. Then you can remove them from `package.json`. You also need to edit `"entrypoints"` in elm-tooling.json to match your project – `elm-tooling init` tries to detect them but might fail.
+3. Edit `elm-tooling.json`. For example, if you previously installed `elm` and `elm-format` using `npm`, copy their versions from `package.json` to `elm-tooling.json`. Then you can remove them from `package.json`. You also need to edit `"entrypoints"` in `elm-tooling.json` to match your project – `elm-tooling init` tries to detect them but might fail.
 
 4. Install the tools in `elm-tooling.json`: `npx elm-tooling postinstall`
 
