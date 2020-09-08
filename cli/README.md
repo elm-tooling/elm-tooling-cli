@@ -48,6 +48,10 @@ This command just downloads stuff from the Internet and shoves it into a folder 
 
 As mentioned in [tools], you can set `ELM_HOME` environment variable to customize where tools will be downloaded. The Elm compiler uses this variable too for where to store packages.
 
+`elm-tooling` uses `curl` to download stuff if it exists, otherwise `wget`, and finally the `https` Node.js core module. So if you need to do any proxy stuff or anything, configure whatever environment variables or whatever `curl` or `wget` understands. Most systems – even Windows! – come with either `curl` or `wget`.
+
+Similarly, `tar` is used to extract archives. Even Windows comes with `tar` these days so you shouldn’t need to install anything.
+
 ### elm-tooling postinstall
 
 Download the [tools] in the closest `elm-tooling.json` and create links to them in `node_modules/.bin/`.
