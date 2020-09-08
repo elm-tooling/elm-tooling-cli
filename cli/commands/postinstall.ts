@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import type { Logger } from "../helpers/logger";
 import {
   bold,
   dim,
@@ -11,25 +12,32 @@ import {
 import { isWindows, Tool } from "../helpers/parse";
 import download from "./download";
 
-export default async function postinstall(cwd: string): Promise<number> {
+export default async function postinstall(
+  cwd: string,
+  logger: Logger
+): Promise<number> {
   if ("NO_ELM_TOOLING_POSTINSTALL" in process.env) {
     return 0;
   }
 
-  const result = await download(cwd);
+  const result = await download(cwd, logger);
 
   switch (result.tag) {
     case "Exit":
       return result.statusCode;
     case "Success":
-      return linkTools(cwd, result.tools);
+      return linkTools(cwd, logger, result.tools);
   }
 }
 
-function linkTools(cwd: string, tools: NonEmptyArray<Tool>): number {
+function linkTools(
+  cwd: string,
+  logger: Logger,
+  tools: NonEmptyArray<Tool>
+): number {
   const nodeModulesPath = findClosest("node_modules", cwd);
   if (nodeModulesPath === undefined) {
-    console.error(
+    logger.error(
       "No node_modules/ folder found. Install your npm dependencies before running this script."
     );
     return 1;
@@ -40,7 +48,7 @@ function linkTools(cwd: string, tools: NonEmptyArray<Tool>): number {
     fs.mkdirSync(nodeModulesBinPath, { recursive: true });
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
-    console.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
+    logger.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
   }
 
   for (const tool of tools) {
@@ -54,12 +62,12 @@ function linkTools(cwd: string, tools: NonEmptyArray<Tool>): number {
       : symlink(tool, linkPath);
 
     if (linkPathPresentationString instanceof Error) {
-      console.error(linkPathPresentationString.message);
+      logger.error(linkPathPresentationString.message);
       return 1;
     }
 
     const what = isWindows ? "shims" : "link";
-    console.log(
+    logger.log(
       `${bold(`${tool.name} ${tool.version}`)} ${what} created: ${dim(
         `${linkPathPresentationString} -> ${tool.absolutePath}`
       )}`

@@ -1,5 +1,6 @@
 import * as path from "path";
 
+import type { Logger } from "../helpers/logger";
 import {
   bold,
   dim,
@@ -17,17 +18,17 @@ import {
   validateFileExists,
 } from "../helpers/parse";
 
-export default function validate(cwd: string): number {
+export default function validate(cwd: string, logger: Logger): number {
   const parseResult = findReadAndParseElmToolingJson(cwd);
 
   switch (parseResult.tag) {
     case "ElmToolingJsonNotFound":
-      console.error(parseResult.message);
+      logger.error(parseResult.message);
       return 1;
 
     case "ReadAsJsonObjectError":
-      console.error(bold(parseResult.elmToolingJsonPath));
-      console.error(parseResult.message);
+      logger.error(bold(parseResult.elmToolingJsonPath));
+      logger.error(parseResult.message);
       return 1;
 
     case "Parsed": {
@@ -65,23 +66,23 @@ export default function validate(cwd: string): number {
       ];
 
       if (validationErrors.length === 0) {
-        console.log(bold(parseResult.elmToolingJsonPath));
-        console.log("No errors found.");
+        logger.log(bold(parseResult.elmToolingJsonPath));
+        logger.log("No errors found.");
         return 0;
       } else {
-        console.error(bold(parseResult.elmToolingJsonPath));
-        console.error("");
-        console.error(printFieldErrors(validationErrors));
+        logger.error(bold(parseResult.elmToolingJsonPath));
+        logger.error("");
+        logger.error(printFieldErrors(validationErrors));
         if (toolsErrors.tag === "Missing" && toolsErrors.errors.length > 0) {
-          console.error("");
-          console.error(
+          logger.error("");
+          logger.error(
             `${dim("To download missing tools:")}\n${indent(
               "elm-tooling download"
             )}`
           );
         }
-        console.error("");
-        console.error(elmToolingJsonDocumentationLink);
+        logger.error("");
+        logger.error(elmToolingJsonDocumentationLink);
         return 1;
       }
     }

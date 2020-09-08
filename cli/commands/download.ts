@@ -3,10 +3,10 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
-import * as readline from "readline";
 import * as zlib from "zlib";
 
 import type { AssetType } from "../helpers/known_tools";
+import type { Logger } from "../helpers/logger";
 import {
   bold,
   dim,
@@ -30,50 +30,56 @@ type DownloadResult =
   | { tag: "Exit"; statusCode: number }
   | { tag: "Success"; tools: NonEmptyArray<Tool> };
 
-export default async function download(cwd: string): Promise<DownloadResult> {
+export default async function download(
+  cwd: string,
+  logger: Logger
+): Promise<DownloadResult> {
   const parseResult = findReadAndParseElmToolingJson(cwd);
 
   switch (parseResult.tag) {
     case "ElmToolingJsonNotFound":
-      console.error(parseResult.message);
+      logger.error(parseResult.message);
       return { tag: "Exit", statusCode: 1 };
 
     case "ReadAsJsonObjectError":
-      console.error(bold(parseResult.elmToolingJsonPath));
-      console.error(parseResult.message);
+      logger.error(bold(parseResult.elmToolingJsonPath));
+      logger.error(parseResult.message);
       return { tag: "Exit", statusCode: 1 };
 
     case "Parsed": {
       switch (parseResult.tools?.tag) {
         case undefined:
-          console.log(bold(parseResult.elmToolingJsonPath));
-          console.log(`The "tools" field is missing. Nothing to download.`);
+          logger.log(bold(parseResult.elmToolingJsonPath));
+          logger.log(`The "tools" field is missing. Nothing to download.`);
           return { tag: "Exit", statusCode: 0 };
 
         case "Error":
-          console.error(bold(parseResult.elmToolingJsonPath));
-          console.error("");
-          console.error(printFieldErrors(parseResult.tools.errors));
-          console.error("");
-          console.error(elmToolingJsonDocumentationLink);
+          logger.error(bold(parseResult.elmToolingJsonPath));
+          logger.error("");
+          logger.error(printFieldErrors(parseResult.tools.errors));
+          logger.error("");
+          logger.error(elmToolingJsonDocumentationLink);
           return { tag: "Exit", statusCode: 1 };
 
         case "Parsed":
-          console.log(bold(parseResult.elmToolingJsonPath));
-          return await downloadTools(parseResult.tools.parsed);
+          logger.log(bold(parseResult.elmToolingJsonPath));
+          return await downloadTools(logger, parseResult.tools.parsed);
       }
     }
   }
 }
 
-async function downloadTools(tools: Tools): Promise<DownloadResult> {
+async function downloadTools(
+  logger: Logger,
+  tools: Tools
+): Promise<DownloadResult> {
   if (tools.existing.length === 0 && tools.missing.length === 0) {
-    console.log(`The "tools" field is empty. Nothing to download.`);
+    logger.log(`The "tools" field is empty. Nothing to download.`);
     return { tag: "Exit", statusCode: 0 };
   }
 
   for (const tool of tools.existing) {
-    console.log(
+    logger.log(
       `${bold(`${tool.name} ${tool.version}`)} already exists: ${dim(
         tool.absolutePath
       )}`
@@ -91,34 +97,29 @@ async function downloadTools(tools: Tools): Promise<DownloadResult> {
   const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
   const firstDrawTime = Date.now();
 
-  const draw = () => {
-    console.log(
-      tools.missing
-        .map((tool, index) => {
-          const progress = toolsProgress[index];
-          const progressString =
-            typeof progress === "string"
-              ? progress.padEnd(4)
-              : Math.round(progress * 100)
-                  .toString()
-                  .padStart(3) + "%";
-          return `${bold(progressString)} ${tool.name} ${tool.version}`;
-        })
-        .join("\n")
-    );
-  };
-
   const redraw = ({ force = false } = {}) => {
     // Without this time thing, you’ll see the progress go up to 100% and then
     // back to 0% again when using curl. It reports the progress per request –
     // even redirects. Hopefully a redirect response usually finishes in 1 second.
     if (Date.now() - firstDrawTime > 1000 || force) {
-      readline.moveCursor(process.stderr, 0, -tools.missing.length);
-      draw();
+      logger.progress(
+        tools.missing
+          .map((tool, index) => {
+            const progress = toolsProgress[index];
+            const progressString =
+              typeof progress === "string"
+                ? progress.padEnd(4)
+                : Math.round(progress * 100)
+                    .toString()
+                    .padStart(3) + "%";
+            return `${bold(progressString)} ${tool.name} ${tool.version}`;
+          })
+          .join("\n")
+      );
     }
   };
 
-  draw();
+  redraw({ force: true });
 
   const results = await Promise.all(
     tools.missing.map((tool, index) =>
@@ -140,8 +141,8 @@ async function downloadTools(tools: Tools): Promise<DownloadResult> {
   redraw({ force: true });
 
   if (downloadErrors.length > 0) {
-    console.error("");
-    console.error(
+    logger.error("");
+    logger.error(
       [
         printNumErrors(downloadErrors.length),
         ...downloadErrors.map((error) => error.message),

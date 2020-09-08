@@ -3,15 +3,19 @@ import * as path from "path";
 import * as readline from "readline";
 
 import { KNOWN_TOOLS } from "../helpers/known_tools";
+import type { Logger } from "../helpers/logger";
 import { bold, ElmTooling, isRecord, NonEmptyArray } from "../helpers/mixed";
 import { getOSName, isWindows } from "../helpers/parse";
 
-export default async function init(cwd: string): Promise<number> {
+export default async function init(
+  cwd: string,
+  logger: Logger
+): Promise<number> {
   const absolutePath = path.join(cwd, "elm-tooling.json");
 
   if (fs.existsSync(absolutePath)) {
-    console.error(bold(absolutePath));
-    console.error("Already exists!");
+    logger.error(bold(absolutePath));
+    logger.error("Already exists!");
     return 1;
   }
 
@@ -50,8 +54,8 @@ export default async function init(cwd: string): Promise<number> {
   };
 
   fs.writeFileSync(absolutePath, JSON.stringify(json, null, 2) + "\n");
-  console.log(bold(absolutePath));
-  console.log("Created! Open it in a text editor and have a look!");
+  logger.log(bold(absolutePath));
+  logger.log("Created! Open it in a text editor and have a look!");
   return 0;
 }
 
