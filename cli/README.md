@@ -119,16 +119,23 @@ The difference compared to installing the regular `elm` and `elm-format` package
 ## Adding elm-tooling to an existing project
 
 1. Install it: `npm install --save-dev elm-tooling`
+
 2. Create an `elm-tooling.json`: `npx elm-tooling init`
+
 3. Edit `elm-tooling.json`. For example, if you previously installed `elm` and `elm-format` using `npm`, copy their versions from `package.json` to `elm-tooling.json`. Then you can remove them from `package.json`. You also need to edit `"entrypoints"` in elm-tooling.json to match your project – `elm-tooling init` tries to detect them but might fail.
+
 4. Install the tools in `elm-tooling.json`: `npx elm-tooling postinstall`
+
 5. Add `"postinstall": "elm-tooling postinstall"` to your `package.json` scripts.
+
 6. Check if there are any issues with your `elm-tooling.json`: `npx elm-tooling validate`
+
 7. Run through your CI and build system and see if everything works or something needs to be tweaked.
 
 ## Creating a new project with elm-tooling
 
 1. Create a folder and enter it: `mkdir my-app && cd my-app`
+
 2. Create a `package.json`:
 
    ```json
@@ -142,11 +149,17 @@ The difference compared to installing the regular `elm` and `elm-format` package
    ```
 
 3. Install `elm-tooling`: `npm install --save-dev elm-tooling`
+
 4. Create an `elm-tooling.json`: `npx elm-tooling init`
+
 5. Install the tools in `elm-tooling.json`: `npx elm-tooling postinstall`
+
 6. Create an `elm.json`: `npx elm init`
+
 7. Optional: Install whatever other `npm` packages and stuff you want.
+
 8. Create the `src` folder: `mkdir src`
+
 9. Create `src/Main.elm` and start coding!
 
 ## License
