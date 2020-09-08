@@ -11,6 +11,7 @@ import {
   bold,
   dim,
   elmToolingJsonDocumentationLink,
+  EXECUTABLE,
   indent,
   NonEmptyArray,
   printNumErrors,
@@ -408,8 +409,7 @@ function extractFile({
       gunzip.on("error", onError);
       write.on("error", onError);
       write.on("close", () => {
-        // Make executable: `chmod +x`.
-        fs.chmod(file, "755", (error) => {
+        fs.chmod(file, EXECUTABLE, (error) => {
           if (error === null) {
             onSuccess();
           } else {

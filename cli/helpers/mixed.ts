@@ -52,6 +52,8 @@ export function partitionMap<T, Left, Right>(
   return [left, right];
 }
 
+export const EXECUTABLE = "755";
+
 const NO_COLOR = "NO_COLOR" in process.env;
 const RESET_COLOR = "\x1B[0m";
 

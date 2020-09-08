@@ -1,7 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { bold, dim, findClosest, NonEmptyArray } from "../helpers/mixed";
+import {
+  bold,
+  dim,
+  EXECUTABLE,
+  findClosest,
+  NonEmptyArray,
+} from "../helpers/mixed";
 import { isWindows, Tool } from "../helpers/parse";
 import download from "./download";
 
@@ -113,11 +119,11 @@ function symlinkShimWindows(tool: Tool, linkPath: string): string | Error {
 
   try {
     fs.writeFileSync(shLinkPath, shScript);
-    fs.chmodSync(shLinkPath, "755");
+    fs.chmodSync(shLinkPath, EXECUTABLE);
     fs.writeFileSync(cmdLinkPath, cmdScript);
-    fs.chmodSync(cmdLinkPath, "755");
+    fs.chmodSync(cmdLinkPath, EXECUTABLE);
     fs.writeFileSync(ps1LinkPath, ps1Script);
-    fs.chmodSync(ps1LinkPath, "755");
+    fs.chmodSync(ps1LinkPath, EXECUTABLE);
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
     return new Error(
