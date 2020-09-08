@@ -53,7 +53,7 @@ export default async function init(
     tools: tools,
   };
 
-  fs.writeFileSync(absolutePath, JSON.stringify(json, null, 2) + "\n");
+  fs.writeFileSync(absolutePath, JSON.stringify(json, null, 4) + "\n");
   logger.log(bold(absolutePath));
   logger.log("Created! Open it in a text editor and have a look!");
   return 0;
