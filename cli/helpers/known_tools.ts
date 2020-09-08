@@ -43,7 +43,7 @@ export const KNOWN_TOOLS: KnownTools = {
           "d1bf666298cbe3c5447b9ca0ea608552d750e5d232f9845c2af11907b654903b",
         url:
           "https://github.com/elm/compiler/releases/download/0.19.1/binary-for-windows-64-bit.gz",
-        fileName: "elm",
+        fileName: "elm.exe",
         type: "gz",
       },
     },
@@ -69,7 +69,7 @@ export const KNOWN_TOOLS: KnownTools = {
           "d1bf666298cbe3c5447b9ca0ea608552d750e5d232f9845c2af11907b654903b",
         url:
           "https://github.com/elm/compiler/releases/download/0.19.1/binary-for-windows-64-bit.gz",
-        fileName: "elm",
+        fileName: "elm.exe",
         type: "gz",
       },
     },

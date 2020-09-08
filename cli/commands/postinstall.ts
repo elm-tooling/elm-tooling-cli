@@ -58,9 +58,9 @@ function linkTools(tools: NonEmptyArray<Tool>): number {
       return 1;
     }
 
-    const s = linkPath === linkPathPresentationString ? "" : "s";
+    const what = isWindows ? "shims" : "link";
     console.log(
-      `${bold(`${tool.name} ${tool.version}`)} link${s} created: ${dim(
+      `${bold(`${tool.name} ${tool.version}`)} ${what} created: ${dim(
         `${linkPathPresentationString} -> ${tool.absolutePath}`
       )}`
     );
@@ -134,7 +134,7 @@ function symlinkShimWindows(tool: Tool, linkPath: string): string | Error {
   return linkPathPresentationString;
 }
 
-// TODO: Need to convert path to unix style? cygpath?
+// Windows-style paths works fine, at least in Git bash.
 function makeShScript(toolAbsolutePath: string): string {
   return lf(`
 #!/bin/sh
@@ -150,12 +150,11 @@ function makeCmdScript(toolAbsolutePath: string): string {
 `);
 }
 
-// TODO: Escaping? exit $LASTEXITCODE needed?
+// The shebang is for PowerShell on unix: https://github.com/npm/cmd-shim/pull/34
 function makePs1Script(toolAbsolutePath: string): string {
   return lf(`
 #!/usr/bin/env pwsh
 & '${toolAbsolutePath.replace(/'/g, "''")}' $args
-exit $LASTEXITCODE
 `);
 }
 
