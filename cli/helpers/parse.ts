@@ -24,7 +24,9 @@ const elmHome =
       )
     : path.join(os.homedir(), ".elm"));
 
-export const elmToolingInstallPath = path.join(elmHome, "elm-tooling");
+export const elmToolingInstallPath = path.resolve(
+  path.join(elmHome, "elm-tooling")
+);
 
 export type ParseResult =
   | {
