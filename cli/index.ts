@@ -7,7 +7,8 @@ import validate from "./commands/validate";
 import { bold, dim } from "./helpers/mixed";
 import { elmToolingInstallPath } from "./helpers/parse";
 
-const help = `
+const help = () =>
+  `
 ${bold("elm-tooling init")}
     Create a sample elm-tooling.json in the current directory
 
@@ -53,7 +54,7 @@ async function run(argv: Array<string>): Promise<number> {
     case "-help":
     case "--help":
     case "help":
-      console.log(help);
+      console.log(help());
       return 0;
 
     case "init":
