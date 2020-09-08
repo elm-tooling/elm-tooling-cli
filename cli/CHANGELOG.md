@@ -1,3 +1,8 @@
+### Version 0.1.6 (2020-09-08)
+
+- Fixed: The CLI now works on Windows.
+- Improved: Lots of little things.
+
 ### Version 0.1.5 (2020-09-06)
 
 - Added: Allow turning `elm-tooling postinstall` into a no-op by setting the `NO_ELM_TOOLING_POSTINSTALL` environment variable.
