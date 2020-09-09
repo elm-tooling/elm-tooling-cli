@@ -11,6 +11,7 @@ import {
   bold,
   dim,
   elmToolingJsonDocumentationLink,
+  Env,
   EXECUTABLE,
   indent,
   NonEmptyArray,
@@ -32,9 +33,10 @@ type DownloadResult =
 
 export default async function download(
   cwd: string,
+  env: Env,
   logger: Logger
 ): Promise<DownloadResult> {
-  const parseResult = findReadAndParseElmToolingJson(cwd);
+  const parseResult = findReadAndParseElmToolingJson(cwd, env);
 
   switch (parseResult.tag) {
     case "ElmToolingJsonNotFound":
@@ -437,9 +439,9 @@ function extractFile({
 
       let cleanup = (): Error | undefined => {
         // If the caller runs `.destroy()` after we’ve already run `cleanup`,
-        // don’t run the cleanup process again: If the cleanup succeeded there’s
-        // nothing to clean; if it failed, running it again will just fail
-        // again.
+        // don’t run the cleanup procedure again: If the cleanup succeeded
+        // there’s nothing to clean; if it failed, running it again will just
+        // fail again.
         cleanup = () => undefined;
         try {
           fs.unlinkSync(temp);

@@ -5,6 +5,7 @@ import {
   bold,
   dim,
   elmToolingJsonDocumentationLink,
+  Env,
   indent,
   NonEmptyArray,
 } from "../helpers/mixed";
@@ -18,8 +19,12 @@ import {
   validateFileExists,
 } from "../helpers/parse";
 
-export default function validate(cwd: string, logger: Logger): number {
-  const parseResult = findReadAndParseElmToolingJson(cwd);
+export default function validate(
+  cwd: string,
+  env: Env,
+  logger: Logger
+): number {
+  const parseResult = findReadAndParseElmToolingJson(cwd, env);
 
   switch (parseResult.tag) {
     case "ElmToolingJsonNotFound":

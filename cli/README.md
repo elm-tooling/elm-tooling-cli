@@ -14,6 +14,7 @@ The CLI for [elm-tooling.json]. Create and validate `elm-tooling.json`. Install 
     - [Example](#example)
     - [Comparison with the regular npm packages](#comparison-with-the-regular-npm-packages)
     - [Notes](#notes)
+- [API](#api)
 - [Adding elm-tooling to an existing project](#adding-elm-tooling-to-an-existing-project)
 - [Creating a new project with elm-tooling](#creating-a-new-project-with-elm-tooling)
 - [License](#license)
@@ -110,7 +111,7 @@ The difference compared to installing the regular `elm` and `elm-format` package
 
   - Maybe you don’t even need `--production`. Some applications use `npm` only for a build step and does not have any production Node.js server or anything like that.
   - Try `--ignore-scripts`. This will skip the `"postinstall"` script – but also any scripts that your dependencies might run during installation! Sometimes, only `"devDependencies"` (such as node-sass) need to run scripts during installation – so try it! If `--ignore-scripts` works you have nothing to lose.
-  - Make a little wrapper script that runs `elm-tooling postinstall` only if `elm-tooling` is installed. This might be annoying if you need cross-platform support, though.
+  - Make a little wrapper script that runs `elm-tooling postinstall` only if `elm-tooling` is installed. For example, you could write the script in JavaScript and use the [API version of the CLI][api].
   - If you only need `--production` installs in for example a Dockerfile, try adding `sed -i '/postinstall/d' package.json` to remove the `"postinstall"` script from `package.json` before running `npm install --production`. This specific example only works with GNU sed and if your `"postinstall"` script isn’t last (due to trailing commas being invalid JSON).
   - Move `elm-tooling` to `"dependencies"`. `elm-tooling` is small and has no dependencies so it won’t bloat your build very much.
 
@@ -119,6 +120,45 @@ The difference compared to installing the regular `elm` and `elm-format` package
 - If you’re using `npm`’s [ignore-scripts] setting, that also means your _own_ `postinstall` script won’t run. Which means that you’ll have to remember to run `npm run postinstall` or `npx elm-tooling postinstall` yourself. `npm` tends to keep stuff in `node_modules/.bin/` even when running `npm ci` (which claims to remove `node_modules/` before installation), so it should hopefully not be too much of a hassle.
 
 - You can set the `NO_ELM_TOOLING_POSTINSTALL` environment variable to turn `elm-tooling postinstall` into a no-op. This is useful if you need to `npm install` without running `elm-tooling postinstall`, but `npm install --ignore-scripts` disables too many scripts (such as those of dependencies).
+
+## API
+
+Instead of using [child\_process.spawn], you can import the CLI and run it directly. That’s an easy way to make a cross-platform script.
+
+Example:
+
+```js
+import elmToolingCli from "elm-tooling";
+
+elmToolingCli(["postinstall"]).then(
+  (exitCode) => {
+    console.log("Exit", exitCode);
+    process.exit(exitCode);
+  },
+  (error) => {
+    console.error("Unexpected error", error);
+  }
+);
+```
+
+Here’s the full interface:
+
+```ts
+import * as stream from "stream";
+
+export default function elmToolingCli(
+  args: Array<string>,
+  options?: {
+    cwd: string;
+    env: Record<string, string | undefined>;
+    stdin: stream.Readable;
+    stdout: stream.Writable;
+    stderr: stream.Writable;
+  }
+): Promise<number>;
+```
+
+The default options use values from the `process` global.
 
 ## Adding elm-tooling to an existing project
 
@@ -170,6 +210,8 @@ The difference compared to installing the regular `elm` and `elm-format` package
 
 [MIT](LICENSE).
 
+[api]: #api
+[child\_process.spawn]: https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
 [elm-tooling.json]: https://github.com/lydell/elm-tooling.json
 [ignore-scripts]: https://docs.npmjs.com/using-npm/config#ignore-scripts
 [npm/npm-lifecycle#49]: https://github.com/npm/npm-lifecycle/issues/49

@@ -1,5 +1,3 @@
-"use strict";
-
 import * as fs from "fs";
 import * as path from "path";
 
@@ -23,6 +21,7 @@ type FileToCopy = {
 
 const FILES_TO_COPY: Array<FileToCopy> = [
   { src: "LICENSE" },
+  { src: "index.d.ts" },
   { src: "package-real.json", dest: "package.json" },
   {
     src: "README.md",

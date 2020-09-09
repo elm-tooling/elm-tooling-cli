@@ -5,6 +5,7 @@ import * as path from "path";
 import { Asset, KNOWN_TOOLS, OSName } from "./known_tools";
 import {
   bold,
+  Env,
   findClosest,
   indent,
   isRecord,
@@ -13,14 +14,14 @@ import {
   printNumErrors,
 } from "./mixed";
 
-export const isWindows = process.platform === "win32";
+export const isWindows = os.platform() === "win32";
 
-export function elmToolingInstallPath(cwd: string): string {
+export function elmToolingInstallPath(cwd: string, env: Env): string {
   const elmHome =
-    process.env.ELM_HOME ||
+    env.ELM_HOME ||
     (isWindows
       ? path.join(
-          process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"),
+          env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"),
           "elm"
         )
       : path.join(os.homedir(), ".elm"));
@@ -72,7 +73,10 @@ export type Tool = {
   asset: Asset;
 };
 
-export function findReadAndParseElmToolingJson(cwd: string): ParseResult {
+export function findReadAndParseElmToolingJson(
+  cwd: string,
+  env: Env
+): ParseResult {
   const elmToolingJsonPath = findClosest("elm-tooling.json", cwd);
   if (elmToolingJsonPath === undefined) {
     return {
@@ -127,7 +131,7 @@ export function findReadAndParseElmToolingJson(cwd: string): ParseResult {
                   { path: [], message: osName.message },
                 ] as NonEmptyArray<FieldError>,
               }
-            : parseTools(cwd, osName, value)
+            : parseTools(cwd, env, osName, value)
         );
         break;
       }
@@ -142,7 +146,7 @@ export function findReadAndParseElmToolingJson(cwd: string): ParseResult {
 }
 
 export function getOSName(): OSName | Error {
-  switch (process.platform) {
+  switch (os.platform()) {
     case "linux":
       return "linux";
     case "darwin":
@@ -151,7 +155,7 @@ export function getOSName(): OSName | Error {
       return "windows";
     default:
       return new Error(
-        `Sorry, your platform (${process.platform}) is not supported yet :(`
+        `Sorry, your platform (${os.platform()}) is not supported yet :(`
       );
   }
 }
@@ -290,6 +294,7 @@ function parseEntrypoints(
 
 function parseTools(
   cwd: string,
+  env: Env,
   osName: OSName,
   json: unknown
 ): FieldResult<Tools> {
@@ -349,7 +354,7 @@ function parseTools(
       name,
       version,
       absolutePath: getToolAbsolutePath(
-        elmToolingInstallPath(cwd),
+        elmToolingInstallPath(cwd, env),
         name,
         version,
         asset.fileName

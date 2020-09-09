@@ -1,2 +1,4 @@
 .eslintrc.js
+index.d.ts
 build
+tmp.*

@@ -5,6 +5,7 @@ import type { Logger } from "../helpers/logger";
 import {
   bold,
   dim,
+  Env,
   EXECUTABLE,
   findClosest,
   NonEmptyArray,
@@ -14,13 +15,14 @@ import download from "./download";
 
 export default async function postinstall(
   cwd: string,
+  env: Env,
   logger: Logger
 ): Promise<number> {
-  if ("NO_ELM_TOOLING_POSTINSTALL" in process.env) {
+  if ("NO_ELM_TOOLING_POSTINSTALL" in env) {
     return 0;
   }
 
-  const result = await download(cwd, logger);
+  const result = await download(cwd, env, logger);
 
   switch (result.tag) {
     case "Exit":

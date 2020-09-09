@@ -1,5 +1,7 @@
-/* eslint-disable no-console */
 import * as readline from "readline";
+import type { Writable } from "stream";
+
+import type { Env } from "./mixed";
 
 export type Logger = {
   log: (message: string) => void;
@@ -9,20 +11,36 @@ export type Logger = {
 
 let previousProgress: number | undefined = undefined;
 
-export const logger: Logger = {
-  log: (message) => {
-    previousProgress = undefined;
-    console.log(message);
-  },
-  error: (message) => {
-    previousProgress = undefined;
-    console.error(message);
-  },
-  progress: (message) => {
-    if (previousProgress !== undefined) {
-      readline.moveCursor(process.stderr, 0, -previousProgress);
-    }
-    previousProgress = message.split("\n").length;
-    console.log(message);
-  },
-};
+export function makeLogger({
+  env,
+  stdout,
+  stderr,
+}: {
+  env: Env;
+  stdout: Writable;
+  stderr: Writable;
+}): Logger {
+  const NO_COLOR = "NO_COLOR" in env;
+  const handleColor = (string: string): string =>
+    // eslint-disable-next-line no-control-regex
+    NO_COLOR ? string.replace(/\x1B\[\dm/g, "") : string;
+
+  return {
+    log: (message) => {
+      previousProgress = undefined;
+      stdout.write(handleColor(message) + "\n");
+    },
+    error: (message) => {
+      previousProgress = undefined;
+      stderr.write(handleColor(message) + "\n");
+    },
+    progress: (passedMessage) => {
+      const message = handleColor(passedMessage);
+      if (previousProgress !== undefined) {
+        readline.moveCursor(stderr, 0, -previousProgress);
+      }
+      previousProgress = message.split("\n").length;
+      stdout.write(message + "\n");
+    },
+  };
+}

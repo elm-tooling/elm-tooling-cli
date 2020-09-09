@@ -1,7 +1,7 @@
-import { bold, dim } from "../helpers/mixed";
+import { bold, dim, Env } from "../helpers/mixed";
 import { elmToolingInstallPath } from "../helpers/parse";
 
-export default function help(cwd: string): string {
+export default function help(cwd: string, env: Env): string {
   return `
 ${bold("elm-tooling init")}
     Create a sample elm-tooling.json in the current directory
@@ -11,7 +11,7 @@ ${bold("elm-tooling validate")}
 
 ${bold("elm-tooling download")}
     Download the tools in the closest elm-tooling.json to:
-    ${dim(elmToolingInstallPath(cwd))}
+    ${dim(elmToolingInstallPath(cwd, env))}
 
 ${bold("elm-tooling postinstall")}
     Download the tools in the closest elm-tooling.json

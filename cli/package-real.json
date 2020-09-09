@@ -6,7 +6,7 @@
   "description": "The CLI for elm-tooling.json",
   "repository": "lydell/elm-tooling.json",
   "type": "commonjs",
-  "exports": {},
+  "exports": "./index.js",
   "bin": "./index.js",
   "keywords": ["elm", "elm-format", "elm-tooling", "elm-tooling.json"]
 }

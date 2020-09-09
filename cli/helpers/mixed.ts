@@ -10,6 +10,8 @@ export type ElmTooling = {
   };
 };
 
+export type Env = Record<string, string | undefined>;
+
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -51,15 +53,14 @@ export function partitionMap<T, Left, Right>(
 
 export const EXECUTABLE = "755";
 
-const NO_COLOR = "NO_COLOR" in process.env;
 const RESET_COLOR = "\x1B[0m";
 
 export function bold(string: string): string {
-  return NO_COLOR ? string : `${RESET_COLOR}\x1B[1m${string}${RESET_COLOR}`;
+  return `${RESET_COLOR}\x1B[1m${string}${RESET_COLOR}`;
 }
 
 export function dim(string: string): string {
-  return NO_COLOR ? string : `${RESET_COLOR}\x1B[2m${string}${RESET_COLOR}`;
+  return `${RESET_COLOR}\x1B[2m${string}${RESET_COLOR}`;
 }
 
 export function indent(string: string): string {
