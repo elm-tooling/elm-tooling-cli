@@ -7,6 +7,7 @@ import {
   elmToolingJsonDocumentationLink,
   Env,
   indent,
+  KNOWN_FIELDS,
   NonEmptyArray,
 } from "../helpers/mixed";
 import {
@@ -64,7 +65,7 @@ export default function validate(
         ...elmJsonErrors,
         ...parseResult.unknownFields.map((field) => ({
           path: [field],
-          message: `Unknown field`,
+          message: `Unknown field\nKnown fields: ${KNOWN_FIELDS.join(", ")}`,
         })),
         ...entrypointsErrors,
         ...toolsErrors.errors,

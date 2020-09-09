@@ -333,7 +333,12 @@ function parseTools(
     if (versions === undefined) {
       return {
         tag: "Left",
-        value: { path: [name], message: `Unknown tool` },
+        value: {
+          path: [name],
+          message: `Unknown tool\nKnown tools: ${Object.keys(KNOWN_TOOLS).join(
+            ", "
+          )}`,
+        },
       };
     }
 
@@ -344,7 +349,12 @@ function parseTools(
     if (osAssets === undefined) {
       return {
         tag: "Left",
-        value: { path: [name], message: `Unknown version: ${version}` },
+        value: {
+          path: [name],
+          message: `Unknown version: ${version}\nKnown versions: ${Object.keys(
+            versions
+          ).join(", ")}`,
+        },
       };
     }
 

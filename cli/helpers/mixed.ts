@@ -10,6 +10,8 @@ export type ElmTooling = {
   };
 };
 
+export const KNOWN_FIELDS: Array<keyof ElmTooling> = ["entrypoints", "tools"];
+
 export type Env = Record<string, string | undefined>;
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
