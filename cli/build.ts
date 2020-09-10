@@ -4,6 +4,9 @@ import * as path from "path";
 const DIR = __dirname;
 const BUILD = path.join(DIR, "build");
 
+const READ_MORE =
+  "**[➡️ Full readme](https://github.com/lydell/elm-tooling.json/tree/master/cli)**";
+
 type Package = {
   version: string;
 };
@@ -27,6 +30,7 @@ const FILES_TO_COPY: Array<FileToCopy> = [
     src: "README.md",
     transformSrc: (content) =>
       content.replace(/("elm-tooling":\s*)"[^"]+"/g, `$1"${PKG.version}"`),
+    transformDest: (content) => content.replace(/<!--[^]*$/, READ_MORE),
   },
 ];
 
