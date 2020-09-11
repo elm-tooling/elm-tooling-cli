@@ -114,8 +114,10 @@ With the above example (and assuming that the `ELM_HOME` environment variable is
 
 On a typical Windows setup (with a user called “John”), they would be:
 
-- `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm\0.19.1\elm`
-- `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm-format\0.8.3\elm-format`
+- `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm\0.19.1\elm.exe`
+- `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm-format\0.8.3\elm-format.exe`
+
+Note that on Windows the `.exe` file extension is used, while on Linux and macOS no file extension is used.
 
 An earlier version of this document stored all tools in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several binaries per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
 
