@@ -14,6 +14,7 @@ The CLI for [elm-tooling.json]. Create and validate `elm-tooling.json`. Install 
     - [Example](#example)
     - [Comparison with the regular npm packages](#comparison-with-the-regular-npm-packages)
     - [Notes](#notes)
+- [CI](#ci)
 - [API](#api)
 - [Adding elm-tooling to an existing project](#adding-elm-tooling-to-an-existing-project)
 - [Creating a new project with elm-tooling](#creating-a-new-project-with-elm-tooling)
@@ -119,7 +120,21 @@ The difference compared to installing the regular `elm` and `elm-format` package
 
 - If you’re using `npm`’s [ignore-scripts] setting, that also means your _own_ `postinstall` script won’t run. Which means that you’ll have to remember to run `npm run postinstall` or `npx elm-tooling postinstall` yourself. `npm` tends to keep stuff in `node_modules/.bin/` even when running `npm ci` (which claims to remove `node_modules/` before installation), so it should hopefully not be too much of a hassle.
 
-- You can set the `NO_ELM_TOOLING_POSTINSTALL` environment variable to turn `elm-tooling postinstall` into a no-op. This is useful if you need to `npm install` without running `elm-tooling postinstall`, but `npm install --ignore-scripts` disables too many scripts (such as those of dependencies).
+- You can set the `NO_ELM_TOOLING_POSTINSTALL` environment variable to turn `elm-tooling postinstall` into a no-op. This lets you run `npm install` without also running `elm-tooling postinstall`, which can be useful in CI.
+
+## CI
+
+See the [Example GitHub Actions workflow] for inspiration. Even if you don’t use GitHub Actions it’s still a good resource – there’s a lot of comments and the concepts and steps should be fairly similiar regardless of what CI you use.
+
+Basically, you need to:
+
+1. Install npm packages, with `NO_ELM_TOOLING_POSTINSTALL` set. It’s nice to cache `node_modules` (based on your `package-lock.json`) for speed and reliability.
+
+   Setting the `NO_ELM_TOOLING_POSTINSTALL` environment variable turns `elm-tooling postinstall` into a no-op, in case you have a `"postinstall": "elm-tooling postinstall"` script in your `package.json`. In CI it’s better to install npm packages and `elm-tooling.json` tools separately so you can cache `node_modules` and `~/.elm` separately.
+
+2. Install tools from `elm-tooling.json`: `npx --no-install elm-tooling postinstall`. Make sure that `~/.elm` is cached (or `ELM_HOME` if you’ve set it), based on `elm.json` (because it lists your Elm dependencies and the Elm compiler installs packages into `~/.elm`) and `elm-tooling.json` (because it lists your tools and `elm-tooling` downloads them into `~/.elm`) as well as `review/elm.json` if you use [elm-review] or whatever other `elm.json` files you might have.
+
+3. Run whatever commands you want.
 
 ## API
 
@@ -174,7 +189,7 @@ The default options use values from the `process` global.
 
 6. Check if there are any issues with your `elm-tooling.json`: `npx elm-tooling validate`
 
-7. Run through your CI and build system and see if everything works or something needs to be tweaked.
+7. Run through your CI and build system and see if everything works or something needs to be tweaked. See the [Example GitHub Actions workflow] for inspiration.
 
 ## Creating a new project with elm-tooling
 
@@ -212,7 +227,9 @@ The default options use values from the `process` global.
 
 [api]: #api
 [child\_process.spawn]: https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
+[elm-review]: https://package.elm-lang.org/packages/jfmengels/elm-review/latest/
 [elm-tooling.json]: https://github.com/lydell/elm-tooling.json
+[example github actions workflow]: https://github.com/lydell/elm-tooling.json/blob/master/.github/workflows/example.yml
 [ignore-scripts]: https://docs.npmjs.com/using-npm/config#ignore-scripts
 [npm/npm-lifecycle#49]: https://github.com/npm/npm-lifecycle/issues/49
 [postinstall]: https://docs.npmjs.com/misc/scripts

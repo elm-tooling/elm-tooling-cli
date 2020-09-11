@@ -47,13 +47,14 @@ jobs:
       # review/elm.json changes. The Elm compiler saves downloaded Elm packages
       # to ~/.elm, and elm-tooling saves downloaded tool binaries there.
       - name: Cache ~/.elm
-        id: cache-elm
         uses: actions/cache@v2
         with:
           path: ~/.elm
           key: elm-${{ hashFiles('cli/example/elm.json', 'cli/example/elm-tooling.json', 'cli/example/review/elm.json') }}
 
       # Install npm packages, unless we restored them from cache.
+      # Since `npm ci` removes the node_modules folder before running it’s
+      # important to skip this step if cache was restored.
       - name: npm ci
         if: steps.cache-node_modules.outputs.cache-hit != 'true'
         env:
@@ -68,8 +69,11 @@ jobs:
       # Install tools from elm-tooling.json, unless we restored them from
       # cache. package-lock.json and elm-tooling.json can change independently,
       # so we need to install separately based on what was restored from cache.
+      # This is run even if we restored ~/.elm from cache to be 100% sure
+      # node_modules/.bin/ contains links to all your tools. `elm-tooling
+      # postinstall` runs very fast when there’s nothing new to download so
+      # skipping the step doesn’t save much time.
       - name: elm-tooling postinstall
-        if: steps.cache-elm.outputs.cache-hit != 'true'
         run: npx --no-install elm-tooling postinstall
 
       # Finally, run whatever you want. For example:
