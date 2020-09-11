@@ -6,6 +6,8 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
 
+    # elm-tooling works cross-platform. Feel free to change/remove `${{
+    # matrix.os }}` if you don’t need to run CI on multiple platforms.
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
