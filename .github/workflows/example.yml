@@ -1,0 +1,72 @@
+name: Example
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run: cli/example
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "14"
+
+      # IGNORE START: This is just internal stuff specific for this repo.
+      - name: Internal cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: internal-node_modules-${{ hashFiles('package-lock.json') }}
+        working-directory: cli
+      - name: Internal npm ci
+        if: steps.internal-cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci
+        working-directory: cli
+      - name: Internal npm test
+        run: npm test
+        working-directory: cli
+      # IGNORE END
+
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache elm
+        uses: actions/cache@v2
+        with:
+          path: ~/.elm
+          key: elm-${{ hashFiles('elm.json', 'elm-tooling.json', 'review/elm.json') }}
+
+      - name: npm ci
+        if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        env:
+          NO_ELM_TOOLING_POSTINSTALL: 1
+        run: npm ci
+
+      - name: elm-tooling postinstall
+        if: steps.cache-elm.outputs.cache-hit != 'true'
+        run: npx --no-install elm-tooling postinstall
+
+      - name: elm make
+        run: npx --no-install elm make src/Main.elm
+
+      - name: elm-test
+        run: npx --no-install elm-test
+
+      - name: elm-review
+        run: npx --no-install elm-review
+
+      - name: elm-format
+        run: npx --no-install elm-format --validate src
+
+      - name: prettier
+        run: npx --no-install prettier --check .
+
+      - name: build
+        run: npm run build

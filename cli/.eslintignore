@@ -1,4 +1,6 @@
 .eslintrc.js
-index.d.ts
 build
+dist
+example
+index.d.ts
 tmp.*
