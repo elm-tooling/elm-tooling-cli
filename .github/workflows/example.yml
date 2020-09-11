@@ -18,6 +18,7 @@ jobs:
 
       # IGNORE START: This is just internal stuff specific for this repo.
       - name: Internal cache node_modules
+        id: internal-cache-node_modules
         uses: actions/cache@v2
         with:
           path: cli/node_modules
@@ -32,12 +33,14 @@ jobs:
       # IGNORE END
 
       - name: Cache node_modules
+        id: cache-node_modules
         uses: actions/cache@v2
         with:
           path: cli/example/node_modules
           key: node_modules-${{ hashFiles('cli/example/package-lock.json') }}
 
-      - name: Cache elm
+      - name: Cache ~/.elm
+        id: cache-elm
         uses: actions/cache@v2
         with:
           path: ~/.elm
