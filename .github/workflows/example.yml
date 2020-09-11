@@ -54,7 +54,7 @@ jobs:
         run: npx --no-install elm-tooling postinstall
 
       - name: elm make
-        run: npx --no-install elm make src/Main.elm
+        run: npx --no-install elm make src/Main.elm --output=/dev/null
 
       - name: elm-test
         run: npx --no-install elm-test
