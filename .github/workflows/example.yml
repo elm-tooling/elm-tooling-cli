@@ -20,9 +20,8 @@ jobs:
       - name: Internal cache node_modules
         uses: actions/cache@v2
         with:
-          path: node_modules
-          key: internal-node_modules-${{ hashFiles('package-lock.json') }}
-        working-directory: cli
+          path: cli/node_modules
+          key: internal-node_modules-${{ hashFiles('cli/package-lock.json') }}
       - name: Internal npm ci
         if: steps.internal-cache-node_modules.outputs.cache-hit != 'true'
         run: npm ci
@@ -35,14 +34,14 @@ jobs:
       - name: Cache node_modules
         uses: actions/cache@v2
         with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('package-lock.json') }}
+          path: cli/example/node_modules
+          key: node_modules-${{ hashFiles('cli/example/package-lock.json') }}
 
       - name: Cache elm
         uses: actions/cache@v2
         with:
           path: ~/.elm
-          key: elm-${{ hashFiles('elm.json', 'elm-tooling.json', 'review/elm.json') }}
+          key: elm-${{ hashFiles('cli/example/elm.json', 'cli/example/elm-tooling.json', 'cli/example/review/elm.json') }}
 
       - name: npm ci
         if: steps.cache-node_modules.outputs.cache-hit != 'true'
