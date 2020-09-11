@@ -17,6 +17,12 @@ jobs:
         working-directory: cli/example
 
     steps:
+      # This repo uses Prettier with LF – make that work on Windows.
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
       - uses: actions/checkout@v2
 
       - uses: actions/setup-node@v1
