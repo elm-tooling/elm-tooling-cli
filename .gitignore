@@ -1,6 +1,6 @@
 build
 dist
 elm-stuff
-elm-tooling.json
+cli/elm-tooling.json
 node_modules
 tmp.*
