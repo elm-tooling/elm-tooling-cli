@@ -1,6 +1,7 @@
+.cache
 build
+cli/elm-tooling.json
 dist
 elm-stuff
-cli/elm-tooling.json
 node_modules
 tmp.*

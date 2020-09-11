@@ -1,3 +1,4 @@
+.cache
 .eslintrc.js
 build
 dist
