@@ -6,7 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     defaults:
-      run: cli/example
+      run:
+        working-directory: cli/example
 
     steps:
       - uses: actions/checkout@v2
