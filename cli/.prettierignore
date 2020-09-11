@@ -1,5 +1,6 @@
 .cache
 build
+example
 dist
 elm-stuff
 *.json

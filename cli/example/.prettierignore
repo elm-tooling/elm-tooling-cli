@@ -1,5 +1,4 @@
 .cache
-build
 dist
 elm-stuff
 *.json
