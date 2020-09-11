@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "example-app",
+  "scripts": {
+    "postinstall": "elm-tooling postinstall",
+    "build": "parcel build index.html",
+    "start": "parcel watch index.html"
+  },
+  "devDependencies": {
+    "elm-hot": "1.1.5",
+    "elm-review": "2.3.2",
+    "elm-test": "0.19.1-revision3",
+    "elm-tooling": "file:../build",
+    "node-elm-compiler": "5.0.5",
+    "parcel-bundler": "1.12.4",
+    "prettier": "^2.1.1"
+  }
+}

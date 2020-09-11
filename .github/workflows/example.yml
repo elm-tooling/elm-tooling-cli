@@ -1,0 +1,97 @@
+name: Example
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Skip this and remove all references to `cli/example` if you have
+        # stuff at the repo root.
+        working-directory: cli/example
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          # Choose your Node.js version here:
+          node-version: "14"
+
+      # IGNORE START: This is just internal stuff specific for this repo.
+      - name: Internal cache node_modules
+        id: internal-cache-node_modules
+        uses: actions/cache@v2
+        with:
+          path: cli/node_modules
+          key: internal-node_modules-${{ hashFiles('cli/package-lock.json') }}
+      - name: Internal npm ci
+        if: steps.internal-cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci
+        working-directory: cli
+      - name: Internal npm test
+        run: npm test
+        working-directory: cli
+      # IGNORE END
+
+      # Re-use node_modules between runs until package-lock.json changes.
+      - name: Cache node_modules
+        id: cache-node_modules
+        uses: actions/cache@v2
+        with:
+          path: cli/example/node_modules
+          key: node_modules-${{ hashFiles('cli/example/package-lock.json') }}
+
+      # Re-use ~/.elm between runs until elm.json, elm-tooling.json or
+      # review/elm.json changes. The Elm compiler saves downloaded Elm packages
+      # to ~/.elm, and elm-tooling saves downloaded tool binaries there.
+      - name: Cache ~/.elm
+        uses: actions/cache@v2
+        with:
+          path: ~/.elm
+          key: elm-${{ hashFiles('cli/example/elm.json', 'cli/example/elm-tooling.json', 'cli/example/review/elm.json') }}
+
+      # Install npm packages, unless we restored them from cache.
+      # Since `npm ci` removes the node_modules folder before running it’s
+      # important to skip this step if cache was restored.
+      - name: npm ci
+        if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        env:
+          # If you have a `"postinstall": "elm-tooling postinstall"` script in
+          # your package.json, this turns it into a no-op. We’ll run it in the
+          # next step because of the caching. If elm-tooling.json changes but
+          # package-lock.json does not, the postinstall script needs running
+          # but this step won’t.
+          NO_ELM_TOOLING_POSTINSTALL: 1
+        run: npm ci
+
+      # Install tools from elm-tooling.json, unless we restored them from
+      # cache. package-lock.json and elm-tooling.json can change independently,
+      # so we need to install separately based on what was restored from cache.
+      # This is run even if we restored ~/.elm from cache to be 100% sure
+      # node_modules/.bin/ contains links to all your tools. `elm-tooling
+      # postinstall` runs very fast when there’s nothing new to download so
+      # skipping the step doesn’t save much time.
+      - name: elm-tooling postinstall
+        run: npx --no-install elm-tooling postinstall
+
+      # Finally, run whatever you want. For example:
+
+      - name: elm make
+        run: npx --no-install elm make src/Main.elm --output=/dev/null
+
+      - name: elm-test
+        run: npx --no-install elm-test
+
+      - name: elm-review
+        run: npx --no-install elm-review
+
+      - name: elm-format
+        run: npx --no-install elm-format --validate src tests
+
+      - name: prettier
+        run: npx --no-install prettier --check .
+
+      - name: build
+        run: npm run build

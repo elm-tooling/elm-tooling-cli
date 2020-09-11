@@ -17,3 +17,5 @@ fs.unlinkSync(path.join(BUILD, "build-post.js"));
 modifyFile(path.join(BUILD, "index.js"), (content) =>
   content.replace(/^exports.default =/m, "module.exports =")
 );
+
+fs.chmodSync(path.join(BUILD, "index.js"), "755");
