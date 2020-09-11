@@ -7,7 +7,7 @@ module.exports = {
     "prettier",
     "prettier/@typescript-eslint",
   ],
-  plugins: ["@typescript-eslint", "simple-import-sort"],
+  plugins: ["@typescript-eslint", "simple-import-sort", "jest"],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ["./tsconfig.json"],
@@ -23,4 +23,10 @@ module.exports = {
     "no-fallthrough": "off",
     "simple-import-sort/sort": "error",
   },
+  overrides: [
+    {
+      files: "*.test.ts",
+      extends: ["plugin:jest/recommended", "plugin:jest/style"],
+    },
+  ],
 };
