@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: cli/node_modules
-          key: internal-node_modules-${{ hashFiles('cli/package-lock.json') }}
+          key: internal-node_modules-${{ matrix.os }}-${{ hashFiles('cli/package-lock.json') }}
       - name: Internal npm ci
         if: steps.internal-cache-node_modules.outputs.cache-hit != 'true'
         run: npm ci
@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: cli/example/node_modules
-          key: node_modules-${{ hashFiles('cli/example/package-lock.json') }}
+          key: node_modules-${{ matrix.os }}-${{ hashFiles('cli/example/package-lock.json') }}
 
       # Re-use ~/.elm between runs until elm.json, elm-tooling.json or
       # review/elm.json changes. The Elm compiler saves downloaded Elm packages
@@ -55,7 +55,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.elm
-          key: elm-${{ hashFiles('cli/example/elm.json', 'cli/example/elm-tooling.json', 'cli/example/review/elm.json') }}
+          key: elm-${{ matrix.os }}-${{ hashFiles('cli/example/elm.json', 'cli/example/elm-tooling.json', 'cli/example/review/elm.json') }}
 
       # Install npm packages, unless we restored them from cache.
       # Since `npm ci` removes the node_modules folder before running it’s
