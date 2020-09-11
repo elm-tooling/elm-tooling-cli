@@ -51,7 +51,7 @@ jobs:
 
       - name: elm-tooling postinstall
         if: steps.cache-elm.outputs.cache-hit != 'true'
-        run: npx --no-install elm-tooling postinstall
+        run: ls -lah && npx --no-install elm-tooling postinstall
 
       - name: elm make
         run: npx --no-install elm make src/Main.elm
