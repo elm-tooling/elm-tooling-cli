@@ -42,6 +42,24 @@ async function initSuccessHelper(
   };
 }
 
+async function initFailHelper(fixture: string): Promise<string> {
+  const dir = path.join(__dirname, "fixtures", fixture);
+
+  const stderr = new MemoryWriteStream();
+
+  const exitCode = await elmToolingCli(["init"], {
+    cwd: dir,
+    env: {},
+    stdin: new FailReadStream(),
+    stdout: new FailWriteStream(),
+    stderr,
+  });
+
+  expect(exitCode).toBe(1);
+
+  return clean(stderr.content);
+}
+
 // Make snapshots easier to read.
 // Before: `"\\"string\\""`
 // After: `"string"`
@@ -108,5 +126,22 @@ describe("init", () => {
     expect((JSON.parse(json) as ElmTooling).entrypoints).toStrictEqual([
       "./src/Main.elm",
     ]);
+  });
+
+  test("already exists", async () => {
+    expect(await initFailHelper("already-exists")).toMatchInlineSnapshot(`
+      ⧘⧙/Users/you/project/fixtures/already-exists/elm-tooling.json⧘
+      Already exists!
+
+    `);
+  });
+
+  test("already exists as folder", async () => {
+    expect(await initFailHelper("already-exists-as-folder"))
+      .toMatchInlineSnapshot(`
+      ⧘⧙/Users/you/project/fixtures/already-exists-as-folder/elm-tooling.json⧘
+      Already exists!
+
+    `);
   });
 });
