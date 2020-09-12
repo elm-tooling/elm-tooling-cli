@@ -1,12 +1,14 @@
+const baseExtends = [
+  "eslint:recommended",
+  "plugin:@typescript-eslint/recommended",
+  "plugin:@typescript-eslint/recommended-requiring-type-checking",
+  "prettier",
+  "prettier/@typescript-eslint",
+];
+
 module.exports = {
   root: true,
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "prettier",
-    "prettier/@typescript-eslint",
-  ],
+  extends: baseExtends,
   plugins: ["@typescript-eslint", "simple-import-sort", "jest"],
   parserOptions: {
     tsconfigRootDir: __dirname,
@@ -26,7 +28,7 @@ module.exports = {
   overrides: [
     {
       files: "*.test.ts",
-      extends: ["plugin:jest/recommended", "plugin:jest/style"],
+      extends: [...baseExtends, "plugin:jest/recommended", "plugin:jest/style"],
     },
   ],
 };
