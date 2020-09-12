@@ -69,4 +69,28 @@ describe("init", () => {
 
     `);
   });
+
+  test("application entrypoints are detected", async () => {
+    const { stdout, json } = await initSuccessHelper("application");
+
+    expect(stdout).toMatchInlineSnapshot(`
+      ⧘⧙/Users/you/project/fixtures/application/elm-tooling.json⧘
+      Created! Open it in a text editor and have a look!
+
+    `);
+
+    expect(json).toMatchInlineSnapshot(`
+      {
+          "entrypoints": [
+              "./legacy/elm/Main.elm",
+              "./src/App.elm"
+          ],
+          "tools": {
+              "elm": "0.19.1",
+              "elm-format": "0.8.3"
+          }
+      }
+
+    `);
+  });
 });
