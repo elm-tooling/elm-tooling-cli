@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import type { ElmTooling } from "../helpers/mixed";
 import elmToolingCli from "../index";
 import {
   clean,
@@ -92,5 +93,20 @@ describe("init", () => {
       }
 
     `);
+  });
+
+  test.each([
+    "no-elm-json",
+    "bad-elm-json",
+    "bad-elm-json-type",
+    "no-files-with-main",
+  ])("Uses fallback for %s", async (fixture) => {
+    const { stdout, json } = await initSuccessHelper(fixture);
+
+    expect(stdout).not.toHaveLength(0);
+
+    expect((JSON.parse(json) as ElmTooling).entrypoints).toStrictEqual([
+      "./src/Main.elm",
+    ]);
   });
 });
