@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
 
-import { KNOWN_TOOLS } from "../helpers/known_tools";
+import { KNOWN_TOOLS } from "../helpers/known-tools";
 import type { Logger } from "../helpers/logger";
 import { bold, ElmTooling, isRecord, NonEmptyArray } from "../helpers/mixed";
 import { getOSName, isWindows } from "../helpers/parse";

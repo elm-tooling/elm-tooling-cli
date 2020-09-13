@@ -4,7 +4,7 @@ import * as readline from "readline";
 import * as stream from "stream";
 
 import elmToolingCli from "..";
-import { KNOWN_TOOLS } from "../helpers/known_tools";
+import { KNOWN_TOOLS } from "../helpers/known-tools";
 import type { ElmTooling } from "../helpers/mixed";
 
 const WORK_DIR = path.join(__dirname, "all-downloads");

@@ -5,7 +5,7 @@ import * as https from "https";
 import * as path from "path";
 import * as zlib from "zlib";
 
-import type { AssetType } from "../helpers/known_tools";
+import type { AssetType } from "../helpers/known-tools";
 import type { Logger } from "../helpers/logger";
 import {
   bold,
