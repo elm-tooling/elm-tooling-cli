@@ -1,23 +1,20 @@
 import type { Env } from "../helpers/mixed";
 import elmToolingCli from "../index";
-import {
-  clean,
-  FailReadStream,
-  FailWriteStream,
-  MemoryWriteStream,
-} from "./helpers";
+import { clean, FailReadStream, MemoryWriteStream } from "./helpers";
 
 async function helpHelper(env: Env): Promise<string> {
   const stdout = new MemoryWriteStream();
+  const stderr = new MemoryWriteStream();
 
   const exitCode = await elmToolingCli(["help"], {
     cwd: __dirname,
     env,
     stdin: new FailReadStream(),
     stdout,
-    stderr: new FailWriteStream(),
+    stderr,
   });
 
+  expect(stderr.content).toBe("");
   expect(exitCode).toBe(0);
 
   return clean(stdout.content);

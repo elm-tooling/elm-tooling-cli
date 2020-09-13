@@ -1,46 +1,47 @@
 import * as path from "path";
 
 import elmToolingCli from "../index";
-import {
-  clean,
-  FailReadStream,
-  FailWriteStream,
-  MemoryWriteStream,
-} from "./helpers";
+import { clean, FailReadStream, MemoryWriteStream } from "./helpers";
 
-// async function validateSuccessHelper(fixture: string): Promise<string> {
-//   const dir = path.join(__dirname, "fixtures", fixture);
+const FIXTURES_DIR = path.join(__dirname, "fixtures", "validate");
 
-//   const stdout = new MemoryWriteStream();
+async function validateSuccessHelper(fixture: string): Promise<string> {
+  const dir = path.join(FIXTURES_DIR, fixture);
 
-//   const exitCode = await elmToolingCli(["validate"], {
-//     cwd: dir,
-//     env: { ELM_HOME: dir },
-//     stdin: new FailReadStream(),
-//     stdout,
-//     stderr: new FailWriteStream(),
-//   });
-
-//   expect(exitCode).toBe(0);
-
-//   return clean(stdout.content);
-// }
-
-// async function validateFailHelper(fixture: string): Promise<string> {
-//   return validateFailHelperAbsolute(path.join(__dirname, "fixtures", fixture));
-// }
-
-async function validateFailHelperAbsolute(dir: string): Promise<string> {
+  const stdout = new MemoryWriteStream();
   const stderr = new MemoryWriteStream();
 
   const exitCode = await elmToolingCli(["validate"], {
     cwd: dir,
     env: { ELM_HOME: dir },
     stdin: new FailReadStream(),
-    stdout: new FailWriteStream(),
+    stdout,
     stderr,
   });
 
+  expect(stderr.content).toBe("");
+  expect(exitCode).toBe(0);
+
+  return clean(stdout.content);
+}
+
+// async function validateFailHelper(fixture: string): Promise<string> {
+//   return validateFailHelperAbsolute(path.join(__dirname, "fixtures", fixture));
+// }
+
+async function validateFailHelperAbsolute(dir: string): Promise<string> {
+  const stdout = new MemoryWriteStream();
+  const stderr = new MemoryWriteStream();
+
+  const exitCode = await elmToolingCli(["validate"], {
+    cwd: dir,
+    env: { ELM_HOME: dir },
+    stdin: new FailReadStream(),
+    stdout,
+    stderr,
+  });
+
+  expect(stdout.content).toBe("");
   expect(exitCode).toBe(1);
 
   return clean(stderr.content);
@@ -56,7 +57,22 @@ expect.addSnapshotSerializer({
 
 describe("validate", () => {
   describe("valid", () => {
-    // TODO
+    test("empty object two levels up", async () => {
+      expect(await validateSuccessHelper("empty-object-two-levels-up/one/two"))
+        .toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/empty-object-two-levels-up/elm-tooling.json⧘
+        No errors found.
+
+      `);
+    });
+
+    test("everything", async () => {
+      expect(await validateSuccessHelper("everything")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/everything/elm-tooling.json⧘
+        No errors found.
+
+      `);
+    });
   });
 
   describe("invalid", () => {

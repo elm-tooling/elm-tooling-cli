@@ -1,22 +1,19 @@
 import elmToolingCli from "../index";
-import {
-  clean,
-  FailReadStream,
-  FailWriteStream,
-  MemoryWriteStream,
-} from "./helpers";
+import { clean, FailReadStream, MemoryWriteStream } from "./helpers";
 
 async function indexHelper(args: Array<string>): Promise<string> {
+  const stdout = new MemoryWriteStream();
   const stderr = new MemoryWriteStream();
 
   const exitCode = await elmToolingCli(args, {
     cwd: __dirname,
     env: {},
     stdin: new FailReadStream(),
-    stdout: new FailWriteStream(),
+    stdout,
     stderr,
   });
 
+  expect(stdout.content).toBe("");
   expect(exitCode).toBe(1);
 
   return clean(stderr.content);

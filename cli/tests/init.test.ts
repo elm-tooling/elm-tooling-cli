@@ -3,17 +3,14 @@ import * as path from "path";
 
 import type { ElmTooling } from "../helpers/mixed";
 import elmToolingCli from "../index";
-import {
-  clean,
-  FailReadStream,
-  FailWriteStream,
-  MemoryWriteStream,
-} from "./helpers";
+import { clean, FailReadStream, MemoryWriteStream } from "./helpers";
+
+const FIXTURES_DIR = path.join(__dirname, "fixtures", "init");
 
 async function initSuccessHelper(
   fixture: string
 ): Promise<{ stdout: string; json: string }> {
-  const dir = path.join(__dirname, "fixtures", fixture);
+  const dir = path.join(FIXTURES_DIR, fixture);
   const elmToolingJsonPath = path.join(dir, "elm-tooling.json");
   try {
     fs.unlinkSync(elmToolingJsonPath);
@@ -25,15 +22,17 @@ async function initSuccessHelper(
   }
 
   const stdout = new MemoryWriteStream();
+  const stderr = new MemoryWriteStream();
 
   const exitCode = await elmToolingCli(["init"], {
     cwd: dir,
     env: {},
     stdin: new FailReadStream(),
     stdout,
-    stderr: new FailWriteStream(),
+    stderr,
   });
 
+  expect(stderr.content).toBe("");
   expect(exitCode).toBe(0);
 
   return {
@@ -43,18 +42,20 @@ async function initSuccessHelper(
 }
 
 async function initFailHelper(fixture: string): Promise<string> {
-  const dir = path.join(__dirname, "fixtures", fixture);
+  const dir = path.join(FIXTURES_DIR, fixture);
 
+  const stdout = new MemoryWriteStream();
   const stderr = new MemoryWriteStream();
 
   const exitCode = await elmToolingCli(["init"], {
     cwd: dir,
     env: {},
     stdin: new FailReadStream(),
-    stdout: new FailWriteStream(),
+    stdout,
     stderr,
   });
 
+  expect(stdout.content).toBe("");
   expect(exitCode).toBe(1);
 
   return clean(stderr.content);
@@ -73,7 +74,7 @@ describe("init", () => {
     const { stdout, json } = await initSuccessHelper("package");
 
     expect(stdout).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/package/elm-tooling.json⧘
+      ⧘⧙/Users/you/project/fixtures/init/package/elm-tooling.json⧘
       Created! Open it in a text editor and have a look!
 
     `);
@@ -93,7 +94,7 @@ describe("init", () => {
     const { stdout, json } = await initSuccessHelper("application");
 
     expect(stdout).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/application/elm-tooling.json⧘
+      ⧘⧙/Users/you/project/fixtures/init/application/elm-tooling.json⧘
       Created! Open it in a text editor and have a look!
 
     `);
@@ -130,7 +131,7 @@ describe("init", () => {
 
   test("already exists", async () => {
     expect(await initFailHelper("already-exists")).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/already-exists/elm-tooling.json⧘
+      ⧘⧙/Users/you/project/fixtures/init/already-exists/elm-tooling.json⧘
       Already exists!
 
     `);
@@ -139,7 +140,7 @@ describe("init", () => {
   test("already exists as folder", async () => {
     expect(await initFailHelper("already-exists-as-folder"))
       .toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/already-exists-as-folder/elm-tooling.json⧘
+      ⧘⧙/Users/you/project/fixtures/init/already-exists-as-folder/elm-tooling.json⧘
       Already exists!
 
     `);
