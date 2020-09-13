@@ -25,9 +25,9 @@ async function validateSuccessHelper(fixture: string): Promise<string> {
   return clean(stdout.content);
 }
 
-// async function validateFailHelper(fixture: string): Promise<string> {
-//   return validateFailHelperAbsolute(path.join(__dirname, "fixtures", fixture));
-// }
+async function validateFailHelper(fixture: string): Promise<string> {
+  return validateFailHelperAbsolute(path.join(FIXTURES_DIR, fixture));
+}
 
 async function validateFailHelperAbsolute(dir: string): Promise<string> {
   const stdout = new MemoryWriteStream();
@@ -76,7 +76,23 @@ describe("validate", () => {
   });
 
   describe("invalid", () => {
-    // TODO
+    test("is folder", async () => {
+      expect(await validateFailHelper("is-folder")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/is-folder/elm-tooling.json⧘
+        Failed to read file as JSON:
+        EISDIR: illegal operation on a directory, read
+
+      `);
+    });
+
+    test("bad json", async () => {
+      expect(await validateFailHelper("bad-json")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/bad-json/elm-tooling.json⧘
+        Failed to read file as JSON:
+        Unexpected end of JSON input
+
+      `);
+    });
   });
 
   describe("errors", () => {
