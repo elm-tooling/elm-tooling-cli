@@ -188,6 +188,50 @@ describe("validate", () => {
 
       `);
     });
+
+    test("unknown versions", async () => {
+      expect(await validateFailHelper("unknown-versions"))
+        .toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/unknown-versions/elm-tooling.json⧘
+
+        ⧘⧙2⧘ errors
+
+        ⧘⧙tools["elm"]⧘
+            Unknown version: v0.19.1
+            Known versions: 0.19.0, 0.19.1
+
+        ⧘⧙tools["elm-format"]⧘
+            Unknown version: 0.8
+            Known versions: 0.8.1, 0.8.2, 0.8.3
+
+        ⧘⧙Documentation:⧘
+            https://github.com/lydell/elm-tooling.json
+
+      `);
+    });
+
+    test("missing tools", async () => {
+      expect(await validateFailHelper("missing-tools")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/missing-tools/elm-tooling.json⧘
+
+        ⧘⧙2⧘ errors
+
+        ⧘⧙tools["elm"]⧘
+            File does not exist: /Users/you/project/fixtures/validate/missing-tools/elm-tooling/elm/0.19.1/elm
+
+        ⧘⧙tools["elm-format"]⧘
+            File does not exist: /Users/you/project/fixtures/validate/missing-tools/elm-tooling/elm-format/0.8.3/elm-format
+
+        ⧘⧙To download missing tools:⧘
+            elm-tooling download
+            ⧘⧙or:⧘
+            elm-tooling postinstall
+
+        ⧘⧙Documentation:⧘
+            https://github.com/lydell/elm-tooling.json
+
+      `);
+    });
   });
 
   describe("errors", () => {
