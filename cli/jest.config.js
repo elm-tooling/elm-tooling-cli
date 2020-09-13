@@ -15,5 +15,12 @@ module.exports = {
       lines: 1,
       statements: 1,
     },
+    // TODO: Remove this once more tests written.
+    "./commands/postinstall.ts": {
+      branches: 1,
+      functions: 1,
+      lines: 1,
+      statements: 1,
+    },
   },
 };

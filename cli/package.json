@@ -4,7 +4,7 @@
   "scripts": {
     "doctoc": "doctoc README.md",
     "pretest": "prettier --check . && eslint .",
-    "test": "jest && ts-node scripts/test-all-downloads.ts",
+    "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts",
     "posttest": "npm run build",
     "prebuild": "ts-node scripts/build-pre.ts",
     "build": "tsc",

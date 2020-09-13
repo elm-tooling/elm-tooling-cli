@@ -62,10 +62,10 @@ describe("help", () => {
 
     `);
 
-    expect(helpHelper([], {})).toBe(output);
-    expect(helpHelper(["-h"], {})).toBe(output);
-    expect(helpHelper(["-help"], {})).toBe(output);
-    expect(helpHelper(["--help"], {})).toBe(output);
+    expect(await helpHelper([], {})).toBe(output);
+    expect(await helpHelper(["-h"], {})).toBe(output);
+    expect(await helpHelper(["-help"], {})).toBe(output);
+    expect(await helpHelper(["--help"], {})).toBe(output);
   });
 
   test("NO_COLOR and ELM_HOME", async () => {

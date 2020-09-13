@@ -1,6 +1,7 @@
 .cache
 .eslintrc.js
 build
+coverage
 dist
 example
 index.d.ts
