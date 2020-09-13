@@ -38,7 +38,7 @@ export function clean(string: string): string {
   // Convert Windows-style paths to Unix-style paths so we can use the same snapshots.
   return os.platform() === "win32"
     ? cleaned
-        .replace(/[A-Z]:((?:\\[\w-]+)+\\?)/g, (_, fullPath: string) =>
+        .replace(/[A-Z]:((?:\\[\w.-]+)+\\?)/g, (_, fullPath: string) =>
           fullPath.replace(/\\/g, "/")
         )
         .replace(/\.exe\b/g, "")
