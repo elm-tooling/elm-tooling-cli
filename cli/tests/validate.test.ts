@@ -93,6 +93,14 @@ describe("validate", () => {
 
       `);
     });
+
+    test("not an object", async () => {
+      expect(await validateFailHelper("not-an-object")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/not-an-object/elm-tooling.json⧘
+        Expected an object but got: ["tools",{"elm":"0.19.1"}]
+
+      `);
+    });
   });
 
   describe("errors", () => {
