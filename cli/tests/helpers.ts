@@ -11,15 +11,9 @@ export class FailReadStream extends stream.Readable {
 }
 
 export class FailWriteStream extends stream.Writable {
-  _write(
-    chunk: string | Buffer,
-    _encoding: BufferEncoding,
-    callback: (error?: Error | null) => void
-  ): void {
-    callback(
-      new Error(
-        `Expected FailWriteStream not to be written to but tried to write: ${chunk.toString()}`
-      )
+  _write(chunk: string | Buffer): void {
+    throw new Error(
+      `Expected FailWriteStream not to be written to but tried to write: ${chunk.toString()}`
     );
   }
 }

@@ -20,7 +20,7 @@ async function run(
   // Let each command handle this when needed.
   if (argv.length > 1) {
     logger.error(
-      `Expected no extra arguments but got: ${argv.slice(1).join(" ")}`
+      `Expected a single argument but got: ${argv.slice(1).join(" ")}`
     );
     return 1;
   }
