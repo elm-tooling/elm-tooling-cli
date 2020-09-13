@@ -17,5 +17,9 @@
       "ES2019",
     ],
     "outDir": "build"
-  }
+  },
+  "exclude": [
+    "scripts",
+    "tests"
+  ]
 }

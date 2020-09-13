@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-const DIR = __dirname;
+const DIR = path.dirname(__dirname);
 const BUILD = path.join(DIR, "build");
 
 const READ_MORE =
