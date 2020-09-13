@@ -3,7 +3,12 @@ import * as path from "path";
 
 import type { ElmTooling } from "../helpers/mixed";
 import elmToolingCli from "../index";
-import { clean, FailReadStream, MemoryWriteStream } from "./helpers";
+import {
+  clean,
+  FailReadStream,
+  MemoryWriteStream,
+  stringSnapshotSerializer,
+} from "./helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "init");
 
@@ -61,13 +66,7 @@ async function initFailHelper(fixture: string): Promise<string> {
   return clean(stderr.content);
 }
 
-// Make snapshots easier to read.
-// Before: `"\\"string\\""`
-// After: `"string"`
-expect.addSnapshotSerializer({
-  test: (value) => typeof value === "string",
-  print: String,
-});
+expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("init", () => {
   test("packages don’t get entrypoints", async () => {
@@ -115,10 +114,13 @@ describe("init", () => {
   });
 
   test.each([
-    "no-elm-json",
-    "bad-elm-json",
+    "bad-elm-json-source-directories",
     "bad-elm-json-type",
+    "bad-elm-json",
+    "empty-elm-json-source-directories",
+    "no-elm-json",
     "no-files-with-main",
+    "not-an-object",
   ])("Uses fallback for %s", async (fixture) => {
     const { stdout, json } = await initSuccessHelper(fixture);
 

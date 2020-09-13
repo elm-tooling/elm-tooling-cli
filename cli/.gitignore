@@ -1,6 +1,7 @@
 .cache
 /elm-tooling.json
 build
+coverage
 dist
 elm-stuff
 node_modules

@@ -1,5 +1,10 @@
 import elmToolingCli from "../index";
-import { clean, FailReadStream, MemoryWriteStream } from "./helpers";
+import {
+  clean,
+  FailReadStream,
+  MemoryWriteStream,
+  stringSnapshotSerializer,
+} from "./helpers";
 
 async function indexHelper(args: Array<string>): Promise<string> {
   const stdout = new MemoryWriteStream();
@@ -19,13 +24,7 @@ async function indexHelper(args: Array<string>): Promise<string> {
   return clean(stderr.content);
 }
 
-// Make snapshots easier to read.
-// Before: `"\\"string\\""`
-// After: `"string"`
-expect.addSnapshotSerializer({
-  test: (value) => typeof value === "string",
-  print: String,
-});
+expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("index", () => {
   test("unknown command", async () => {

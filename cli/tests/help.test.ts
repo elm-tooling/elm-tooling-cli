@@ -1,12 +1,17 @@
 import type { Env } from "../helpers/mixed";
 import elmToolingCli from "../index";
-import { clean, FailReadStream, MemoryWriteStream } from "./helpers";
+import {
+  clean,
+  FailReadStream,
+  MemoryWriteStream,
+  stringSnapshotSerializer,
+} from "./helpers";
 
-async function helpHelper(env: Env): Promise<string> {
+async function helpHelper(args: Array<string>, env: Env): Promise<string> {
   const stdout = new MemoryWriteStream();
   const stderr = new MemoryWriteStream();
 
-  const exitCode = await elmToolingCli(["help"], {
+  const exitCode = await elmToolingCli(args, {
     cwd: __dirname,
     env,
     stdin: new FailReadStream(),
@@ -20,17 +25,13 @@ async function helpHelper(env: Env): Promise<string> {
   return clean(stdout.content);
 }
 
-// Make snapshots easier to read.
-// Before: `"\\"string\\""`
-// After: `"string"`
-expect.addSnapshotSerializer({
-  test: (value) => typeof value === "string",
-  print: String,
-});
+expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("help", () => {
   test("default", async () => {
-    expect(await helpHelper({})).toMatchInlineSnapshot(`
+    const output = await helpHelper(["help"], {});
+
+    expect(output).toMatchInlineSnapshot(`
       ⧘⧙elm-tooling init⧘
           Create a sample elm-tooling.json in the current directory
 
@@ -60,10 +61,15 @@ describe("help", () => {
           https://github.com/lydell/elm-tooling.json/tree/master/cli
 
     `);
+
+    expect(helpHelper([], {})).toBe(output);
+    expect(helpHelper(["-h"], {})).toBe(output);
+    expect(helpHelper(["-help"], {})).toBe(output);
+    expect(helpHelper(["--help"], {})).toBe(output);
   });
 
   test("NO_COLOR and ELM_HOME", async () => {
-    expect(await helpHelper({ NO_COLOR: "", ELM_HOME: "/test" }))
+    expect(await helpHelper(["help"], { NO_COLOR: "", ELM_HOME: "/test" }))
       .toMatchInlineSnapshot(`
       elm-tooling init
           Create a sample elm-tooling.json in the current directory

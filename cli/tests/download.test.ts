@@ -1,7 +1,12 @@
 import * as path from "path";
 
 import elmToolingCli from "../index";
-import { clean, FailReadStream, MemoryWriteStream } from "./helpers";
+import {
+  clean,
+  FailReadStream,
+  MemoryWriteStream,
+  stringSnapshotSerializer,
+} from "./helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "download");
 
@@ -47,13 +52,7 @@ async function downloadFailHelperAbsolute(dir: string): Promise<string> {
   return clean(stderr.content);
 }
 
-// Make snapshots easier to read.
-// Before: `"\\"string\\""`
-// After: `"string"`
-expect.addSnapshotSerializer({
-  test: (value) => typeof value === "string",
-  print: String,
-});
+expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("download", () => {
   describe("nothing to do", () => {

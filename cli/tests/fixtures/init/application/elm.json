@@ -3,7 +3,8 @@
     "source-directories": [
         "src",
         "lib",
-        "./legacy/elm/"
+        "./legacy/elm/",
+        {"invalid": "will be ignored"}
     ],
     "elm-version": "0.19.1",
     "dependencies": {

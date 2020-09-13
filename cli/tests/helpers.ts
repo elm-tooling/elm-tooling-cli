@@ -44,3 +44,11 @@ export function clean(string: string): string {
         .replace(/\.exe\b/g, "")
     : cleaned;
 }
+
+// Make snapshots easier to read.
+// Before: `"\\"string\\""`
+// After: `"string"`
+export const stringSnapshotSerializer = {
+  test: (value: unknown): boolean => typeof value === "string",
+  print: String,
+};
