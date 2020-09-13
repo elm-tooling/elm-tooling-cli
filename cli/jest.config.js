@@ -9,6 +9,8 @@ module.exports = {
       lines: 100,
       statements: 100,
     },
+    // Download is exercised in `scripts/test-all-downloads.ts`.
+    // Testing error handling is still manual, though.
     "./commands/download.ts": {
       branches: 1,
       functions: 1,
