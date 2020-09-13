@@ -1,0 +1,9 @@
+.cache
+/elm-tooling.json
+build
+dist
+elm-stuff
+node_modules
+scripts/all-downloads
+scripts/all-downloads.actual.txt
+tmp.*

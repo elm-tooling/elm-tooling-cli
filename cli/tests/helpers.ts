@@ -26,16 +26,14 @@ export function clean(string: string): string {
   const { root } = path.parse(__dirname);
 
   // Replace start of absolute paths with hardcoded stuff so the tests pass on
-  // more than one computer. Replace colors and cursor movements for snapshots.
+  // more than one computer. Replace colors for snapshots.
   const cleaned = string
     .split(__dirname)
     .join(path.join(root, "Users", "you", "project"))
     // eslint-disable-next-line no-control-regex
     .replace(/\x1B\[0?m/g, "⧘")
     // eslint-disable-next-line no-control-regex
-    .replace(/\x1B\[\d+m/g, "⧙")
-    // eslint-disable-next-line no-control-regex
-    .replace(/\x1B\[(-\d+)A/g, "⬆️ $1");
+    .replace(/\x1B\[\d+m/g, "⧙");
 
   // Convert Windows-style paths to Unix-style paths so we can use the same snapshots.
   return os.platform() === "win32"

@@ -3,7 +3,12 @@
   "type": "commonjs",
   "scripts": {
     "doctoc": "doctoc README.md",
-    "test": "prettier --check . && eslint . && jest && ts-node scripts/build.ts && tsc && ts-node scripts/build-post.ts"
+    "pretest": "prettier --check . && eslint .",
+    "test": "jest && ts-node scripts/test-all-downloads.ts",
+    "posttest": "npm run build",
+    "prebuild": "ts-node scripts/build-pre.ts",
+    "build": "tsc",
+    "postbuild": "ts-node scripts/build-post.ts"
   },
   "devDependencies": {
     "@types/jest": "26.0.13",

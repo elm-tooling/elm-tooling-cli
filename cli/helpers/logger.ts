@@ -37,7 +37,7 @@ export function makeLogger({
     progress: (passedMessage) => {
       const message = handleColor(passedMessage);
       if (previousProgress !== undefined) {
-        readline.moveCursor(stderr, 0, -previousProgress);
+        readline.moveCursor(stdout, 0, -previousProgress);
       }
       previousProgress = message.split("\n").length;
       stdout.write(message + "\n");
