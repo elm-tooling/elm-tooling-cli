@@ -29,7 +29,8 @@ expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("help", () => {
   test("default", async () => {
-    const output = await helpHelper(["help"], {});
+    const env = { ELM_HOME: "/Users/you/.elm" };
+    const output = await helpHelper(["help"], env);
 
     expect(output).toMatchInlineSnapshot(`
       ⧘⧙elm-tooling init⧘
@@ -40,7 +41,7 @@ describe("help", () => {
 
       ⧘⧙elm-tooling download⧘
           Download the tools in the closest elm-tooling.json to:
-          ⧘⧙/Users/lydell/.elm/elm-tooling⧘
+          ⧘⧙/Users/you/.elm/elm-tooling⧘
 
       ⧘⧙elm-tooling postinstall⧘
           Download the tools in the closest elm-tooling.json
@@ -62,13 +63,13 @@ describe("help", () => {
 
     `);
 
-    expect(await helpHelper([], {})).toBe(output);
-    expect(await helpHelper(["-h"], {})).toBe(output);
-    expect(await helpHelper(["-help"], {})).toBe(output);
-    expect(await helpHelper(["--help"], {})).toBe(output);
+    expect(await helpHelper([], env)).toBe(output);
+    expect(await helpHelper(["-h"], env)).toBe(output);
+    expect(await helpHelper(["-help"], env)).toBe(output);
+    expect(await helpHelper(["--help"], env)).toBe(output);
   });
 
-  test("NO_COLOR and ELM_HOME", async () => {
+  test("NO_COLOR", async () => {
     expect(await helpHelper(["help"], { NO_COLOR: "", ELM_HOME: "/test" }))
       .toMatchInlineSnapshot(`
       elm-tooling init
