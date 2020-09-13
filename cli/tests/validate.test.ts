@@ -101,6 +101,25 @@ describe("validate", () => {
 
       `);
     });
+
+    test("wrong field types", async () => {
+      expect(await validateFailHelper("wrong-field-types"))
+        .toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/wrong-field-types/elm-tooling.json⧘
+
+        ⧘⧙2⧘ errors
+
+        ⧘⧙entrypoints⧘
+            Expected an array but got: null
+
+        ⧘⧙tools⧘
+            Expected an object but got: ["elm","elm-format"]
+
+        ⧘⧙Documentation:⧘
+            https://github.com/lydell/elm-tooling.json
+
+      `);
+    });
   });
 
   describe("errors", () => {
