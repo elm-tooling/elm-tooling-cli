@@ -76,32 +76,6 @@ describe("validate", () => {
   });
 
   describe("invalid", () => {
-    test("is folder", async () => {
-      expect(await validateFailHelper("is-folder")).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/validate/is-folder/elm-tooling.json⧘
-        Failed to read file as JSON:
-        EISDIR: illegal operation on a directory, read
-
-      `);
-    });
-
-    test("bad json", async () => {
-      expect(await validateFailHelper("bad-json")).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/validate/bad-json/elm-tooling.json⧘
-        Failed to read file as JSON:
-        Unexpected end of JSON input
-
-      `);
-    });
-
-    test("not an object", async () => {
-      expect(await validateFailHelper("not-an-object")).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/validate/not-an-object/elm-tooling.json⧘
-        Expected an object but got: ["tools",{"elm":"0.19.1"}]
-
-      `);
-    });
-
     test("wrong field types", async () => {
       expect(await validateFailHelper("wrong-field-types"))
         .toMatchInlineSnapshot(`
@@ -239,6 +213,32 @@ describe("validate", () => {
       expect(await validateFailHelperAbsolute(path.parse(__dirname).root))
         .toMatchInlineSnapshot(`
         No elm-tooling.json found. To create one: elm-tooling init
+
+      `);
+    });
+
+    test("is folder", async () => {
+      expect(await validateFailHelper("is-folder")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/is-folder/elm-tooling.json⧘
+        Failed to read file as JSON:
+        EISDIR: illegal operation on a directory, read
+
+      `);
+    });
+
+    test("bad json", async () => {
+      expect(await validateFailHelper("bad-json")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/bad-json/elm-tooling.json⧘
+        Failed to read file as JSON:
+        Unexpected end of JSON input
+
+      `);
+    });
+
+    test("not an object", async () => {
+      expect(await validateFailHelper("not-an-object")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/not-an-object/elm-tooling.json⧘
+        Expected an object but got: ["tools",{"elm":"0.19.1"}]
 
       `);
     });
