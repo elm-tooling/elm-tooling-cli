@@ -237,7 +237,7 @@ function parseEntrypoints(
   const [errors, entrypoints]: [
     Array<FieldError>,
     Array<Entrypoint>
-  ] = partitionMap(json, (entrypoint, index) => {
+  ] = partitionMap(json, (entrypoint, index, _, entrypointsSoFar) => {
     if (typeof entrypoint !== "string") {
       return {
         tag: "Left",
@@ -270,6 +270,20 @@ function parseEntrypoints(
       return {
         tag: "Left",
         value: { path: [index], message: exists.message },
+      };
+    }
+
+    if (
+      entrypointsSoFar.some(
+        (otherEntrypoint) => otherEntrypoint.absolutePath === absolutePath
+      )
+    ) {
+      return {
+        tag: "Left",
+        value: {
+          path: [index],
+          message: `Duplicate entrypoint: ${absolutePath}`,
+        },
       };
     }
 

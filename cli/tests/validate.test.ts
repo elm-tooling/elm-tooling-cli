@@ -120,6 +120,74 @@ describe("validate", () => {
 
       `);
     });
+
+    test("empty entrypoints", async () => {
+      expect(await validateFailHelper("empty-entrypoints"))
+        .toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/empty-entrypoints/elm-tooling.json⧘
+
+        ⧘⧙1⧘ error
+
+        ⧘⧙entrypoints⧘
+            Expected at least one entrypoint but got 0.
+
+        ⧘⧙Documentation:⧘
+            https://github.com/lydell/elm-tooling.json
+
+      `);
+    });
+
+    test("kitchen sink", async () => {
+      expect(await validateFailHelper("kitchen-sink")).toMatchInlineSnapshot(`
+        ⧘⧙/Users/you/project/fixtures/validate/kitchen-sink/elm-tooling.json⧘
+
+        ⧘⧙12⧘ errors
+
+        ⧘⧙elm.json⧘
+            There should be an elm.json next to elm-tooling.json
+            File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/elm.json
+
+        ⧘⧙not-a-thing⧘
+            Unknown field
+            Known fields: entrypoints, tools
+
+        ⧘⧙nope⧘
+            Unknown field
+            Known fields: entrypoints, tools
+
+        ⧘⧙entrypoints[0]⧘
+            Expected the string to start with "./" (to indicate that it is a relative path) but got: "Main.elm"
+
+        ⧘⧙entrypoints[2]⧘
+            Duplicate entrypoint: /Users/you/project/fixtures/validate/kitchen-sink/Main.elm
+
+        ⧘⧙entrypoints[3]⧘
+            File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/missing/Main.elm
+
+        ⧘⧙entrypoints[4]⧘
+            File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/missing/Main.elm
+
+        ⧘⧙entrypoints[5]⧘
+            Exists but is not a file: /Users/you/project/fixtures/validate/kitchen-sink/
+
+        ⧘⧙entrypoints[6]⧘
+            Expected a string but got: null
+
+        ⧘⧙tools["elm-invalid"]⧘
+            Expected a version as a string but got: 1
+
+        ⧘⧙tools["elm-nope"]⧘
+            Unknown tool
+            Known tools: elm, elm-format
+
+        ⧘⧙tools["elm-format"]⧘
+            Exists but is not a file: /Users/you/project/fixtures/validate/kitchen-sink/elm-tooling/elm-format/0.8.3/elm-format
+
+        ⧘⧙Documentation:⧘
+            https://github.com/lydell/elm-tooling.json
+
+      `);
+    });
   });
 
   describe("errors", () => {
