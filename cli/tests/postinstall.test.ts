@@ -1,5 +1,6 @@
 import * as path from "path";
 
+import type { Env } from "../helpers/mixed";
 import elmToolingCli from "../index";
 import {
   clean,
@@ -10,7 +11,10 @@ import {
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "postinstall");
 
-async function postinstallSuccessHelper(fixture: string): Promise<string> {
+async function postinstallSuccessHelper(
+  fixture: string,
+  env?: Env
+): Promise<string> {
   const dir = path.join(FIXTURES_DIR, fixture);
 
   const stdout = new MemoryWriteStream();
@@ -18,7 +22,7 @@ async function postinstallSuccessHelper(fixture: string): Promise<string> {
 
   const exitCode = await elmToolingCli(["postinstall"], {
     cwd: dir,
-    env: { ELM_HOME: dir },
+    env: { ELM_HOME: dir, ...env },
     stdin: new FailReadStream(),
     stdout,
     stderr,
@@ -40,5 +44,13 @@ describe("postinstall", () => {
         The "tools" field is empty. Nothing to download.
 
       `);
+  });
+
+  test("nothing to do (NO_ELM_TOOLING_POSTINSTALL)", async () => {
+    expect(
+      await postinstallSuccessHelper("would-download", {
+        NO_ELM_TOOLING_POSTINSTALL: "",
+      })
+    ).toMatchInlineSnapshot(``);
   });
 });
