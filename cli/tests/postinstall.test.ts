@@ -34,6 +34,27 @@ async function postinstallSuccessHelper(
   return clean(stdout.content);
 }
 
+async function postinstallFailHelper(fixture: string): Promise<string> {
+  const dir = path.join(FIXTURES_DIR, fixture);
+
+  const stdout = new MemoryWriteStream();
+  const stderr = new MemoryWriteStream();
+
+  const exitCode = await elmToolingCli(["postinstall"], {
+    cwd: dir,
+    env: { ELM_HOME: dir },
+    stdin: new FailReadStream(),
+    stdout,
+    stderr,
+  });
+
+  // There will be some logging from download.
+  expect(stdout.content).not.toBe("");
+  expect(exitCode).toBe(1);
+
+  return clean(stderr.content);
+}
+
 expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("postinstall", () => {
@@ -52,5 +73,14 @@ describe("postinstall", () => {
         NO_ELM_TOOLING_POSTINSTALL: "",
       })
     ).toMatchInlineSnapshot(``);
+  });
+
+  test("node_modules/.bin is a file", async () => {
+    expect(await postinstallFailHelper("node_modules-bin-is-a-file"))
+      .toMatchInlineSnapshot(`
+      Failed to create /Users/you/project/fixtures/postinstall/node_modules-bin-is-a-file/node_modules/.bin:
+      EEXIST: file already exists, mkdir '/Users/you/project/fixtures/postinstall/node_modules-bin-is-a-file/node_modules/.bin'
+
+    `);
   });
 });

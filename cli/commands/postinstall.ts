@@ -51,6 +51,7 @@ function linkTools(
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
     logger.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
+    return 1;
   }
 
   for (const tool of tools) {
