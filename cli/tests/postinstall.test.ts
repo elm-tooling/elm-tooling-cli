@@ -178,6 +178,7 @@ describe("postinstall", () => {
           
         elmx
           not elm
+          
       `);
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
