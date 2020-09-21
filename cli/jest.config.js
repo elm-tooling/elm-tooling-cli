@@ -21,7 +21,5 @@ module.exports = {
     // Download is exercised in `scripts/test-all-downloads.ts`.
     // Testing error handling is still manual, though.
     "./commands/download.ts": ignoreCoverage,
-    // Windows-only code.
-    "./helpers/symlink-shim-windows.ts": ignoreCoverage,
   },
 };
