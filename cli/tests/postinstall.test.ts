@@ -109,6 +109,15 @@ describe("postinstall", () => {
     `);
   });
 
+  test("node_modules/.bin/elm is a folder", async () => {
+    expect(await postinstallFailHelper("binary-is-folder"))
+      .toMatchInlineSnapshot(`
+      Failed to remove old link for elm at /Users/you/project/fixtures/postinstall/binary-is-folder/node_modules/.bin/elm:
+      EPERM: operation not permitted, unlink '/Users/you/project/fixtures/postinstall/binary-is-folder/node_modules/.bin/elm'
+
+    `);
+  });
+
   test("create and overwrite", async () => {
     const fixture = "create";
     const binDir = path.join(FIXTURES_DIR, fixture, "node_modules", ".bin");
