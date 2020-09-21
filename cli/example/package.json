@@ -9,10 +9,10 @@
   "devDependencies": {
     "elm-hot": "1.1.5",
     "elm-review": "2.3.2",
-    "elm-test": "0.19.1-revision3",
+    "elm-test": "0.19.1-revision4",
     "elm-tooling": "file:../build",
     "node-elm-compiler": "5.0.5",
     "parcel-bundler": "1.12.4",
-    "prettier": "^2.1.1"
+    "prettier": "2.1.2"
   }
 }
