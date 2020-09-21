@@ -110,12 +110,12 @@ describe("postinstall", () => {
   });
 
   test("node_modules/.bin/elm is a folder", async () => {
-    expect(await postinstallFailHelper("binary-is-folder"))
-      .toMatchInlineSnapshot(`
-      Failed to remove old link for elm at /Users/you/project/fixtures/postinstall/binary-is-folder/node_modules/.bin/elm:
-      EPERM: operation not permitted, unlink '/Users/you/project/fixtures/postinstall/binary-is-folder/node_modules/.bin/elm'
-
-    `);
+    // Fails with EISDIR on Linux, but EPERM on mac.
+    expect(
+      (await postinstallFailHelper("binary-is-folder")).split("\n")[0]
+    ).toMatchInlineSnapshot(
+      `Failed to remove old link for elm at /Users/you/project/fixtures/postinstall/binary-is-folder/node_modules/.bin/elm:`
+    );
   });
 
   test("create and overwrite", async () => {
