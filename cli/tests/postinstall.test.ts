@@ -109,8 +109,16 @@ describe("postinstall", () => {
     `);
   });
 
-  test("create", async () => {
-    const { stdout, bin } = await postinstallSuccessHelper("create");
+  test("create and overwrite", async () => {
+    const fixture = "create";
+    const binDir = path.join(FIXTURES_DIR, fixture, "node_modules", ".bin");
+    for (const item of fs.readdirSync(binDir)) {
+      if (item !== "elmx") {
+        fs.unlinkSync(path.join(binDir, item));
+      }
+    }
+
+    const { stdout, bin } = await postinstallSuccessHelper(fixture);
     expect(stdout).toMatchInlineSnapshot(`
       ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling.json⧘
       ⧘⧙elm 0.19.1⧘ already exists: ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm⧘
@@ -125,6 +133,32 @@ describe("postinstall", () => {
       expect(bin).toMatchInlineSnapshot(`
         elm -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm
         elm-format -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format
+        elmx
+          not elm
+          
+      `);
+    }
+
+    const { stdout: stdout2, bin: bin2 } = await postinstallSuccessHelper(
+      fixture
+    );
+    expect(stdout2).toMatchInlineSnapshot(`
+      ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling.json⧘
+      ⧘⧙elm 0.19.1⧘ already exists: ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm⧘
+      ⧘⧙elm-format 0.8.3⧘ already exists: ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧘⧙elm 0.19.1⧘ link created: ⧘⧙/Users/you/project/fixtures/postinstall/create/node_modules/.bin/elm -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm⧘
+      ⧘⧙elm-format 0.8.3⧘ link created: ⧘⧙/Users/you/project/fixtures/postinstall/create/node_modules/.bin/elm-format -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format⧘
+
+    `);
+    if (IS_WINDOWS) {
+      expect(bin2).toMatchInlineSnapshot();
+    } else {
+      expect(bin2).toMatchInlineSnapshot(`
+        elm -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm
+        elm-format -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format
+        elmx
+          not elm
+          
       `);
     }
   });
