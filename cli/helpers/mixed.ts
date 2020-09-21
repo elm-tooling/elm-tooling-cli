@@ -33,13 +33,18 @@ export type Either<Left, Right> =
 
 export function partitionMap<T, Left, Right>(
   items: Array<T>,
-  f: (item: T, index: number) => Either<Left, Right>
+  f: (
+    item: T,
+    index: number,
+    leftSoFar: Array<Left>,
+    rightSoFar: Array<Right>
+  ) => Either<Left, Right>
 ): [Array<Left>, Array<Right>] {
   const left: Array<Left> = [];
   const right: Array<Right> = [];
 
   for (const [index, item] of items.entries()) {
-    const either = f(item, index);
+    const either = f(item, index, left, right);
     switch (either.tag) {
       case "Left":
         left.push(either.value);

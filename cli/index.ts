@@ -20,7 +20,7 @@ async function run(
   // Let each command handle this when needed.
   if (argv.length > 1) {
     logger.error(
-      `Expected no extra arguments but got: ${argv.slice(1).join(" ")}`
+      `Expected a single argument but got: ${argv.slice(1).join(" ")}`
     );
     return 1;
   }
@@ -69,6 +69,7 @@ type Options = {
 
 export default function elmToolingCli(
   args: Array<string>,
+  /* istanbul ignore next */
   { cwd, env, stdout, stderr }: Options = {
     cwd: process.cwd(),
     env: process.env,
@@ -80,6 +81,7 @@ export default function elmToolingCli(
   return run(args, cwd, env, makeLogger({ env, stdout, stderr }));
 }
 
+/* istanbul ignore if */
 if (require.main === module) {
   elmToolingCli(process.argv.slice(2)).then(
     (exitCode) => {

@@ -1,7 +1,0 @@
-.cache
-build
-cli/elm-tooling.json
-dist
-elm-stuff
-node_modules
-tmp.*

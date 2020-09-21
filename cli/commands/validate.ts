@@ -81,11 +81,7 @@ export default function validate(
         logger.error(printFieldErrors(validationErrors));
         if (toolsErrors.tag === "Missing" && toolsErrors.errors.length > 0) {
           logger.error("");
-          logger.error(
-            `${dim("To download missing tools:")}\n${indent(
-              "elm-tooling download"
-            )}`
-          );
+          logger.error(missingToolsText);
         }
         logger.error("");
         logger.error(elmToolingJsonDocumentationLink);
@@ -94,6 +90,17 @@ export default function validate(
     }
   }
 }
+
+const missingToolsText = `
+${dim("To download missing tools:")}
+${indent(
+  `
+elm-tooling download
+${dim("or:")}
+elm-tooling postinstall
+`.trim()
+)}
+`.trim();
 
 function getEntrypointsErrors(
   fieldResult: FieldResult<NonEmptyArray<Entrypoint>>

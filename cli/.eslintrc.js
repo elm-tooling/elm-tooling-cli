@@ -1,13 +1,15 @@
+const baseExtends = [
+  "eslint:recommended",
+  "plugin:@typescript-eslint/recommended",
+  "plugin:@typescript-eslint/recommended-requiring-type-checking",
+  "prettier",
+  "prettier/@typescript-eslint",
+];
+
 module.exports = {
   root: true,
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "prettier",
-    "prettier/@typescript-eslint",
-  ],
-  plugins: ["@typescript-eslint", "simple-import-sort"],
+  extends: baseExtends,
+  plugins: ["@typescript-eslint", "simple-import-sort", "jest"],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ["./tsconfig.json"],
@@ -23,4 +25,21 @@ module.exports = {
     "no-fallthrough": "off",
     "simple-import-sort/sort": "error",
   },
+  overrides: [
+    {
+      files: "scripts/**/*.ts",
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+        project: ["./scripts/tsconfig.json"],
+      },
+    },
+    {
+      files: "tests/**/*.ts",
+      extends: [...baseExtends, "plugin:jest/recommended", "plugin:jest/style"],
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+        project: ["./tests/tsconfig.json"],
+      },
+    },
+  ],
 };

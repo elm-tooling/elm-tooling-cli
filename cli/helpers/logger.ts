@@ -26,18 +26,19 @@ export function makeLogger({
     NO_COLOR ? string.replace(/\x1B\[\dm/g, "") : string;
 
   return {
-    log: (message) => {
+    log(message) {
       previousProgress = undefined;
       stdout.write(handleColor(message) + "\n");
     },
-    error: (message) => {
+    error(message) {
       previousProgress = undefined;
       stderr.write(handleColor(message) + "\n");
     },
-    progress: (passedMessage) => {
+    /* istanbul ignore next */
+    progress(passedMessage) {
       const message = handleColor(passedMessage);
       if (previousProgress !== undefined) {
-        readline.moveCursor(stderr, 0, -previousProgress);
+        readline.moveCursor(stdout, 0, -previousProgress);
       }
       previousProgress = message.split("\n").length;
       stdout.write(message + "\n");

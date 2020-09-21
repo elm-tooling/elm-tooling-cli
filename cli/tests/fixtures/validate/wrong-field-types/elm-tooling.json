@@ -1,0 +1,4 @@
+{
+  "entrypoints": null,
+  "tools": ["elm", "elm-format"]
+}

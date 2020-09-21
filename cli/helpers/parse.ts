@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
-import { Asset, KNOWN_TOOLS, OSName } from "./known_tools";
+import { Asset, KNOWN_TOOLS, OSName } from "./known-tools";
 import {
   bold,
   Env,
@@ -17,6 +17,7 @@ import {
 export const isWindows = os.platform() === "win32";
 
 export function elmToolingInstallPath(cwd: string, env: Env): string {
+  /* istanbul ignore next */
   const elmHome =
     env.ELM_HOME ||
     (isWindows
@@ -125,7 +126,8 @@ export function findReadAndParseElmToolingJson(
         result.tools = prefixFieldResult(
           "tools",
           osName instanceof Error
-            ? {
+            ? /* istanbul ignore next */
+              {
                 tag: "Error" as const,
                 errors: [
                   { path: [], message: osName.message },
@@ -146,6 +148,7 @@ export function findReadAndParseElmToolingJson(
 }
 
 export function getOSName(): OSName | Error {
+  /* istanbul ignore next */
   switch (os.platform()) {
     case "linux":
       return "linux";
@@ -192,16 +195,18 @@ export function validateFileExists(fullPath: string): FileExists {
     }
   } catch (errorAny) {
     const error = errorAny as Error & { code?: string };
+    /* istanbul ignore else */
     if (error.code === "ENOENT") {
       return {
         tag: "DoesNotExist",
         message: `File does not exist: ${fullPath}`,
       };
+    } else {
+      return {
+        tag: "Error",
+        message: `File error for ${fullPath}: ${error.message}`,
+      };
     }
-    return {
-      tag: "Error",
-      message: `File error for ${fullPath}: ${error.message}`,
-    };
   }
   return { tag: "Exists" };
 }
@@ -237,7 +242,7 @@ function parseEntrypoints(
   const [errors, entrypoints]: [
     Array<FieldError>,
     Array<Entrypoint>
-  ] = partitionMap(json, (entrypoint, index) => {
+  ] = partitionMap(json, (entrypoint, index, _, entrypointsSoFar) => {
     if (typeof entrypoint !== "string") {
       return {
         tag: "Left",
@@ -270,6 +275,20 @@ function parseEntrypoints(
       return {
         tag: "Left",
         value: { path: [index], message: exists.message },
+      };
+    }
+
+    if (
+      entrypointsSoFar.some(
+        (otherEntrypoint) => otherEntrypoint.absolutePath === absolutePath
+      )
+    ) {
+      return {
+        tag: "Left",
+        value: {
+          path: [index],
+          message: `Duplicate entrypoint: ${absolutePath}`,
+        },
       };
     }
 
@@ -433,6 +452,7 @@ export function printFieldErrors(errors: Array<FieldError>): string {
 }
 
 function joinPath(errorPath: Array<string | number>): string {
+  /* istanbul ignore if */
   if (errorPath.length === 0) {
     return "General";
   }

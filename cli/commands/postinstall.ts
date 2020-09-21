@@ -38,6 +38,7 @@ function linkTools(
   tools: NonEmptyArray<Tool>
 ): number {
   const nodeModulesPath = findClosest("node_modules", cwd);
+  /* istanbul ignore if */
   if (nodeModulesPath === undefined) {
     logger.error(
       "No node_modules/ folder found. Install your npm dependencies before running this script."
@@ -51,6 +52,7 @@ function linkTools(
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
     logger.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
+    return 1;
   }
 
   for (const tool of tools) {
@@ -59,16 +61,16 @@ function linkTools(
     // Just like npm, these overwrite whatever links are already in
     // `node_modules/.bin/`. Most likely it’s either old links from for example
     // the `elm` npm package, or links from previous runs of this script.
-    const linkPathPresentationString = isWindows
-      ? symlinkShimWindows(tool, linkPath)
-      : symlink(tool, linkPath);
+    const [linkPathPresentationString, what] = isWindows
+      ? // istanbul ignore next
+        [symlinkShimWindows(tool, linkPath), "shims"]
+      : [symlink(tool, linkPath), "link"];
 
     if (linkPathPresentationString instanceof Error) {
       logger.error(linkPathPresentationString.message);
       return 1;
     }
 
-    const what = isWindows ? "shims" : "link";
     logger.log(
       `${bold(`${tool.name} ${tool.version}`)} ${what} created: ${dim(
         `${linkPathPresentationString} -> ${tool.absolutePath}`
@@ -93,7 +95,7 @@ function symlink(tool: Tool, linkPath: string): string | Error {
 
   try {
     fs.symlinkSync(tool.absolutePath, linkPath);
-  } catch (errorAny) {
+  } catch (errorAny) /* istanbul ignore next */ {
     const error = errorAny as Error & { code?: number };
     return new Error(
       `Failed to create link for ${tool.name} at ${linkPath}:\n${error.message}`
@@ -103,7 +105,7 @@ function symlink(tool: Tool, linkPath: string): string | Error {
   return linkPath;
 }
 
-// Inspired by: https://github.com/npm/cmd-shim/blob/92c0a16d3c8a8c53ade76b5eae8efae01dd7f41f/index.js
+// istanbul ignore next
 function symlinkShimWindows(tool: Tool, linkPath: string): string | Error {
   const shLinkPath = linkPath;
   const cmdLinkPath = `${linkPath}.cmd`;
@@ -122,7 +124,7 @@ function symlinkShimWindows(tool: Tool, linkPath: string): string | Error {
     const error = errorAny as Error & { code?: string };
     if (error.code !== "ENOENT") {
       return new Error(
-        `Failed to remove old links for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
+        `Failed to remove old shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
       );
     }
   }
@@ -137,7 +139,7 @@ function symlinkShimWindows(tool: Tool, linkPath: string): string | Error {
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
     return new Error(
-      `Failed to create links for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
+      `Failed to create shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
     );
   }
 
@@ -145,15 +147,20 @@ function symlinkShimWindows(tool: Tool, linkPath: string): string | Error {
 }
 
 // Windows-style paths works fine, at least in Git bash.
-function makeShScript(toolAbsolutePath: string): string {
+export function makeShScript(toolAbsolutePath: string): string {
   return lf(`
 #!/bin/sh
-'${toolAbsolutePath.replace(/'/g, "'\\''")}' "$@"
+${toolAbsolutePath
+  .split(/(')/)
+  .map((segment) =>
+    segment === "" ? "" : segment === "'" ? "\\'" : `'${segment}'`
+  )
+  .join("")} "$@"
 `);
 }
 
 // Note: Paths on Windows cannot contain `"`.
-function makeCmdScript(toolAbsolutePath: string): string {
+export function makeCmdScript(toolAbsolutePath: string): string {
   return crlf(`
 @ECHO off
 "${toolAbsolutePath}" %*
@@ -161,7 +168,7 @@ function makeCmdScript(toolAbsolutePath: string): string {
 }
 
 // The shebang is for PowerShell on unix: https://github.com/npm/cmd-shim/pull/34
-function makePs1Script(toolAbsolutePath: string): string {
+export function makePs1Script(toolAbsolutePath: string): string {
   return lf(`
 #!/usr/bin/env pwsh
 & '${toolAbsolutePath.replace(/'/g, "''")}' $args

@@ -1,0 +1,42 @@
+all-downloads/
+  0/
+    elm-tooling/
+      elm/
+        0.19.0/
+          elm
+      elm-format/
+        0.8.1/
+          elm-format
+    elm-tooling.json
+      {
+        "tools": {
+          "elm": "0.19.0",
+          "elm-format": "0.8.1"
+        }
+      }
+  1/
+    elm-tooling/
+      elm/
+        0.19.1/
+          elm
+      elm-format/
+        0.8.2/
+          elm-format
+    elm-tooling.json
+      {
+        "tools": {
+          "elm": "0.19.1",
+          "elm-format": "0.8.2"
+        }
+      }
+  2/
+    elm-tooling/
+      elm-format/
+        0.8.3/
+          elm-format
+    elm-tooling.json
+      {
+        "tools": {
+          "elm-format": "0.8.3"
+        }
+      }
