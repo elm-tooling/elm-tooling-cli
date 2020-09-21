@@ -2,6 +2,8 @@ import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
 
+export const IS_WINDOWS = os.platform() === "win32";
+
 export class FailReadStream extends stream.Readable {
   _read(size: number): void {
     throw new Error(
@@ -36,7 +38,7 @@ export function clean(string: string): string {
     .replace(/\x1B\[\d+m/g, "⧙");
 
   // Convert Windows-style paths to Unix-style paths so we can use the same snapshots.
-  return os.platform() === "win32"
+  return IS_WINDOWS
     ? cleaned
         .replace(/[A-Z]:((?:\\[\w.-]+)+\\?)/g, (_, fullPath: string) =>
           fullPath.replace(/\\/g, "/")
