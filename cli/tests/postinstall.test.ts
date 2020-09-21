@@ -1,5 +1,3 @@
-/* eslint-disable jest/no-conditional-expect */
-
 import * as fs from "fs";
 import * as path from "path";
 
@@ -14,6 +12,17 @@ import {
 } from "./helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "postinstall");
+
+function cleanPostinstall(string: string): string {
+  return (
+    string
+      // Remove Windows differences.
+      .replace(/shims/g, "link")
+      .replace(/\{[^{}]+\}/g, "")
+      // Fails with EISDIR on Linux, but EPERM on Mac.
+      .replace(/(EPERM|EISDIR):.*/g, "EISDIR: fake error")
+  );
+}
 
 async function postinstallSuccessHelper(
   fixture: string,
@@ -55,7 +64,7 @@ async function postinstallSuccessHelper(
         .join("\n")
     : "(does not exist)";
 
-  return { stdout: clean(stdout.content), bin: clean(bin) };
+  return { stdout: cleanPostinstall(clean(stdout.content)), bin: clean(bin) };
 }
 
 async function postinstallFailHelper(fixture: string): Promise<string> {
@@ -76,7 +85,7 @@ async function postinstallFailHelper(fixture: string): Promise<string> {
   expect(stdout.content).not.toBe("");
   expect(exitCode).toBe(1);
 
-  return clean(stderr.content);
+  return cleanPostinstall(clean(stderr.content));
 }
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);
@@ -110,12 +119,12 @@ describe("postinstall", () => {
   });
 
   test("node_modules/.bin/elm is a folder", async () => {
-    // Fails with EISDIR on Linux, but EPERM on mac.
-    expect(
-      (await postinstallFailHelper("binary-is-folder")).split("\n")[0]
-    ).toMatchInlineSnapshot(
-      `Failed to remove old link for elm at /Users/you/project/fixtures/postinstall/binary-is-folder/node_modules/.bin/elm:`
-    );
+    expect(await postinstallFailHelper("binary-is-folder"))
+      .toMatchInlineSnapshot(`
+      Failed to remove old link for elm at /Users/you/project/fixtures/postinstall/binary-is-folder/node_modules/.bin/elm:
+      EISDIR: fake error
+
+    `);
   });
 
   test("create and overwrite", async () => {
@@ -137,8 +146,41 @@ describe("postinstall", () => {
 
     `);
     if (IS_WINDOWS) {
-      expect(bin).toMatchInlineSnapshot();
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(bin).toMatchInlineSnapshot(`
+        elm
+          #!/bin/sh
+          '/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm' "$@"
+          
+        elm-format
+          #!/bin/sh
+          '/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format' "$@"
+          
+        elm-format.cmd
+          @ECHO off
+          
+          "/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format" %*
+          
+          
+        elm-format.ps1
+          #!/usr/bin/env pwsh
+          & '/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format' $args
+          
+        elm.cmd
+          @ECHO off
+          
+          "/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm" %*
+          
+          
+        elm.ps1
+          #!/usr/bin/env pwsh
+          & '/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm' $args
+          
+        elmx
+          not elm
+      `);
     } else {
+      // eslint-disable-next-line jest/no-conditional-expect
       expect(bin).toMatchInlineSnapshot(`
         elm -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm
         elm-format -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format
@@ -151,24 +193,7 @@ describe("postinstall", () => {
     const { stdout: stdout2, bin: bin2 } = await postinstallSuccessHelper(
       fixture
     );
-    expect(stdout2).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling.json⧘
-      ⧘⧙elm 0.19.1⧘ already exists: ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm⧘
-      ⧘⧙elm-format 0.8.3⧘ already exists: ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format⧘
-      ⧘⧙elm 0.19.1⧘ link created: ⧘⧙/Users/you/project/fixtures/postinstall/create/node_modules/.bin/elm -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm⧘
-      ⧘⧙elm-format 0.8.3⧘ link created: ⧘⧙/Users/you/project/fixtures/postinstall/create/node_modules/.bin/elm-format -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format⧘
-
-    `);
-    if (IS_WINDOWS) {
-      expect(bin2).toMatchInlineSnapshot();
-    } else {
-      expect(bin2).toMatchInlineSnapshot(`
-        elm -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm
-        elm-format -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format
-        elmx
-          not elm
-          
-      `);
-    }
+    expect(stdout2).toBe(stdout);
+    expect(bin2).toBe(bin);
   });
 });

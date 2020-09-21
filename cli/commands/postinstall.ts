@@ -124,7 +124,7 @@ function symlinkShimWindows(tool: Tool, linkPath: string): string | Error {
     const error = errorAny as Error & { code?: string };
     if (error.code !== "ENOENT") {
       return new Error(
-        `Failed to remove old links for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
+        `Failed to remove old shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
       );
     }
   }
@@ -139,7 +139,7 @@ function symlinkShimWindows(tool: Tool, linkPath: string): string | Error {
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
     return new Error(
-      `Failed to create links for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
+      `Failed to create shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
     );
   }
 
