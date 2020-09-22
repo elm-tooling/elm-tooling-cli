@@ -1,3 +1,9 @@
+### Version 0.2.0 (2020-09-22)
+
+- Improved: Show known fields/tools/verions in validation errors.
+- Added: It’s now possible to import the CLI and run it from JavaScript without `child_process.spawn`.
+- Fixed: Minor bugs.
+
 ### Version 0.1.6 (2020-09-08)
 
 - Fixed: The CLI now works on Windows.
