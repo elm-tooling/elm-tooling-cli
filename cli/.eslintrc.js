@@ -95,8 +95,10 @@ module.exports = {
     "@typescript-eslint/triple-slash-reference": warn,
     "@typescript-eslint/unbound-method": error,
     "@typescript-eslint/unified-signatures": warn,
-    curly: warn,
+    "default-case-last": warn,
     "for-direction": error,
+    "no-caller": error,
+    "no-case-declarations": error,
     "no-compare-neg-zero": error,
     "no-console": warn,
     "no-constant-condition": error,
@@ -104,7 +106,9 @@ module.exports = {
     "no-dupe-else-if": error,
     "no-duplicate-case": error,
     "no-empty-character-class": warn,
+    "no-empty-pattern": warn,
     "no-empty": warn,
+    "no-eval": error,
     "no-invalid-regexp": error,
     "no-misleading-character-class": error,
     "no-promise-executor-return": error,
@@ -116,6 +120,9 @@ module.exports = {
     "no-useless-backreference": error,
     "simple-import-sort/sort": warn,
     "use-isnan": error,
+    curly: warn,
+    eqeqeq: warn,
+    // TODO: Continue at no-extend-native
   },
   overrides: [
     {
