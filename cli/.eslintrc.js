@@ -10,6 +10,7 @@ module.exports = {
     tsconfigRootDir: __dirname,
     project: ["./tsconfig.json"],
   },
+  reportUnusedDisableDirectives: true,
   env: {
     es2020: true,
     node: true,
@@ -86,7 +87,10 @@ module.exports = {
     "@typescript-eslint/restrict-plus-operands": error,
     "@typescript-eslint/restrict-template-expressions": error,
     "@typescript-eslint/return-await": error,
-    "@typescript-eslint/strict-boolean-expressions": error,
+    "@typescript-eslint/strict-boolean-expressions": [
+      error,
+      { allowString: false, allowNumber: false, allowNullableObject: false },
+    ],
     "@typescript-eslint/switch-exhaustiveness-check": error,
     "@typescript-eslint/triple-slash-reference": warn,
     "@typescript-eslint/unbound-method": error,
@@ -95,6 +99,7 @@ module.exports = {
     "for-direction": error,
     "no-compare-neg-zero": error,
     "no-console": warn,
+    "no-constant-condition": error,
     "simple-import-sort/sort": warn,
   },
   overrides: [

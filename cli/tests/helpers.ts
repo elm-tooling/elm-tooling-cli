@@ -14,6 +14,7 @@ export class FailReadStream extends stream.Readable {
 
 export class MemoryWriteStream extends stream.Writable {
   content = "";
+
   _write(
     chunk: string | Buffer,
     _encoding: BufferEncoding,
@@ -32,9 +33,7 @@ export function clean(string: string): string {
   const cleaned = string
     .split(__dirname)
     .join(path.join(root, "Users", "you", "project"))
-    // eslint-disable-next-line no-control-regex
     .replace(/\x1B\[0?m/g, "⧘")
-    // eslint-disable-next-line no-control-regex
     .replace(/\x1B\[\d+m/g, "⧙");
 
   // Convert Windows-style paths to Unix-style paths so we can use the same snapshots.

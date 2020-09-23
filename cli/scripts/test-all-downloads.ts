@@ -17,7 +17,7 @@ const CLEAR =
 function join<T>(listOfLists: Array<Array<T>>): Array<Array<T | undefined>> {
   const longestLength = Math.max(0, ...listOfLists.map((list) => list.length));
   return Array.from({ length: longestLength }, (_, i) =>
-    Array.from({ length: listOfLists.length }, (_, j) => listOfLists[j][i])
+    Array.from({ length: listOfLists.length }, (_2, j) => listOfLists[j][i])
   );
 }
 
@@ -61,6 +61,7 @@ function calculateHeight<T>(variants: Array<Array<T>>): number {
 
 class MemoryWriteStream extends stream.Writable {
   content = "";
+
   _write(
     chunk: string | Buffer,
     _encoding: BufferEncoding,
@@ -165,7 +166,7 @@ run().then(
     process.exit(0);
   },
   (error: Error) => {
-    process.stderr.write(`\n${error.stack || error.message}\n`);
+    process.stderr.write(`\n${error.stack ?? error.message}\n`);
     process.exit(1);
   }
 );

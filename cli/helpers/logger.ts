@@ -22,7 +22,6 @@ export function makeLogger({
 }): Logger {
   const NO_COLOR = "NO_COLOR" in env;
   const handleColor = (string: string): string =>
-    // eslint-disable-next-line no-control-regex
     NO_COLOR ? string.replace(/\x1B\[\dm/g, "") : string;
 
   return {

@@ -3,7 +3,7 @@ import * as path from "path";
 
 import elmToolingCli from "..";
 
-async function run() {
+async function run(): Promise<void> {
   const dir = path.join(
     path.dirname(__dirname),
     "tests",
@@ -82,7 +82,7 @@ run().then(
     process.exit(0);
   },
   (error: Error) => {
-    process.stderr.write(`\n${error.stack || error.message}\n`);
+    process.stderr.write(`\n${error.stack ?? error.message}\n`);
     process.exit(1);
   }
 );

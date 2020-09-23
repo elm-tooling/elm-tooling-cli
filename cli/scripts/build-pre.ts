@@ -41,13 +41,13 @@ if (fs.existsSync(BUILD)) {
 fs.mkdirSync(BUILD);
 
 for (const { src, dest = src, transformSrc, transformDest } of FILES_TO_COPY) {
-  if (transformSrc) {
+  if (transformSrc !== undefined) {
     fs.writeFileSync(
       path.join(DIR, src),
       transformSrc(fs.readFileSync(path.join(DIR, src), "utf8"))
     );
   }
-  if (transformDest) {
+  if (transformDest !== undefined) {
     fs.writeFileSync(
       path.join(BUILD, dest),
       transformDest(fs.readFileSync(path.join(DIR, src), "utf8"))
