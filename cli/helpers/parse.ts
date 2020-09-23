@@ -16,13 +16,13 @@ import {
 
 export const isWindows = os.platform() === "win32";
 
-export function elmToolingInstallPath(cwd: string, env: Env): string {
+export function getElmToolingInstallPath(cwd: string, env: Env): string {
   /* istanbul ignore next */
   const elmHome =
-    env.ELM_HOME ||
+    env.ELM_HOME ??
     (isWindows
       ? path.join(
-          env.APPDATA || path.join(os.homedir(), "AppData", "Roaming"),
+          env.APPDATA ?? path.join(os.homedir(), "AppData", "Roaming"),
           "elm"
         )
       : path.join(os.homedir(), ".elm"));
@@ -171,8 +171,8 @@ function prefixFieldResult<T>(
     case "Error":
       return {
         tag: "Error",
-        errors: fieldResult.errors.map(({ path, message }) => ({
-          path: [prefix, ...path],
+        errors: fieldResult.errors.map(({ path: fieldPath, message }) => ({
+          path: [prefix, ...fieldPath],
           message,
         })) as NonEmptyArray<FieldError>,
       };
@@ -383,7 +383,7 @@ function parseTools(
       name,
       version,
       absolutePath: getToolAbsolutePath(
-        elmToolingInstallPath(cwd, env),
+        getElmToolingInstallPath(cwd, env),
         name,
         version,
         asset.fileName
@@ -438,7 +438,7 @@ function getToolAbsolutePath(
   name: string,
   version: string,
   fileName: string
-) {
+): string {
   return path.join(elmToolingInstallPath, name, version, fileName);
 }
 

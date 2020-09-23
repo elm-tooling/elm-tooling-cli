@@ -142,7 +142,7 @@ function tryGetSourceDirectories(cwd: string): Array<string> {
   }
 }
 
-function isMainFile(file: string): Promise<boolean> {
+async function isMainFile(file: string): Promise<boolean> {
   return new Promise((resolve) => {
     let found = false;
     const rl = readline.createInterface({

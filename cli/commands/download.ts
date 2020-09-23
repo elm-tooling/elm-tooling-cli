@@ -65,7 +65,7 @@ export default async function download(
 
         case "Parsed":
           logger.log(bold(parseResult.elmToolingJsonPath));
-          return await downloadTools(logger, parseResult.tools.parsed);
+          return downloadTools(logger, parseResult.tools.parsed);
       }
     }
   }
@@ -99,7 +99,7 @@ async function downloadTools(
   const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
   const firstDrawTime = Date.now();
 
-  const redraw = ({ force = false } = {}) => {
+  const redraw = ({ force = false } = {}): void => {
     // Without this time thing, you’ll see the progress go up to 100% and then
     // back to 0% again when using curl. It reports the progress per request –
     // even redirects. Hopefully a redirect response usually finishes in 1 second.
@@ -159,7 +159,7 @@ async function downloadTools(
   };
 }
 
-function downloadAndExtract(
+async function downloadAndExtract(
   tool: Tool,
   onProgress: (percentage: number) => void
 ): Promise<void> {
@@ -167,8 +167,8 @@ function downloadAndExtract(
     const removeExtractedAndReject = (error: Error): void => {
       try {
         hash.destroy();
-        extract.destroy();
-        download.kill();
+        extractor.destroy();
+        downloader.kill();
         fs.unlinkSync(tool.absolutePath);
         reject(error);
       } catch (removeErrorAny) {
@@ -183,24 +183,24 @@ function downloadAndExtract(
 
     const hash = crypto.createHash("sha256");
 
-    const extract = extractFile({
+    const extractor = extractFile({
       assetType: tool.asset.type,
       file: tool.absolutePath,
       onError: removeExtractedAndReject,
       onSuccess: resolve,
     });
 
-    const download = downloadFile(tool.asset.url, {
+    const downloader = downloadFile(tool.asset.url, {
       onData: (chunk) => {
         hash.update(chunk);
-        extract.write(chunk);
+        extractor.write(chunk);
       },
       onProgress,
       onError: removeExtractedAndReject,
       onSuccess: () => {
         const digest = hash.digest("hex");
         if (digest === tool.asset.hash) {
-          extract.end();
+          extractor.end();
         } else {
           removeExtractedAndReject(
             new Error(hashMismatch(digest, tool.asset.hash))
@@ -211,7 +211,7 @@ function downloadAndExtract(
   });
 }
 
-function downloadAndExtractError(tool: Tool, error: Error) {
+function downloadAndExtractError(tool: Tool, error: Error): string {
   return `
 ${bold(`${tool.name} ${tool.version}`)}
 ${indent(
@@ -224,7 +224,7 @@ ${error.message}
   `.trim();
 }
 
-function hashMismatch(actual: string, expected: string) {
+function hashMismatch(actual: string, expected: string): string {
   return `
 The downloaded file does not have the expected hash!
 Expected: ${expected}
@@ -252,7 +252,7 @@ function downloadFile(
   const onStderr = (chunk: Buffer): void => {
     stderr += chunk.toString();
     // Extract progress percentage from curl/wget.
-    const matches = stderr.match(/\d+(?:[.,]\d+)?%/g) || [];
+    const matches = stderr.match(/\d+(?:[.,]\d+)?%/g) ?? [];
     if (matches.length > 0) {
       onProgress(Math.min(1, parseFloat(matches[matches.length - 1]) / 100));
     }
@@ -283,18 +283,18 @@ function downloadFile(
   curl.stderr.on("data", onStderr);
   curl.on("close", onClose("curl"));
 
-  curl.on("error", (error: Error & { code?: string }) => {
+  curl.on("error", (curlError: Error & { code?: string }) => {
     errored.push("curl");
-    if (error.code === "ENOENT") {
+    if (curlError.code === "ENOENT") {
       const wget = childProcess.spawn("wget", ["-O", "-", url]);
       toKill = wget;
       wget.stdout.on("data", onData);
       wget.stderr.on("data", onStderr);
       wget.on("close", onClose("wget"));
 
-      wget.on("error", (error: Error & { code?: string }) => {
+      wget.on("error", (wgetError: Error & { code?: string }) => {
         errored.push("wget");
-        if (error.code === "ENOENT") {
+        if (wgetError.code === "ENOENT") {
           toKill = downloadFileNative(url, {
             onData,
             onProgress,
@@ -302,11 +302,11 @@ function downloadFile(
             onSuccess,
           });
         } else {
-          onError(error);
+          onError(wgetError);
         }
       });
     } else {
-      onError(error);
+      onError(curlError);
     }
   });
 
@@ -355,7 +355,7 @@ function downloadFileNative(
 
       case 200: {
         const contentLength = parseInt(
-          response.headers["content-length"] || "",
+          response.headers["content-length"] ?? "",
           10
         );
         let length = 0;
