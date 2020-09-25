@@ -27,11 +27,11 @@ export function makeLogger({
   return {
     log(message) {
       previousProgress = undefined;
-      stdout.write(handleColor(message) + "\n");
+      stdout.write(`${handleColor(message)}\n`);
     },
     error(message) {
       previousProgress = undefined;
-      stderr.write(handleColor(message) + "\n");
+      stderr.write(`${handleColor(message)}\n`);
     },
     /* istanbul ignore next */
     progress(passedMessage) {
@@ -40,7 +40,7 @@ export function makeLogger({
         readline.moveCursor(stdout, 0, -previousProgress);
       }
       previousProgress = message.split("\n").length;
-      stdout.write(message + "\n");
+      stdout.write(`${message}\n`);
     },
   };
 }

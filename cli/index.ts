@@ -35,7 +35,7 @@ async function run(
       return 0;
 
     case "init":
-      return await init(cwd, logger);
+      return init(cwd, logger);
 
     case "validate":
       return validate(cwd, env, logger);
@@ -51,7 +51,7 @@ async function run(
     }
 
     case "postinstall":
-      return await postinstall(cwd, env, logger);
+      return postinstall(cwd, env, logger);
 
     default:
       logger.error(`Unknown command: ${argv[0]}`);
@@ -67,7 +67,7 @@ type Options = {
   stderr: Writable;
 };
 
-export default function elmToolingCli(
+export default async function elmToolingCli(
   args: Array<string>,
   /* istanbul ignore next */
   { cwd, env, stdout, stderr }: Options = {
@@ -89,7 +89,7 @@ if (require.main === module) {
     },
     (error: Error) => {
       process.stderr.write(
-        `Unexpected error:\n${error.stack || error.message}\n`
+        `Unexpected error:\n${error.stack ?? error.message}\n`
       );
       process.exit(1);
     }

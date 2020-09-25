@@ -3,7 +3,7 @@
   "type": "commonjs",
   "scripts": {
     "doctoc": "doctoc README.md",
-    "pretest": "prettier --check . && eslint .",
+    "pretest": "prettier --check . && cross-env CI= eslint . --color --report-unused-disable-directives",
     "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts",
     "posttest": "npm run build",
     "prebuild": "ts-node scripts/build-pre.ts",
@@ -15,6 +15,7 @@
     "@types/node": "14.11.1",
     "@typescript-eslint/eslint-plugin": "4.2.0",
     "@typescript-eslint/parser": "4.2.0",
+    "cross-env": "^7.0.2",
     "doctoc": "1.4.0",
     "eslint": "7.9.0",
     "eslint-config-prettier": "6.11.0",

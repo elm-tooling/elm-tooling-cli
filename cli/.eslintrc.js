@@ -120,7 +120,7 @@ module.exports = {
     "no-prototype-builtins": error,
     "no-regex-spaces": error,
     "no-restricted-syntax": [
-      "error",
+      error,
       {
         selector: "SequenceExpression",
         message:
@@ -160,6 +160,10 @@ module.exports = {
     yoda: warn,
   },
   overrides: [
+    {
+      // Lint .ts files without `--ext ts`.
+      files: "*.ts",
+    },
     {
       files: "scripts/**/*.ts",
       parserOptions: {

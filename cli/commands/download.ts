@@ -111,9 +111,9 @@ async function downloadTools(
             const progressString =
               typeof progress === "string"
                 ? progress.padEnd(4)
-                : Math.round(progress * 100)
+                : `${Math.round(progress * 100)
                     .toString()
-                    .padStart(3) + "%";
+                    .padStart(3)}%`;
             return `${bold(progressString)} ${tool.name} ${tool.version}`;
           })
           .join("\n")
@@ -264,13 +264,14 @@ function downloadFile(
     } else if (code === 0) {
       onSuccess();
     } else {
+      const trimmed = stderr
+        .trim()
+        // Remove curl’s progress bar remnants.
+        .replace(/^[\s#O=-]+/g, "");
       onError(
         new Error(
           `${commandName} exited with non-zero exit code ${code}:\n${
-            stderr
-              .trim()
-              // Remove curl’s progress bar remnants.
-              .replace(/^[\s#O=-]+/g, "") || EMPTY_STDERR
+            trimmed === "" ? EMPTY_STDERR : trimmed
           }`
         )
       );
@@ -535,10 +536,11 @@ function extractTar({
     if (code === 0) {
       onSuccess();
     } else {
+      const trimmed = stderr.trim();
       onError(
         new Error(
           `tar exited with non-zero exit code ${code}:\n${
-            stderr.trim() || EMPTY_STDERR
+            trimmed === "" ? EMPTY_STDERR : trimmed
           }`
         )
       );
