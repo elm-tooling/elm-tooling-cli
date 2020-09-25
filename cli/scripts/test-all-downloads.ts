@@ -17,7 +17,7 @@ const CLEAR =
 function join<T>(listOfLists: Array<Array<T>>): Array<Array<T | undefined>> {
   const longestLength = Math.max(0, ...listOfLists.map((list) => list.length));
   return Array.from({ length: longestLength }, (_, i) =>
-    Array.from({ length: listOfLists.length }, (_, j) => listOfLists[j][i])
+    Array.from({ length: listOfLists.length }, (_2, j) => listOfLists[j][i])
   );
 }
 
@@ -61,6 +61,7 @@ function calculateHeight<T>(variants: Array<Array<T>>): number {
 
 class MemoryWriteStream extends stream.Writable {
   content = "";
+
   _write(
     chunk: string | Buffer,
     _encoding: BufferEncoding,
@@ -71,7 +72,7 @@ class MemoryWriteStream extends stream.Writable {
   }
 }
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   const variants: Array<Array<readonly [string, string]>> = join(
     Object.keys(KNOWN_TOOLS).map((name) =>
       Object.keys(KNOWN_TOOLS[name]).map((version) => [name, version] as const)
@@ -111,6 +112,7 @@ async function run(): Promise<void> {
           write(chunk: string | Buffer, _encoding, callback) {
             readline.cursorTo(process.stdout, 0, hasWritten ? y + 1 : y);
             process.stdout.write(chunk);
+            readline.cursorTo(process.stdout, 0, calculateHeight(variants));
             hasWritten = true;
             callback();
           },
@@ -147,7 +149,7 @@ async function run(): Promise<void> {
   }
 
   const expected = fs.readFileSync(EXPECTED_FILE, "utf8");
-  const actual = tree(WORK_DIR).join("\n") + "\n";
+  const actual = `${tree(WORK_DIR).join("\n")}\n`;
 
   process.stdout.write(actual);
 
@@ -159,13 +161,15 @@ async function run(): Promise<void> {
   }
 }
 
-run().then(
-  () => {
-    process.stdout.write("\nSuccess!\n");
-    process.exit(0);
-  },
-  (error: Error) => {
-    process.stderr.write(`\n${error.stack || error.message}\n`);
-    process.exit(1);
-  }
-);
+if (require.main === module) {
+  run().then(
+    () => {
+      process.stdout.write("\nSuccess!\n");
+      process.exit(0);
+    },
+    (error: Error) => {
+      process.stderr.write(`\n${error.stack ?? error.message}\n`);
+      process.exit(1);
+    }
+  );
+}

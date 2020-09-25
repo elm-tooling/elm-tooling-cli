@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-export type NonEmptyArray<T> = [T, ...T[]];
+export type NonEmptyArray<T> = [T, ...Array<T>];
 
 export type ElmTooling = {
   entrypoints?: NonEmptyArray<string>;

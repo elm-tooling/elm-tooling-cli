@@ -51,10 +51,10 @@ export default async function init(
       entrypoints.length === 0
         ? undefined
         : (entrypoints as NonEmptyArray<string>),
-    tools: tools,
+    tools,
   };
 
-  fs.writeFileSync(absolutePath, JSON.stringify(json, null, 4) + "\n");
+  fs.writeFileSync(absolutePath, `${JSON.stringify(json, null, 4)}\n`);
   logger.log(bold(absolutePath));
   logger.log("Created! Open it in a text editor and have a look!");
   return 0;
@@ -142,7 +142,7 @@ function tryGetSourceDirectories(cwd: string): Array<string> {
   }
 }
 
-function isMainFile(file: string): Promise<boolean> {
+async function isMainFile(file: string): Promise<boolean> {
   return new Promise((resolve) => {
     let found = false;
     const rl = readline.createInterface({
