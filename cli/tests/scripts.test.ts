@@ -5,6 +5,8 @@ import { run as runIntegration } from "../scripts/test-integration";
 
 jest.setTimeout(20000);
 
+// Wait a little bit after finishing the script to increase the chance of Jest
+// printing its stuff below the script output.
 function wrap(f: () => Promise<unknown>): () => Promise<void> {
   return async () => {
     await f();
