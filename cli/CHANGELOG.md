@@ -1,3 +1,7 @@
+### Version 0.3.0 (2020-09-24)
+
+- Added: elm-format 0.8.4.
+
 ### Version 0.2.0 (2020-09-22)
 
 - Improved: Show known fields/tools/verions in validation errors.
