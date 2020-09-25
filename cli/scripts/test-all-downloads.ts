@@ -148,7 +148,7 @@ async function run(): Promise<void> {
   }
 
   const expected = fs.readFileSync(EXPECTED_FILE, "utf8");
-  const actual = tree(WORK_DIR).join("\n") + "\n";
+  const actual = `${tree(WORK_DIR).join("\n")}\n`;
 
   process.stdout.write(actual);
 
