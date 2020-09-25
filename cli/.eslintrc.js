@@ -1,6 +1,5 @@
 const error = "error";
 const warn = "CI" in process.env ? "error" : "warn";
-console.log("### CI?", "CI" in process.env, warn);
 
 module.exports = {
   root: true,
