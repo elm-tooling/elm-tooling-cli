@@ -47,6 +47,8 @@ jobs:
       - name: Internal npm test
         run: npm test
         working-directory: cli
+        env:
+          CI:
       # IGNORE END
 
       # Re-use node_modules between runs until package-lock.json changes.
