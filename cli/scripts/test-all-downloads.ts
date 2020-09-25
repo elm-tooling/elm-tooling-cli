@@ -72,7 +72,7 @@ class MemoryWriteStream extends stream.Writable {
   }
 }
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   const variants: Array<Array<readonly [string, string]>> = join(
     Object.keys(KNOWN_TOOLS).map((name) =>
       Object.keys(KNOWN_TOOLS[name]).map((version) => [name, version] as const)
@@ -112,6 +112,7 @@ async function run(): Promise<void> {
           write(chunk: string | Buffer, _encoding, callback) {
             readline.cursorTo(process.stdout, 0, hasWritten ? y + 1 : y);
             process.stdout.write(chunk);
+            readline.cursorTo(process.stdout, 0, calculateHeight(variants));
             hasWritten = true;
             callback();
           },
@@ -160,13 +161,15 @@ async function run(): Promise<void> {
   }
 }
 
-run().then(
-  () => {
-    process.stdout.write("\nSuccess!\n");
-    process.exit(0);
-  },
-  (error: Error) => {
-    process.stderr.write(`\n${error.stack ?? error.message}\n`);
-    process.exit(1);
-  }
-);
+if (require.main === module) {
+  run().then(
+    () => {
+      process.stdout.write("\nSuccess!\n");
+      process.exit(0);
+    },
+    (error: Error) => {
+      process.stderr.write(`\n${error.stack ?? error.message}\n`);
+      process.exit(1);
+    }
+  );
+}
