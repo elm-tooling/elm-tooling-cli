@@ -203,6 +203,7 @@ export default function ensure(options: {
 - cwd: The current working directory. Needed in case `ELM_HOME` is set to a relative path. It’s unclear where the user wants to install tools in that case. `process.cwd()` is probably a good choice.
 - env: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. `process.env` is a good choice.
 - onProgress: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
+- Returns: A promise that resolves to the absolute path to the tool.
 
 If you need several tools you can use `Promise.all` to download them all in parallel.
 
@@ -224,7 +225,7 @@ ensure({
     console.log(percentage);
   },
 }).then((toolAbsolutePath) => {
-  // `toolAbsolutePath` is the absolute path to the elm 0.19.1 binary.
+  // `toolAbsolutePath` is the absolute path to the latest known elm 0.19.x binary.
   // Standard Node.js `child_process.spawn` and `child_process.spawnSync` work
   // great for running the binary, even on Windows.
   console.log(
