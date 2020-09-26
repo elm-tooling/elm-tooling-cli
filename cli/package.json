@@ -6,9 +6,7 @@
     "pretest": "prettier --check . && cross-env CI= eslint . --color --report-unused-disable-directives",
     "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts && ts-node scripts/test-ensure.ts",
     "posttest": "npm run build",
-    "prebuild": "ts-node scripts/build-pre.ts",
-    "build": "tsc",
-    "postbuild": "ts-node scripts/build-post.ts"
+    "build": "ts-node scripts/build.ts"
   },
   "devDependencies": {
     "@types/jest": "26.0.14",
