@@ -195,22 +195,25 @@ export function validateFileExists(fullPath: string): FileExists {
     }
   } catch (errorAny) {
     const error = errorAny as Error & { code?: string };
-    if (error.code === "ENOENT") {
-      return {
-        tag: "DoesNotExist",
-        message: `File does not exist: ${fullPath}`,
-      };
-    } else if (error.code === "ENOTDIR") {
-      return {
-        tag: "Error",
-        message: `Parts of this path exist, but is not a directory (which it needs to be): ${fullPath}`,
-      };
-    } else {
+    switch (error.code) {
+      case "ENOENT":
+        return {
+          tag: "DoesNotExist",
+          message: `File does not exist: ${fullPath}`,
+        };
+      case "ENOTDIR":
+        return {
+          tag: "Error",
+          message: `A part of this path exist, but is not a directory (which it needs to be): ${path.dirname(
+            fullPath
+          )}`,
+        };
       // istanbul ignore next
-      return {
-        tag: "Error",
-        message: `File error for ${fullPath}: ${error.message}`,
-      };
+      default:
+        return {
+          tag: "Error",
+          message: `File error for ${fullPath}: ${error.message}`,
+        };
     }
   }
   return { tag: "Exists" };
@@ -467,6 +470,7 @@ function joinPath(errorPath: Array<string | number>): string {
   return `${errorPath[0]}${rest.join("")}`;
 }
 
+// istanbul ignore next
 export function getToolThrowing({
   name,
   version,

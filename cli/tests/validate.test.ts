@@ -114,7 +114,7 @@ describe("validate", () => {
       expect(await validateFailHelper("kitchen-sink")).toMatchInlineSnapshot(`
         ⧘⧙/Users/you/project/fixtures/validate/kitchen-sink/elm-tooling.json⧘
 
-        ⧘⧙12⧘ errors
+        ⧘⧙13⧘ errors
 
         ⧘⧙elm.json⧘
             There should be an elm.json next to elm-tooling.json
@@ -144,6 +144,9 @@ describe("validate", () => {
             Exists but is not a file: /Users/you/project/fixtures/validate/kitchen-sink/
 
         ⧘⧙entrypoints[6]⧘
+            A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/validate/kitchen-sink/folder-that-actually-is-a-file
+
+        ⧘⧙entrypoints[7]⧘
             Expected a string but got: null
 
         ⧘⧙tools["elm-invalid"]⧘
