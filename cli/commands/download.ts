@@ -16,6 +16,7 @@ import {
   indent,
   NonEmptyArray,
   printNumErrors,
+  removeColor,
 } from "../helpers/mixed";
 import {
   findReadAndParseElmToolingJson,
@@ -609,7 +610,7 @@ export async function ensure({
     });
   } catch (errorAny) {
     const error = errorAny as Error;
-    throw new Error(downloadAndExtractSimpleError(tool, error));
+    throw new Error(removeColor(downloadAndExtractSimpleError(tool, error)));
   }
 
   return tool.absolutePath;

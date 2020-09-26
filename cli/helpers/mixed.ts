@@ -70,6 +70,10 @@ export function dim(string: string): string {
   return `${RESET_COLOR}\x1B[2m${string}${RESET_COLOR}`;
 }
 
+export function removeColor(string: string): string {
+  return string.replace(/\x1B\[\dm/g, "");
+}
+
 export function indent(string: string): string {
   return string.replace(/^/gm, "    ");
 }
