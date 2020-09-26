@@ -19,13 +19,20 @@ import {
 } from "../helpers/mixed";
 import {
   findReadAndParseElmToolingJson,
+  getToolThrowing,
   isWindows,
   printFieldErrors,
   Tool,
   Tools,
+  validateFileExists,
 } from "../helpers/parse";
 
 const EMPTY_STDERR = dim("(empty stderr)");
+
+// Without this delay, you’ll see the progress go up to 100% and then back to 0%
+// again when using curl. It reports the progress per request – even redirects.
+// Hopefully a redirect response usually finishes in 1 second.
+const PROGRESS_DELAY = 1000;
 
 type DownloadResult =
   | { tag: "Exit"; statusCode: number }
@@ -99,11 +106,8 @@ async function downloadTools(
   const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
   const firstDrawTime = Date.now();
 
-  const redraw = ({ force = false } = {}): void => {
-    // Without this time thing, you’ll see the progress go up to 100% and then
-    // back to 0% again when using curl. It reports the progress per request –
-    // even redirects. Hopefully a redirect response usually finishes in 1 second.
-    if (Date.now() - firstDrawTime > 1000 || force) {
+  const redraw = ({ force }: { force: boolean }): void => {
+    if (Date.now() - firstDrawTime > PROGRESS_DELAY || force) {
       logger.progress(
         tools.missing
           .map((tool, index) => {
@@ -127,10 +131,10 @@ async function downloadTools(
     tools.missing.map((tool, index) =>
       downloadAndExtract(tool, (percentage) => {
         toolsProgress[index] = percentage;
-        redraw();
+        redraw({ force: false });
       }).catch((error: Error) => {
         toolsProgress[index] = "ERR!";
-        redraw();
+        redraw({ force: true });
         return new Error(downloadAndExtractError(tool, error));
       })
     )
@@ -221,6 +225,15 @@ ${dim(`> ${tool.absolutePath}`)}
 ${error.message}
   `.trim()
 )}
+  `.trim();
+}
+
+function downloadAndExtractSimpleError(tool: Tool, error: Error): string {
+  return `
+Failed to download:
+< ${tool.asset.url}
+> ${tool.absolutePath}
+${error.message}
   `.trim();
 }
 
@@ -552,4 +565,52 @@ function extractTar({
     write: (chunk) => tar.stdin.write(chunk),
     end: () => tar.stdin.end(),
   };
+}
+
+export async function ensure({
+  name,
+  version,
+  cwd,
+  env,
+  onProgress,
+}: {
+  name: string;
+  version: string;
+  cwd: string;
+  env: Env;
+  onProgress: (percentage: number) => void;
+}): Promise<string> {
+  const tool = getToolThrowing({ name, version, cwd, env });
+
+  const exists = validateFileExists(tool.absolutePath);
+  switch (exists.tag) {
+    case "Error":
+      throw new Error(exists.message);
+
+    case "Exists":
+      return tool.absolutePath;
+
+    case "DoesNotExist":
+      // Keep going.
+      break;
+  }
+
+  fs.mkdirSync(path.dirname(tool.absolutePath), { recursive: true });
+
+  const startTime = Date.now();
+
+  onProgress(0);
+
+  try {
+    await downloadAndExtract(tool, (percentage) => {
+      if (Date.now() - startTime > PROGRESS_DELAY) {
+        onProgress(percentage);
+      }
+    });
+  } catch (errorAny) {
+    const error = errorAny as Error;
+    throw new Error(downloadAndExtractSimpleError(tool, error));
+  }
+
+  return tool.absolutePath;
 }

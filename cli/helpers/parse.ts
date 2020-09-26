@@ -195,13 +195,18 @@ export function validateFileExists(fullPath: string): FileExists {
     }
   } catch (errorAny) {
     const error = errorAny as Error & { code?: string };
-    /* istanbul ignore else */
     if (error.code === "ENOENT") {
       return {
         tag: "DoesNotExist",
         message: `File does not exist: ${fullPath}`,
       };
+    } else if (error.code === "ENOTDIR") {
+      return {
+        tag: "Error",
+        message: `Parts of this path exist, but is not a directory (which it needs to be): ${fullPath}`,
+      };
     } else {
+      // istanbul ignore next
       return {
         tag: "Error",
         message: `File error for ${fullPath}: ${error.message}`,
@@ -460,4 +465,60 @@ function joinPath(errorPath: Array<string | number>): string {
     .slice(1)
     .map((segment) => `[${JSON.stringify(segment)}]`);
   return `${errorPath[0]}${rest.join("")}`;
+}
+
+export function getToolThrowing({
+  name,
+  version,
+  cwd,
+  env,
+}: {
+  name: string;
+  version: string;
+  cwd: string;
+  env: Env;
+}): Tool {
+  const osName = getOSName();
+
+  if (osName instanceof Error) {
+    throw osName;
+  }
+
+  const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
+    ? KNOWN_TOOLS[name]
+    : undefined;
+
+  if (versions === undefined) {
+    throw new Error(
+      `Unknown tool: ${name}\nKnown tools: ${Object.keys(KNOWN_TOOLS).join(
+        ", "
+      )}`
+    );
+  }
+
+  const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
+    ? versions[version]
+    : undefined;
+
+  if (osAssets === undefined) {
+    throw new Error(
+      `Unknown ${name} version: ${version}\nKnown versions: ${Object.keys(
+        versions
+      ).join(", ")}`
+    );
+  }
+
+  const asset = osAssets[osName];
+
+  return {
+    name,
+    version,
+    absolutePath: getToolAbsolutePath(
+      getElmToolingInstallPath(cwd, env),
+      name,
+      version,
+      asset.fileName
+    ),
+    asset,
+  };
 }
