@@ -30,11 +30,6 @@ import {
 
 const EMPTY_STDERR = dim("(empty stderr)");
 
-// Without this delay, you’ll see the progress go up to 100% and then back to 0%
-// again when using curl. It reports the progress per request – even redirects.
-// Hopefully a redirect response usually finishes in 1 second.
-const PROGRESS_DELAY = 1000;
-
 type DownloadResult =
   | { tag: "Exit"; statusCode: number }
   | { tag: "Success"; tools: NonEmptyArray<Tool> };
@@ -105,39 +100,42 @@ async function downloadTools(
   }
 
   const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
-  const firstDrawTime = Date.now();
 
-  const redraw = ({ force }: { force: boolean }): void => {
-    if (Date.now() - firstDrawTime > PROGRESS_DELAY || force) {
-      logger.progress(
-        tools.missing
-          .map((tool, index) => {
-            const progress = toolsProgress[index];
-            const progressString =
-              typeof progress === "string"
-                ? progress.padEnd(4)
-                : `${Math.round(progress * 100)
-                    .toString()
-                    .padStart(3)}%`;
-            return `${bold(progressString)} ${tool.name} ${tool.version}`;
-          })
-          .join("\n")
-      );
-    }
+  const redraw = (): void => {
+    logger.progress(
+      tools.missing
+        .map((tool, index) => {
+          const progress = toolsProgress[index];
+          const progressString =
+            typeof progress === "string"
+              ? progress.padEnd(4)
+              : `${Math.round(progress * 100)
+                  .toString()
+                  .padStart(3)}%`;
+          return `${bold(progressString)} ${tool.name} ${tool.version}`;
+        })
+        .join("\n")
+    );
   };
 
-  redraw({ force: true });
+  redraw();
 
   const results = await Promise.all(
     tools.missing.map((tool, index) =>
       downloadAndExtract(tool, (percentage) => {
         toolsProgress[index] = percentage;
-        redraw({ force: false });
-      }).catch((error: Error) => {
-        toolsProgress[index] = "ERR!";
-        redraw({ force: true });
-        return new Error(downloadAndExtractError(tool, error));
-      })
+        redraw();
+      }).then(
+        () => {
+          toolsProgress[index] = 1;
+          redraw();
+        },
+        (error: Error) => {
+          toolsProgress[index] = "ERR!";
+          redraw();
+          return new Error(downloadAndExtractError(tool, error));
+        }
+      )
     )
   );
 
@@ -145,7 +143,7 @@ async function downloadTools(
     result instanceof Error ? result : []
   );
 
-  redraw({ force: true });
+  redraw();
 
   if (downloadErrors.length > 0) {
     logger.error("");
@@ -268,7 +266,10 @@ function downloadFile(
     // Extract progress percentage from curl/wget.
     const matches = stderr.match(/\d+(?:[.,]\d+)?%/g) ?? [];
     if (matches.length > 0) {
-      onProgress(Math.min(1, parseFloat(matches[matches.length - 1]) / 100));
+      callOnProgressIfReasonable(
+        parseFloat(matches[matches.length - 1].replace(",", ".")) / 100,
+        onProgress
+      );
     }
   };
 
@@ -379,7 +380,7 @@ function downloadFileNative(
           length += chunk.length;
           onData(chunk);
           if (Number.isFinite(contentLength) && contentLength > 0) {
-            onProgress(Math.min(1, length / contentLength));
+            callOnProgressIfReasonable(length / contentLength, onProgress);
           }
         });
 
@@ -568,6 +569,20 @@ function extractTar({
   };
 }
 
+// Without this, you’ll see the progress go up to 100% and then back to 0% again
+// when using curl. It reports the progress per request – even redirects. It
+// seems to always go from 0% to 100% for redirects (which makes sense – there’s
+// no body, only headers). So only report progress _between_ 0% and 100%. It’s
+// up to the caller to report 0% before starting and 100% when done.
+function callOnProgressIfReasonable(
+  percentage: number,
+  onProgress: (percentage: number) => void
+): void {
+  if (percentage > 0 && percentage < 1) {
+    onProgress(percentage);
+  }
+}
+
 export async function ensure({
   name,
   version,
@@ -598,20 +613,16 @@ export async function ensure({
 
   fs.mkdirSync(path.dirname(tool.absolutePath), { recursive: true });
 
-  const startTime = Date.now();
-
   onProgress(0);
 
   try {
-    await downloadAndExtract(tool, (percentage) => {
-      if (Date.now() - startTime > PROGRESS_DELAY) {
-        onProgress(percentage);
-      }
-    });
+    await downloadAndExtract(tool, onProgress);
   } catch (errorAny) {
     const error = errorAny as Error;
     throw new Error(removeColor(downloadAndExtractSimpleError(tool, error)));
   }
+
+  onProgress(1);
 
   return tool.absolutePath;
 }
