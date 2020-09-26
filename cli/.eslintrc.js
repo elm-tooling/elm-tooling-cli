@@ -1,5 +1,7 @@
 const error = "error";
-const warn = "CI" in process.env ? "error" : "warn";
+const warn = process.argv.includes("--report-unused-disable-directives")
+  ? "error"
+  : "warn";
 
 module.exports = {
   root: true,
