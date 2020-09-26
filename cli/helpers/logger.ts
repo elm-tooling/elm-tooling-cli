@@ -33,7 +33,7 @@ export function makeLogger({
       previousProgress = undefined;
       stderr.write(`${handleColor(message)}\n`);
     },
-    /* istanbul ignore next */
+    // istanbul ignore next
     progress(passedMessage) {
       const message = handleColor(passedMessage);
       if (previousProgress !== undefined) {

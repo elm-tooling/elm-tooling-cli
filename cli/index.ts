@@ -69,7 +69,7 @@ type Options = {
 
 export default async function elmToolingCli(
   args: Array<string>,
-  /* istanbul ignore next */
+  // istanbul ignore next
   { cwd, env, stdout, stderr }: Options = {
     cwd: process.cwd(),
     env: process.env,
@@ -81,7 +81,7 @@ export default async function elmToolingCli(
   return run(args, cwd, env, makeLogger({ env, stdout, stderr }));
 }
 
-/* istanbul ignore if */
+// istanbul ignore if
 if (require.main === module) {
   elmToolingCli(process.argv.slice(2)).then(
     (exitCode) => {

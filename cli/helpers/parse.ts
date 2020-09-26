@@ -17,7 +17,7 @@ import {
 export const isWindows = os.platform() === "win32";
 
 export function getElmToolingInstallPath(cwd: string, env: Env): string {
-  /* istanbul ignore next */
+  // istanbul ignore next
   const elmHome =
     env.ELM_HOME ??
     (isWindows
@@ -126,7 +126,7 @@ export function findReadAndParseElmToolingJson(
         result.tools = prefixFieldResult(
           "tools",
           osName instanceof Error
-            ? /* istanbul ignore next */
+            ? // istanbul ignore next
               {
                 tag: "Error" as const,
                 errors: [
@@ -148,7 +148,7 @@ export function findReadAndParseElmToolingJson(
 }
 
 export function getOSName(): OSName | Error {
-  /* istanbul ignore next */
+  // istanbul ignore next
   switch (os.platform()) {
     case "linux":
       return "linux";
@@ -460,7 +460,7 @@ export function printFieldErrors(errors: Array<FieldError>): string {
 }
 
 function joinPath(errorPath: Array<string | number>): string {
-  /* istanbul ignore if */
+  // istanbul ignore if
   if (errorPath.length === 0) {
     return "General";
   }
