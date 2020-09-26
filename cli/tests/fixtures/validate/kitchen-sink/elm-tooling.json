@@ -7,7 +7,6 @@
     "./missing/Main.elm",
     "./missing/.//Main.elm",
     "./",
-    "./folder-that-actually-is-a-file/Main.elm",
     null
   ],
   "tools": {

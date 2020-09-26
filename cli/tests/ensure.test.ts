@@ -1,7 +1,7 @@
 import * as path from "path";
 
 import ensure from "../ensure";
-import { clean, stringSnapshotSerializer } from "./helpers";
+import { clean, IS_WINDOWS, stringSnapshotSerializer } from "./helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "ensure");
 
@@ -56,16 +56,25 @@ describe("ensure", () => {
       Known versions: 0.19.0, 0.19.1
     `));
 
-  test("error finding binary", () =>
-    expect(
-      ensureHelper({
-        fixture: "folder-that-actually-is-a-file",
-        name: "elm",
-        version: /^/,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/ensure/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1`
-    ));
+  test("error finding binary", () => {
+    const promise = ensureHelper({
+      fixture: "folder-that-actually-is-a-file",
+      name: "elm",
+      version: /^/,
+    });
+
+    if (IS_WINDOWS) {
+      // eslint-disable-next-line jest/no-conditional-expect
+      return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
+        `File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/folder-that-actually-is-a-file/Main.elm`
+      );
+    } else {
+      // eslint-disable-next-line jest/no-conditional-expect
+      return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
+        `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/ensure/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1`
+      );
+    }
+  });
 
   test("already downloaded", () =>
     expect(
