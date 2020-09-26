@@ -16,6 +16,8 @@ The CLI for [elm-tooling.json]. Create and validate `elm-tooling.json`. Install 
     - [Notes](#notes)
 - [CI](#ci)
 - [API](#api)
+  - [elmToolingCli](#elmtoolingcli)
+  - [ensure](#ensure)
 - [Adding elm-tooling to an existing project](#adding-elm-tooling-to-an-existing-project)
 - [Creating a new project with elm-tooling](#creating-a-new-project-with-elm-tooling)
 - [License](#license)
@@ -138,6 +140,8 @@ Basically, you need to:
 
 ## API
 
+### elmToolingCli
+
 Instead of using [child\_process.spawn], you can import the CLI and run it directly. That’s an easy way to make a cross-platform script.
 
 Example:
@@ -174,6 +178,45 @@ export default function elmToolingCli(
 ```
 
 The default options use values from the `process` global.
+
+### ensure
+
+TODO
+
+```ts
+export default function ensure(options: {
+  name: string;
+  version: string;
+  cwd: string;
+  env: Record<string, string | undefined>;
+  onProgress: (percentage: number) => void;
+}): Promise<string>;
+```
+
+Example:
+
+```js
+import ensure from "elm-tooling/ensure";
+import * as child_process from "child_process";
+
+ensure({
+  name: "elm",
+  version: "0.19.1",
+  cwd: process.cwd(),
+  env: prcoess.env,
+  onProgress: (percentage) => {
+    // `percentage` is a number from 0 to 1.
+    // This is only called if the tool does not already exist on disk and needs
+    // to be downloaded.
+    console.log(percentage);
+  },
+}).then((toolAbsolutePath) => {
+  // `toolAbsolutePath` is the absolute path to the elm 0.19.1 binary.
+  console.log(
+    child_process.spawnSync(toolAbsolutePath, ["--help"], { encoding: "utf8" })
+  );
+}, console.error);
+```
 
 ## Adding elm-tooling to an existing project
 
