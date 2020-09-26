@@ -29,9 +29,9 @@ export async function run(): Promise<void> {
     throw new Error(pathError(absolutePath1, absolutePath2));
   }
 
-  if (progress.length < 3) {
+  if (progress.length < 2) {
     throw new Error(
-      `Expected at least 3 progress reports but got ${
+      `Expected at least 2 progress reports but got ${
         progress.length
       }:\n${JSON.stringify(progress, null, 2)}`
     );
