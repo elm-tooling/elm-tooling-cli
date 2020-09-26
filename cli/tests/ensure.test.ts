@@ -66,7 +66,7 @@ describe("ensure", () => {
     if (IS_WINDOWS) {
       // eslint-disable-next-line jest/no-conditional-expect
       return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
-        `File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/folder-that-actually-is-a-file/Main.elm`
+        `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/ensure/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1'`
       );
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
