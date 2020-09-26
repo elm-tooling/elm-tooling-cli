@@ -12,7 +12,7 @@ async function ensureHelper({
 }: {
   fixture: string;
   name: string;
-  version: string;
+  version: RegExp;
 }): Promise<string> {
   const dir = path.join(FIXTURES_DIR, fixture);
 
@@ -37,7 +37,7 @@ describe("ensure", () => {
       ensureHelper({
         fixture: "should-not-matter",
         name: "elmx",
-        version: "0.19.1",
+        version: /x/,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
       Unknown tool: elmx
@@ -49,10 +49,10 @@ describe("ensure", () => {
       ensureHelper({
         fixture: "should-not-matter",
         name: "elm",
-        version: "v0.19.1",
+        version: /^v0\.19\./,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      Unknown elm version: v0.19.1
+      No elm versions matching: /^v0\\.19\\./
       Known versions: 0.19.0, 0.19.1
     `));
 
@@ -61,7 +61,7 @@ describe("ensure", () => {
       ensureHelper({
         fixture: "folder-that-actually-is-a-file",
         name: "elm",
-        version: "0.19.1",
+        version: /^/,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/ensure/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1`
@@ -72,7 +72,7 @@ describe("ensure", () => {
       ensureHelper({
         fixture: "already-downloaded",
         name: "elm",
-        version: "0.19.1",
+        version: /^0\.19\.1$/,
       })
     ).resolves.toMatchInlineSnapshot(
       `/Users/you/project/fixtures/ensure/already-downloaded/elm-tooling/elm/0.19.1/elm`

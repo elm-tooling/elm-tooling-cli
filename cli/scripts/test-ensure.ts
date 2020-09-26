@@ -13,7 +13,7 @@ export async function run(): Promise<void> {
 
   const options = {
     name: "elm-format",
-    version: "0.8.4",
+    version: /^0\.8\./,
     cwd: WORK_DIR,
     env: { ELM_HOME: WORK_DIR },
     onProgress: (percentage: number) => {

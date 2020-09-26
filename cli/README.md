@@ -186,7 +186,7 @@ TODO
 ```ts
 export default function ensure(options: {
   name: string;
-  version: string;
+  version: RegExp;
   cwd: string;
   env: Record<string, string | undefined>;
   onProgress: (percentage: number) => void;
@@ -201,7 +201,7 @@ import * as child_process from "child_process";
 
 ensure({
   name: "elm",
-  version: "0.19.1",
+  version: /^0\.19\./,
   cwd: process.cwd(),
   env: prcoess.env,
   onProgress: (percentage) => {

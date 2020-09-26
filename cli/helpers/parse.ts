@@ -472,12 +472,12 @@ function joinPath(errorPath: Array<string | number>): string {
 
 export function getToolThrowing({
   name,
-  version,
+  version: versionRegex,
   cwd,
   env,
 }: {
   name: string;
-  version: string;
+  version: RegExp;
   cwd: string;
   env: Env;
 }): Tool {
@@ -500,27 +500,27 @@ export function getToolThrowing({
     );
   }
 
-  const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
-    ? versions[version]
-    : undefined;
+  const matchingVersion = Object.keys(versions)
+    .reverse()
+    .find((version) => versionRegex.test(version));
 
-  if (osAssets === undefined) {
+  if (matchingVersion === undefined) {
     throw new Error(
-      `Unknown ${name} version: ${version}\nKnown versions: ${Object.keys(
+      `No ${name} versions matching: ${versionRegex.toString()}\nKnown versions: ${Object.keys(
         versions
       ).join(", ")}`
     );
   }
 
-  const asset = osAssets[osName];
+  const asset = versions[matchingVersion][osName];
 
   return {
     name,
-    version,
+    version: matchingVersion,
     absolutePath: getToolAbsolutePath(
       getElmToolingInstallPath(cwd, env),
       name,
-      version,
+      matchingVersion,
       asset.fileName
     ),
     asset,
