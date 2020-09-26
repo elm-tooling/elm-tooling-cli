@@ -25,6 +25,7 @@ type FileToCopy = {
 const FILES_TO_COPY: Array<FileToCopy> = [
   { src: "LICENSE" },
   { src: "index.d.ts" },
+  { src: "ensure.d.ts" },
   { src: "package-real.json", dest: "package.json" },
   {
     src: "README.md",

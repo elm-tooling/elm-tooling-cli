@@ -11,8 +11,11 @@ function modifyFile(
   fs.writeFileSync(file, transform(fs.readFileSync(file, "utf8")));
 }
 
-modifyFile(path.join(BUILD, "index.js"), (content) =>
-  content.replace(/^exports.default =/m, "module.exports =")
-);
+function adjustDefaultExport(content: string): string {
+  return content.replace(/^exports.default =/m, "module.exports =");
+}
+
+modifyFile(path.join(BUILD, "index.js"), adjustDefaultExport);
+modifyFile(path.join(BUILD, "ensure.js"), adjustDefaultExport);
 
 fs.chmodSync(path.join(BUILD, "index.js"), "755");
