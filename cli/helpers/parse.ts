@@ -470,7 +470,6 @@ function joinPath(errorPath: Array<string | number>): string {
   return `${errorPath[0]}${rest.join("")}`;
 }
 
-// istanbul ignore next
 export function getToolThrowing({
   name,
   version,
@@ -484,6 +483,7 @@ export function getToolThrowing({
 }): Tool {
   const osName = getOSName();
 
+  // istanbul ignore if
   if (osName instanceof Error) {
     throw osName;
   }
