@@ -199,7 +199,7 @@ export default function ensure(options: {
 ```
 
 - name: The name of the tool you want. For example, `"elm"`.
-- version: A regex matching the version you want. The latest known version matching your regex will be chosen. This is a poor man’s semver matching.
+- version: A regex matching the version you want. The latest known version matching your regex will be chosen. This is a poor man’s semver matching. For example, `/^0\.19\./` matches any 0.19.x version.
 - cwd: The current working directory. Needed in case `ELM_HOME` is set to a relative path. It’s unclear where the user wants to install tools in that case. `process.cwd()` is probably a good choice.
 - env: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. `process.env` is a good choice.
 - onProgress: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
