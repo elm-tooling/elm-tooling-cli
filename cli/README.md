@@ -192,16 +192,16 @@ It makes sure that your tool exists on disk and then gives you the absolute path
 export default function ensure(options: {
   name: string;
   version: RegExp;
-  cwd: string;
-  env: Record<string, string | undefined>;
+  cwd?: string;
+  env?: Record<string, string | undefined>;
   onProgress: (percentage: number) => void;
 }): Promise<string>;
 ```
 
 - name: The name of the tool you want. For example, `"elm"`.
 - version: A regex matching the version you want. The latest known version matching your regex will be chosen. This is a poor man’s semver matching. For example, `/^0\.19\./` matches any 0.19.x version.
-- cwd: The current working directory. Needed in case `ELM_HOME` is set to a relative path. It’s unclear where the user wants to install tools in that case. `process.cwd()` is probably a good choice.
-- env: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. `process.env` is a good choice.
+- cwd: The current working directory. Needed in case `ELM_HOME` is set to a relative path. Defaults to `process.cwd()`.
+- env: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. Defaults to `process.env`.
 - onProgress: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
 - Returns: A promise that resolves to the absolute path to the tool.
 
@@ -216,8 +216,6 @@ import * as child_process from "child_process";
 ensure({
   name: "elm",
   version: /^0\.19\./, // 0.19.x
-  cwd: process.cwd(),
-  env: process.env,
   onProgress: (percentage) => {
     // `percentage` is a number from 0 to 1.
     // This is only called if the tool does not already exist on disk and needs

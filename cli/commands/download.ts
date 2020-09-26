@@ -586,14 +586,14 @@ function callOnProgressIfReasonable(
 export async function ensure({
   name,
   version,
-  cwd,
-  env,
+  cwd = process.cwd(),
+  env = process.env,
   onProgress,
 }: {
   name: string;
   version: RegExp;
-  cwd: string;
-  env: Env;
+  cwd?: string;
+  env?: Env;
   onProgress: (percentage: number) => void;
 }): Promise<string> {
   const tool = getToolThrowing({ name, version, cwd, env });
