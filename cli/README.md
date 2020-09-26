@@ -181,7 +181,12 @@ The default options use values from the `process` global.
 
 ### ensure
 
-TODO
+This function lets you depend on a binary tool in an npm package.
+
+It makes sure that your tool exists on disk and then gives you the absolute path to it so you can execute it.
+
+- Each user will only need to download the binary tool once.
+- If the user has the same tool in their `elm-tooling.json`, they will get maximum parallel downloading on clean installs.
 
 ```ts
 export default function ensure(options: {
@@ -193,6 +198,14 @@ export default function ensure(options: {
 }): Promise<string>;
 ```
 
+- name: The name of the tool you want. For example, `"elm"`.
+- version: A regex matching the version you want. The latest known version matching your regex will be chosen. This is a poor man’s semver matching.
+- cwd: The current working directory. Needed in case `ELM_HOME` is set to a relative path. It’s unclear where the user wants to install tools in that case. `process.cwd()` is probably a good choice.
+- env: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. `process.env` is a good choice.
+- onProgress: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
+
+If you need several tools you can use `Promise.all` to download them all in parallel.
+
 Example:
 
 ```js
@@ -201,9 +214,9 @@ import * as child_process from "child_process";
 
 ensure({
   name: "elm",
-  version: /^0\.19\./,
+  version: /^0\.19\./, // 0.19.x
   cwd: process.cwd(),
-  env: prcoess.env,
+  env: process.env,
   onProgress: (percentage) => {
     // `percentage` is a number from 0 to 1.
     // This is only called if the tool does not already exist on disk and needs
@@ -212,6 +225,8 @@ ensure({
   },
 }).then((toolAbsolutePath) => {
   // `toolAbsolutePath` is the absolute path to the elm 0.19.1 binary.
+  // Standard Node.js `child_process.spawn` and `child_process.spawnSync` work
+  // great for running the binary, even on Windows.
   console.log(
     child_process.spawnSync(toolAbsolutePath, ["--help"], { encoding: "utf8" })
   );
