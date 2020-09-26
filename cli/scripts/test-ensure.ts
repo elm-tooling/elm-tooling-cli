@@ -26,7 +26,7 @@ export async function run(): Promise<void> {
   const absolutePath2 = await ensure(options);
 
   if (absolutePath1 !== absolutePath2) {
-    throw new Error(`Expected the same absolute path after both invocations.`);
+    throw new Error(pathError(absolutePath1, absolutePath2));
   }
 
   if (progress.length < 3) {
@@ -62,6 +62,14 @@ export async function run(): Promise<void> {
   }
 
   process.stdout.write(`${absolutePath1}\n`);
+}
+
+function pathError(absolutePath1: string, absolutePath2: string): string {
+  return `
+Expected the same absolute path after both invocations.
+First:  ${absolutePath1}
+Second: ${absolutePath2}
+  `.trim();
 }
 
 if (require.main === module) {
