@@ -4,7 +4,7 @@
   "scripts": {
     "doctoc": "doctoc README.md",
     "pretest": "prettier --check . && cross-env CI= eslint . --color --report-unused-disable-directives",
-    "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts",
+    "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts && ts-node scripts/test-ensure.ts",
     "posttest": "npm run build",
     "prebuild": "ts-node scripts/build-pre.ts",
     "build": "tsc",
