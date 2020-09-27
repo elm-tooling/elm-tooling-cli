@@ -44,7 +44,7 @@ describe("ensure", () => {
       Known tools: elm, elm-format
     `));
 
-  test("unknown version", () =>
+  test("unknown version (range)", () =>
     expect(
       ensureHelper({
         fixture: "should-not-matter",
@@ -56,6 +56,18 @@ describe("ensure", () => {
       Known versions: 0.19.0, 0.19.1
     `));
 
+  test("unknown exact version", () =>
+    expect(
+      ensureHelper({
+        fixture: "should-not-matter",
+        name: "elm",
+        version: "=0.1.0",
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      No elm versions matching: =0.1.0
+      Known versions: 0.19.0, 0.19.1
+    `));
+
   test("missing range character", () =>
     expect(
       ensureHelper({
@@ -64,7 +76,7 @@ describe("ensure", () => {
         version: "0.19.0",
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `Version ranges must start with ^ or ~ and be followed by 3 dot-separated numbers, but got: 0.19.0`
+      `Version ranges must start with ^ or ~ (or = if you really need an exact version) and be followed by 3 dot-separated numbers, but got: 0.19.0`
     ));
 
   test("missing semver number", () =>
@@ -75,7 +87,7 @@ describe("ensure", () => {
         version: "^0.19",
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `Version ranges must start with ^ or ~ and be followed by 3 dot-separated numbers, but got: ^0.19`
+      `Version ranges must start with ^ or ~ (or = if you really need an exact version) and be followed by 3 dot-separated numbers, but got: ^0.19`
     ));
 
   test("error finding binary", () => {

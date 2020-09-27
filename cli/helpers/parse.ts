@@ -470,7 +470,7 @@ function joinPath(errorPath: Array<string | number>): string {
   return `${errorPath[0]}${rest.join("")}`;
 }
 
-const versionRangeRegex = /^[~^](\d+)\.(\d+)\.(\d+)([+-].+)?$/;
+const versionRangeRegex = /^([=~^])(\d+)\.(\d+)\.(\d+)([+-].+)?$/;
 
 export function getToolThrowing({
   name,
@@ -487,15 +487,16 @@ export function getToolThrowing({
 
   if (match === null) {
     throw new Error(
-      `Version ranges must start with ^ or ~ and be followed by 3 dot-separated numbers, but got: ${versionRange}`
+      `Version ranges must start with ^ or ~ (or = if you really need an exact version) and be followed by 3 dot-separated numbers, but got: ${versionRange}`
     );
   }
 
-  const major = Number(match[1]);
-  const minor = Number(match[2]);
+  const sign = match[1];
+  const major = Number(match[2]);
+  const minor = Number(match[3]);
   const lowerBound = versionRange.slice(1);
   const upperBound =
-    major === 0 || versionRange.startsWith("~")
+    major === 0 || sign === "~"
       ? `${major}.${minor + 1}.0`
       : `${major + 1}.0.0`;
 
@@ -520,10 +521,11 @@ export function getToolThrowing({
 
   const matchingVersion = Object.keys(versions)
     .reverse()
-    .find(
-      (version) =>
-        semverCompare(version, lowerBound) >= 0 &&
-        semverCompare(version, upperBound) < 0
+    .find((version) =>
+      sign === "="
+        ? version === lowerBound
+        : semverCompare(version, lowerBound) >= 0 &&
+          semverCompare(version, upperBound) < 0
     );
 
   if (matchingVersion === undefined) {
