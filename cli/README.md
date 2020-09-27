@@ -198,11 +198,11 @@ export default function ensure(options: {
 }): Promise<string>;
 ```
 
-- name: The name of the tool you want. For example, `"elm"`.
-- version: A [`^` or `~` semver version range][semver-ranges]. The latest known version matching the range will be chosen. Note that the range _has_ to start with `^` or `~` (exact versions are not allowed) and _must_ be followed by 3 dot-separated digits (unlike `npm` you can’t leave out any numbers). Example: `"~0.19.0"`.
-- cwd: The current working directory. Needed in case `ELM_HOME` is set to a relative path. Defaults to `process.cwd()`.
-- env: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. Defaults to `process.env`.
-- onProgress: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
+- `name`: The name of the tool you want. For example, `"elm"`.
+- `version`: A [`^` or `~` semver version range][semver-ranges]. The latest known version matching the range will be chosen. Note that the range _has_ to start with `^` or `~` (exact versions are not allowed) and _must_ be followed by 3 dot-separated digits (unlike `npm` you can’t leave out any numbers). Example: `"~0.19.0"`.
+- `cwd`: The current working directory. Needed in case `ELM_HOME` is set to a relative path. Defaults to `process.cwd()`.
+- `env`: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. Defaults to `process.env`.
+- `onProgress`: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
 - Returns: A promise that resolves to the absolute path to the tool.
 
 If you need several tools you can use `Promise.all` to download them all in parallel.
