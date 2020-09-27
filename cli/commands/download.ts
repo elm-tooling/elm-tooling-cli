@@ -591,7 +591,7 @@ export async function ensure({
   onProgress,
 }: {
   name: string;
-  version: RegExp;
+  version: string;
   cwd?: string;
   env?: Env;
   onProgress: (percentage: number) => void;

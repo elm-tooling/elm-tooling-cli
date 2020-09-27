@@ -12,7 +12,7 @@ async function ensureHelper({
 }: {
   fixture: string;
   name: string;
-  version: RegExp;
+  version: string;
 }): Promise<string> {
   const dir = path.join(FIXTURES_DIR, fixture);
 
@@ -37,7 +37,7 @@ describe("ensure", () => {
       ensureHelper({
         fixture: "should-not-matter",
         name: "elmx",
-        version: /x/,
+        version: "^0.0.0",
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
       Unknown tool: elmx
@@ -49,18 +49,40 @@ describe("ensure", () => {
       ensureHelper({
         fixture: "should-not-matter",
         name: "elm",
-        version: /^v0\.19\./,
+        version: "^1337.1.0",
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      No elm versions matching: /^v0\\.19\\./
+      No elm versions matching: ^1337.1.0
       Known versions: 0.19.0, 0.19.1
     `));
+
+  test("missing range character", () =>
+    expect(
+      ensureHelper({
+        fixture: "should-not-matter",
+        name: "elm",
+        version: "0.19.0",
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `Version ranges must start with ^ or ~ and be followed by 3 dot-separated numbers, but got: 0.19.0`
+    ));
+
+  test("missing semver number", () =>
+    expect(
+      ensureHelper({
+        fixture: "should-not-matter",
+        name: "elm",
+        version: "^0.19",
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `Version ranges must start with ^ or ~ and be followed by 3 dot-separated numbers, but got: ^0.19`
+    ));
 
   test("error finding binary", () => {
     const promise = ensureHelper({
       fixture: "folder-that-actually-is-a-file",
       name: "elm",
-      version: /^/,
+      version: "^0.19.1",
     });
 
     if (IS_WINDOWS) {
@@ -80,10 +102,10 @@ describe("ensure", () => {
     expect(
       ensureHelper({
         fixture: "already-downloaded",
-        name: "elm",
-        version: /^0\.19\.1$/,
+        name: "elm-format",
+        version: "^0.8.1-rc1",
       })
     ).resolves.toMatchInlineSnapshot(
-      `/Users/you/project/fixtures/ensure/already-downloaded/elm-tooling/elm/0.19.1/elm`
+      `/Users/you/project/fixtures/ensure/already-downloaded/elm-tooling/elm-format/0.8.4/elm-format`
     ));
 });

@@ -1,6 +1,6 @@
 export default function ensure(options: {
   name: string;
-  version: RegExp;
+  version: string;
   cwd?: string;
   env?: Record<string, string | undefined>;
   onProgress: (percentage: number) => void;

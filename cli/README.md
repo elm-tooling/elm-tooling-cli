@@ -114,7 +114,7 @@ The difference compared to installing the regular `elm` and `elm-format` package
 
   - Maybe you don’t even need `--production`. Some applications use `npm` only for a build step and does not have any production Node.js server or anything like that.
   - Try `--ignore-scripts`. This will skip the `"postinstall"` script – but also any scripts that your dependencies might run during installation! Sometimes, only `"devDependencies"` (such as node-sass) need to run scripts during installation – so try it! If `--ignore-scripts` works you have nothing to lose.
-  - Make a little wrapper script that runs `elm-tooling postinstall` only if `elm-tooling` is installed. For example, you could write the script in JavaScript and use the [API version of the CLI][api].
+  - Make a little wrapper script that runs `elm-tooling postinstall` only if `elm-tooling` is installed. For example, you could write the script in JavaScript and use the [API version of the CLI][cli-api].
   - If you only need `--production` installs in for example a Dockerfile, try adding `RUN sed -i '/postinstall/d' package.json` to remove the `"postinstall"` script from `package.json` before running `npm install --production`. This specific example only works with GNU sed and if your `"postinstall"` script isn’t last (due to trailing commas being invalid JSON).
   - Move `elm-tooling` to `"dependencies"`. `elm-tooling` is small and has no dependencies so it won’t bloat your build very much. Set the `NO_ELM_TOOLING_POSTINSTALL` environment variable to turn `elm-tooling postinstall` into a no-op (see below).
 
@@ -191,7 +191,7 @@ It makes sure that your tool exists on disk and then gives you the absolute path
 ```ts
 export default function ensure(options: {
   name: string;
-  version: RegExp;
+  version: string;
   cwd?: string;
   env?: Record<string, string | undefined>;
   onProgress: (percentage: number) => void;
@@ -199,7 +199,7 @@ export default function ensure(options: {
 ```
 
 - name: The name of the tool you want. For example, `"elm"`.
-- version: A regex matching the version you want. The latest known version matching your regex will be chosen. This is a poor man’s semver matching. For example, `/^0\.19\./` matches any 0.19.x version.
+- version: A [`^` or `~` semver version range][semver-ranges]. The latest known version matching the range will be chosen. Note that the range _has_ to start with `^` or `~` (exact versions are not allowed) and _must_ be followed by 3 dot-separated digits (unlike `npm` you can’t leave out any numbers). Example: `"~0.19.0"`.
 - cwd: The current working directory. Needed in case `ELM_HOME` is set to a relative path. Defaults to `process.cwd()`.
 - env: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. Defaults to `process.env`.
 - onProgress: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
@@ -215,7 +215,7 @@ import * as child_process from "child_process";
 
 ensure({
   name: "elm",
-  version: /^0\.19\./, // 0.19.x
+  version: "~0.19.0",
   onProgress: (percentage) => {
     // `percentage` is a number from 0 to 1.
     // This is only called if the tool does not already exist on disk and needs
@@ -282,12 +282,13 @@ ensure({
 
 [MIT](LICENSE).
 
-[api]: #api
 [child\_process.spawn]: https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
+[cli-api]: #elmtoolingcli
 [elm-review]: https://package.elm-lang.org/packages/jfmengels/elm-review/latest/
 [elm-tooling.json]: https://github.com/lydell/elm-tooling.json
 [example github actions workflow]: https://github.com/lydell/elm-tooling.json/blob/master/.github/workflows/example.yml
 [ignore-scripts]: https://docs.npmjs.com/using-npm/config#ignore-scripts
 [npm/npm-lifecycle#49]: https://github.com/npm/npm-lifecycle/issues/49
 [postinstall]: https://docs.npmjs.com/misc/scripts
+[semver-ranges]: https://docs.npmjs.com/misc/semver#tilde-ranges-123-12-1
 [tools]: https://github.com/lydell/elm-tooling.json#tools

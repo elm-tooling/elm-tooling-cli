@@ -470,17 +470,35 @@ function joinPath(errorPath: Array<string | number>): string {
   return `${errorPath[0]}${rest.join("")}`;
 }
 
+const versionRangeRegex = /^[~^](\d+)\.(\d+)\.(\d+)([+-].+)?$/;
+
 export function getToolThrowing({
   name,
-  version: versionRegex,
+  version: versionRange,
   cwd,
   env,
 }: {
   name: string;
-  version: RegExp;
+  version: string;
   cwd: string;
   env: Env;
 }): Tool {
+  const match = versionRangeRegex.exec(versionRange);
+
+  if (match === null) {
+    throw new Error(
+      `Version ranges must start with ^ or ~ and be followed by 3 dot-separated numbers, but got: ${versionRange}`
+    );
+  }
+
+  const major = Number(match[1]);
+  const minor = Number(match[2]);
+  const lowerBound = versionRange.slice(1);
+  const upperBound =
+    major === 0 || versionRange.startsWith("~")
+      ? `${major}.${minor + 1}.0`
+      : `${major + 1}.0.0`;
+
   const osName = getOSName();
 
   // istanbul ignore if
@@ -502,11 +520,15 @@ export function getToolThrowing({
 
   const matchingVersion = Object.keys(versions)
     .reverse()
-    .find((version) => versionRegex.test(version));
+    .find(
+      (version) =>
+        semverCompare(version, lowerBound) >= 0 &&
+        semverCompare(version, upperBound) < 0
+    );
 
   if (matchingVersion === undefined) {
     throw new Error(
-      `No ${name} versions matching: ${versionRegex.toString()}\nKnown versions: ${Object.keys(
+      `No ${name} versions matching: ${versionRange}\nKnown versions: ${Object.keys(
         versions
       ).join(", ")}`
     );
@@ -526,3 +548,28 @@ export function getToolThrowing({
     asset,
   };
 }
+
+/* eslint-disable */
+const fn = new Intl.Collator("en", { numeric: true }).compare;
+
+// Copied from:
+// https://github.com/lukeed/semiver/blob/ae7eebe6053c96be63032b14fb0b68e2553fcac4/src/index.js
+// Author: Luke Edwards. See LICENSE.
+function semverCompare(aInput: string, bInput: string): number {
+  let bool;
+  const a = aInput.split(".");
+  const b = bInput.split(".");
+
+  return (
+    fn(a[0], b[0]) ||
+    fn(a[1], b[1]) ||
+    ((b[2] = b.slice(2).join(".")),
+    (bool = /[.-]/.test((a[2] = a.slice(2).join(".")))),
+    bool == /[.-]/.test(b[2])
+      ? fn(a[2], b[2])
+      : bool
+      ? /* istanbul ignore next */ -1
+      : 1)
+  );
+}
+/* eslint-enable */
