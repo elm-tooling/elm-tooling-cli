@@ -261,6 +261,18 @@ function parseEntrypoints(
       };
     }
 
+    if (entrypoint.includes("\\")) {
+      return {
+        tag: "Left",
+        value: {
+          path: [index],
+          message: `Expected the string to use only "/" as path delimiter but found "\\": ${JSON.stringify(
+            entrypoint
+          )}`,
+        },
+      };
+    }
+
     if (!entrypoint.startsWith("./")) {
       return {
         tag: "Left",

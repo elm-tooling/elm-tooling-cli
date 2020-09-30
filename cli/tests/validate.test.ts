@@ -114,7 +114,7 @@ describe("validate", () => {
       expect(await validateFailHelper("kitchen-sink")).toMatchInlineSnapshot(`
         ⧘⧙/Users/you/project/fixtures/validate/kitchen-sink/elm-tooling.json⧘
 
-        ⧘⧙12⧘ errors
+        ⧘⧙13⧘ errors
 
         ⧘⧙elm.json⧘
             There should be an elm.json next to elm-tooling.json
@@ -131,19 +131,22 @@ describe("validate", () => {
         ⧘⧙entrypoints[0]⧘
             Expected the string to start with "./" (to indicate that it is a relative path) but got: "Main.elm"
 
-        ⧘⧙entrypoints[2]⧘
-            Duplicate entrypoint: /Users/you/project/fixtures/validate/kitchen-sink/Main.elm
+        ⧘⧙entrypoints[1]⧘
+            Expected the string to use only "/" as path delimiter but found "\\": ".\\\\Main.elm"
 
         ⧘⧙entrypoints[3]⧘
-            File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/missing/Main.elm
+            Duplicate entrypoint: /Users/you/project/fixtures/validate/kitchen-sink/Main.elm
 
         ⧘⧙entrypoints[4]⧘
             File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/missing/Main.elm
 
         ⧘⧙entrypoints[5]⧘
-            Exists but is not a file: /Users/you/project/fixtures/validate/kitchen-sink/
+            File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/missing/Main.elm
 
         ⧘⧙entrypoints[6]⧘
+            Exists but is not a file: /Users/you/project/fixtures/validate/kitchen-sink/
+
+        ⧘⧙entrypoints[7]⧘
             Expected a string but got: null
 
         ⧘⧙tools["elm-invalid"]⧘

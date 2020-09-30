@@ -2,6 +2,7 @@
   "not-a-thing": { "yet": "at least" },
   "entrypoints": [
     "Main.elm",
+    ".\\Main.elm",
     "./Main.elm",
     "././/Main.elm",
     "./missing/Main.elm",
