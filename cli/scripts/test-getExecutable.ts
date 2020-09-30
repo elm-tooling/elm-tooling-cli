@@ -12,8 +12,8 @@ export async function run(): Promise<void> {
   const progress: Array<number> = [];
 
   const options = {
-    name: "elm-format",
-    version: "^0.8.4",
+    name: "elm-json",
+    version: "^0.2.8",
     cwd: WORK_DIR,
     env: { ELM_HOME: WORK_DIR },
     onProgress: (percentage: number) => {

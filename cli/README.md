@@ -200,7 +200,7 @@ export default function getExecutable(options: {
 ```
 
 - `name`: The name of the tool you want. For example, `"elm"`.
-- `version`: A [`^` or `~` semver version range][semver-ranges]. The latest known version matching the range will be chosen. Note that the range _has_ to start with `^` or `~` (or `=` if you _really_ need an exact version) and _must_ be followed by 3 dot-separated digits (unlike `npm` you can’t leave out any numbers). Example: `"~0.19.0"`.
+- `version`: A [`^` or `~` semver version range][semver-ranges]. The latest known version matching the range will be chosen. Note that the range _has_ to start with `^` or `~` (or `=` if you _really_ need an exact version) and _must_ be followed by 3 dot-separated digits (unlike `npm` you can’t leave out any numbers). Example: `"~0.2.8"`.
 - `cwd`: The current working directory. Needed in case `ELM_HOME` is set to a relative path. Defaults to `process.cwd()`.
 - `env`: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. Defaults to `process.env`.
 - `onProgress`: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
@@ -215,8 +215,8 @@ import getExecutable from "elm-tooling/getExecutable";
 import * as child_process from "child_process";
 
 getExecutable({
-  name: "elm",
-  version: "~0.19.0",
+  name: "elm-json",
+  version: "~0.2.8",
   onProgress: (percentage) => {
     // `percentage` is a number from 0 to 1.
     // This is only called if the tool does not already exist on disk and needs
@@ -224,7 +224,7 @@ getExecutable({
     console.log(percentage);
   },
 }).then((toolAbsolutePath) => {
-  // `toolAbsolutePath` is the absolute path to the latest known elm 0.19.x executable.
+  // `toolAbsolutePath` is the absolute path to the latest known elm-json 0.2.8 executable.
   // Standard Node.js `child_process.spawn` and `child_process.spawnSync` work
   // great for running the executable, even on Windows.
   console.log(
