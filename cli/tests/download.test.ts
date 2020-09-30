@@ -110,7 +110,7 @@ describe("download", () => {
 
         ⧘⧙tools["elm-compiler"]⧘
             Unknown tool
-            Known tools: elm, elm-format
+            Known tools: elm, elm-format, elm-json
 
         ⧘⧙tools["elm-format"]⧘
             Unknown version: 0.8

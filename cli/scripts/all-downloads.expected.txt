@@ -7,11 +7,15 @@ all-downloads/
       elm-format/
         0.8.1/
           elm-format
+      elm-json/
+        0.2.8/
+          elm-json
     elm-tooling.json
       {
         "tools": {
           "elm": "0.19.0",
-          "elm-format": "0.8.1"
+          "elm-format": "0.8.1",
+          "elm-json": "0.2.8"
         }
       }
   1/
