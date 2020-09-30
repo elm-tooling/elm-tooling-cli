@@ -90,7 +90,7 @@ describe("ensure", () => {
       `Version ranges must start with ^ or ~ (or = if you really need an exact version) and be followed by 3 dot-separated numbers, but got: ^0.19`
     ));
 
-  test("error finding binary", () => {
+  test("error finding executable", () => {
     const promise = ensureHelper({
       fixture: "folder-that-actually-is-a-file",
       name: "elm",

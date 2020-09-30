@@ -102,7 +102,7 @@ Thanks to the [postinstall] script shown in `package.json` above, `elm` and `elm
 
 The difference compared to installing the regular `elm` and `elm-format` packages are:
 
-- Faster initial installs. `elm-tooling` downloads all tools in parallel, while the binary downloads for the regular `elm` and `elm-format` packages are serial.
+- Faster initial installs. `elm-tooling` downloads all tools in parallel, while the executable downloads for the regular `elm` and `elm-format` packages are serial.
 - Faster subsequent installs. Once you’ve downloaded one version of a tool once you never need to download it again. This works by saving the binaries in a shared location rather than locally in each project.
 - Less disk usage. Again, storing the binaries in a shared location saves tens of megabytes per project.
 - Less npm dependencies. The `elm` and `elm-format` npm packages depend on 70 dependencies. `elm-tooling` has no npm dependencies at all.
@@ -181,11 +181,11 @@ The default options use values from the `process` global.
 
 ### ensure
 
-This function lets you depend on a binary tool in an npm package.
+This function lets npm packages depend on tools distributed as platform specific executables.
 
-It makes sure that your tool exists on disk and then gives you the absolute path to it so you can execute it.
+It makes sure that a tool choice exists on disk and then returns the absolute path to it so you can execute it.
 
-- Each user will only need to download the binary tool once.
+- Each user will only need to download each executable tool once per computer (rather than once per project).
 - If the user has the same tool in their `elm-tooling.json`, they will get maximum parallel downloading on clean installs.
 
 ```ts
@@ -223,9 +223,9 @@ ensure({
     console.log(percentage);
   },
 }).then((toolAbsolutePath) => {
-  // `toolAbsolutePath` is the absolute path to the latest known elm 0.19.x binary.
+  // `toolAbsolutePath` is the absolute path to the latest known elm 0.19.x executable.
   // Standard Node.js `child_process.spawn` and `child_process.spawnSync` work
-  // great for running the binary, even on Windows.
+  // great for running the executable, even on Windows.
   console.log(
     child_process.spawnSync(toolAbsolutePath, ["--help"], { encoding: "utf8" })
   );
