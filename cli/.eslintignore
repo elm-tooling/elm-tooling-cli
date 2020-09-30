@@ -4,5 +4,5 @@ build
 coverage
 dist
 example
-index.d.ts
+*.d.ts
 tmp.*

@@ -1,7 +1,7 @@
 import * as readline from "readline";
 import type { Writable } from "stream";
 
-import type { Env } from "./mixed";
+import { Env, removeColor } from "./mixed";
 
 export type Logger = {
   log: (message: string) => void;
@@ -22,7 +22,7 @@ export function makeLogger({
 }): Logger {
   const NO_COLOR = "NO_COLOR" in env;
   const handleColor = (string: string): string =>
-    NO_COLOR ? string.replace(/\x1B\[\dm/g, "") : string;
+    NO_COLOR ? removeColor(string) : string;
 
   return {
     log(message) {
@@ -33,7 +33,7 @@ export function makeLogger({
       previousProgress = undefined;
       stderr.write(`${handleColor(message)}\n`);
     },
-    /* istanbul ignore next */
+    // istanbul ignore next
     progress(passedMessage) {
       const message = handleColor(passedMessage);
       if (previousProgress !== undefined) {

@@ -119,9 +119,9 @@ describe("postinstall", () => {
   });
 
   test("node_modules/.bin/elm is a folder", async () => {
-    expect(await postinstallFailHelper("binary-is-folder"))
+    expect(await postinstallFailHelper("executable-is-folder"))
       .toMatchInlineSnapshot(`
-      Failed to remove old link for elm at /Users/you/project/fixtures/postinstall/binary-is-folder/node_modules/.bin/elm:
+      Failed to remove old link for elm at /Users/you/project/fixtures/postinstall/executable-is-folder/node_modules/.bin/elm:
       EISDIR: fake error
 
     `);

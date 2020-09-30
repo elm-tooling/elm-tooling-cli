@@ -16,13 +16,16 @@ import {
   indent,
   NonEmptyArray,
   printNumErrors,
+  removeColor,
 } from "../helpers/mixed";
 import {
   findReadAndParseElmToolingJson,
+  getToolThrowing,
   isWindows,
   printFieldErrors,
   Tool,
   Tools,
+  validateFileExists,
 } from "../helpers/parse";
 
 const EMPTY_STDERR = dim("(empty stderr)");
@@ -97,42 +100,42 @@ async function downloadTools(
   }
 
   const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
-  const firstDrawTime = Date.now();
 
-  const redraw = ({ force = false } = {}): void => {
-    // Without this time thing, you’ll see the progress go up to 100% and then
-    // back to 0% again when using curl. It reports the progress per request –
-    // even redirects. Hopefully a redirect response usually finishes in 1 second.
-    if (Date.now() - firstDrawTime > 1000 || force) {
-      logger.progress(
-        tools.missing
-          .map((tool, index) => {
-            const progress = toolsProgress[index];
-            const progressString =
-              typeof progress === "string"
-                ? progress.padEnd(4)
-                : `${Math.round(progress * 100)
-                    .toString()
-                    .padStart(3)}%`;
-            return `${bold(progressString)} ${tool.name} ${tool.version}`;
-          })
-          .join("\n")
-      );
-    }
+  const redraw = (): void => {
+    logger.progress(
+      tools.missing
+        .map((tool, index) => {
+          const progress = toolsProgress[index];
+          const progressString =
+            typeof progress === "string"
+              ? progress.padEnd(4)
+              : `${Math.round(progress * 100)
+                  .toString()
+                  .padStart(3)}%`;
+          return `${bold(progressString)} ${tool.name} ${tool.version}`;
+        })
+        .join("\n")
+    );
   };
 
-  redraw({ force: true });
+  redraw();
 
   const results = await Promise.all(
     tools.missing.map((tool, index) =>
       downloadAndExtract(tool, (percentage) => {
         toolsProgress[index] = percentage;
         redraw();
-      }).catch((error: Error) => {
-        toolsProgress[index] = "ERR!";
-        redraw();
-        return new Error(downloadAndExtractError(tool, error));
-      })
+      }).then(
+        () => {
+          toolsProgress[index] = 1;
+          redraw();
+        },
+        (error: Error) => {
+          toolsProgress[index] = "ERR!";
+          redraw();
+          return new Error(downloadAndExtractError(tool, error));
+        }
+      )
     )
   );
 
@@ -140,7 +143,7 @@ async function downloadTools(
     result instanceof Error ? result : []
   );
 
-  redraw({ force: true });
+  redraw();
 
   if (downloadErrors.length > 0) {
     logger.error("");
@@ -224,6 +227,15 @@ ${error.message}
   `.trim();
 }
 
+function downloadAndExtractSimpleError(tool: Tool, error: Error): string {
+  return `
+Failed to download:
+< ${tool.asset.url}
+> ${tool.absolutePath}
+${error.message}
+  `.trim();
+}
+
 function hashMismatch(actual: string, expected: string): string {
   return `
 The downloaded file does not have the expected hash!
@@ -254,7 +266,10 @@ function downloadFile(
     // Extract progress percentage from curl/wget.
     const matches = stderr.match(/\d+(?:[.,]\d+)?%/g) ?? [];
     if (matches.length > 0) {
-      onProgress(Math.min(1, parseFloat(matches[matches.length - 1]) / 100));
+      callOnProgressIfReasonable(
+        parseFloat(matches[matches.length - 1].replace(",", ".")) / 100,
+        onProgress
+      );
     }
   };
 
@@ -365,7 +380,7 @@ function downloadFileNative(
           length += chunk.length;
           onData(chunk);
           if (Number.isFinite(contentLength) && contentLength > 0) {
-            onProgress(Math.min(1, length / contentLength));
+            callOnProgressIfReasonable(length / contentLength, onProgress);
           }
         });
 
@@ -552,4 +567,62 @@ function extractTar({
     write: (chunk) => tar.stdin.write(chunk),
     end: () => tar.stdin.end(),
   };
+}
+
+// Without this, you’ll see the progress go up to 100% and then back to 0% again
+// when using curl. It reports the progress per request – even redirects. It
+// seems to always go from 0% to 100% for redirects (which makes sense – there’s
+// no body, only headers). So only report progress _between_ 0% and 100%. It’s
+// up to the caller to report 0% before starting and 100% when done.
+function callOnProgressIfReasonable(
+  percentage: number,
+  onProgress: (percentage: number) => void
+): void {
+  if (percentage > 0 && percentage < 1) {
+    onProgress(percentage);
+  }
+}
+
+export async function getExecutable({
+  name,
+  version,
+  cwd = process.cwd(),
+  env = process.env,
+  onProgress,
+}: {
+  name: string;
+  version: string;
+  cwd?: string;
+  env?: Env;
+  onProgress: (percentage: number) => void;
+}): Promise<string> {
+  const tool = getToolThrowing({ name, version, cwd, env });
+
+  const exists = validateFileExists(tool.absolutePath);
+  switch (exists.tag) {
+    case "Error":
+      throw new Error(exists.message);
+
+    case "Exists":
+      return tool.absolutePath;
+
+    case "DoesNotExist":
+      // Keep going.
+      break;
+  }
+
+  fs.mkdirSync(path.dirname(tool.absolutePath), { recursive: true });
+
+  onProgress(0);
+
+  try {
+    await downloadAndExtract(tool, onProgress);
+  } catch (errorAny) {
+    const error = errorAny as Error;
+    throw new Error(removeColor(downloadAndExtractSimpleError(tool, error)));
+  }
+
+  onProgress(1);
+
+  return tool.absolutePath;
 }

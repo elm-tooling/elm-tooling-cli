@@ -27,7 +27,7 @@ export default async function init(
     (paths) =>
       paths.map((file) => {
         const relative = path.relative(path.dirname(absolutePath), file);
-        /* istanbul ignore next */
+        // istanbul ignore next
         const normalized = isWindows ? relative.replace(/\\/g, "/") : relative;
         return `./${normalized}`;
       }),
@@ -77,7 +77,7 @@ async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
     files.map((file) =>
       isMainFile(file).then(
         (isMain) => (isMain ? file : new Error(`${file} is not a main file.`)),
-        /* istanbul ignore next */
+        // istanbul ignore next
         (error: Error) => error
       )
     )
