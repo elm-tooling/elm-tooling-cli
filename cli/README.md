@@ -300,7 +300,7 @@ getExecutable({
 [cli-api]: #elmtoolingcli
 [elm-review]: https://package.elm-lang.org/packages/jfmengels/elm-review/latest/
 [elm-tooling.json]: https://github.com/lydell/elm-tooling.json
-[example github actions workflow]: https://github.com/lydell/elm-tooling.json/blob/master/.github/workflows/example.yml
+[example github actions workflow]: https://github.com/lydell/elm-tooling.json/blob/main/.github/workflows/example.yml
 [ignore-scripts]: https://docs.npmjs.com/using-npm/config#ignore-scripts
 [npm/npm-lifecycle#49]: https://github.com/npm/npm-lifecycle/issues/49
 [postinstall]: https://docs.npmjs.com/misc/scripts

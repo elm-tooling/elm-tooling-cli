@@ -174,5 +174,5 @@ The above logs provide:
 Public domain
 
 [elm-language-server]: https://github.com/elm-tooling/elm-language-server
-[elm-tooling install]: https://github.com/lydell/elm-tooling.json/blob/master/cli#elm-tooling-install
-[elm-tooling]: https://github.com/lydell/elm-tooling.json/blob/master/cli
+[elm-tooling install]: https://github.com/lydell/elm-tooling.json/blob/main/cli#elm-tooling-install
+[elm-tooling]: https://github.com/lydell/elm-tooling.json/blob/main/cli
