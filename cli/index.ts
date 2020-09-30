@@ -5,7 +5,7 @@ import type { Readable, Writable } from "stream";
 import download from "./commands/download";
 import help from "./commands/help";
 import init from "./commands/init";
-import postinstall from "./commands/postinstall";
+import install from "./commands/install";
 import validate from "./commands/validate";
 import { Logger, makeLogger } from "./helpers/logger";
 import type { Env } from "./helpers/mixed";
@@ -50,8 +50,8 @@ async function run(
       }
     }
 
-    case "postinstall":
-      return postinstall(cwd, env, logger);
+    case "install":
+      return install(cwd, env, logger);
 
     default:
       logger.error(`Unknown command: ${argv[0]}`);

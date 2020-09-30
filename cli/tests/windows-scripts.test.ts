@@ -2,7 +2,7 @@ import {
   makeCmdScript,
   makePs1Script,
   makeShScript,
-} from "../commands/postinstall";
+} from "../commands/install";
 import { stringSnapshotSerializer } from "./helpers";
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);

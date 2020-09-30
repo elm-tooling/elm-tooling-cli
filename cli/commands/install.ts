@@ -13,12 +13,12 @@ import {
 import { isWindows, Tool } from "../helpers/parse";
 import download from "./download";
 
-export default async function postinstall(
+export default async function install(
   cwd: string,
   env: Env,
   logger: Logger
 ): Promise<number> {
-  if ("NO_ELM_TOOLING_POSTINSTALL" in env) {
+  if ("NO_ELM_TOOLING_INSTALL" in env) {
     return 0;
   }
 

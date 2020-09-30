@@ -1,6 +1,8 @@
 import { bold, dim, Env } from "../helpers/mixed";
 import { getElmToolingInstallPath } from "../helpers/parse";
 
+// `elm-tooling download` is undocumented on purpose because currently there’s
+// no use case for it. It might be removed at any time.
 export default function help(cwd: string, env: Env): string {
   return `
 ${bold("elm-tooling init")}
@@ -9,21 +11,21 @@ ${bold("elm-tooling init")}
 ${bold("elm-tooling validate")}
     Validate the closest elm-tooling.json
 
-${bold("elm-tooling download")}
+${bold("elm-tooling install")}
     Download the tools in the closest elm-tooling.json to:
     ${dim(getElmToolingInstallPath(cwd, env))}
+    And create links to them in node_modules/.bin/
 
-${bold("elm-tooling postinstall")}
-    Download the tools in the closest elm-tooling.json
-    and create links to them in node_modules/.bin/
+${bold("npx elm --help")}
+    Example on how to run installed tools
 
 ${bold("Environment variables:")}
     ${bold("ELM_HOME")}
         Customize where tools will be downloaded.
         The Elm compiler uses this variable too for where to store packages.
 
-    ${bold("NO_ELM_TOOLING_POSTINSTALL")}
-        Disable the postinstall command.
+    ${bold("NO_ELM_TOOLING_INSTALL")}
+        Disable the install command.
 
     ${bold("NO_COLOR")}
         Disable colored output.

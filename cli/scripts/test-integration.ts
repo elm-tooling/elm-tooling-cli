@@ -67,10 +67,10 @@ export async function run(): Promise<void> {
   await runCli("validate", false);
 
   // Install tools.
-  await runCli("postinstall", true);
+  await runCli("install", true);
 
   // Running again is ok.
-  await runCli("postinstall", true);
+  await runCli("install", true);
 
   // elm-tooling.json should be valid now.
   await runCli("validate", true);

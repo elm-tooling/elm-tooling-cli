@@ -39,21 +39,21 @@ describe("help", () => {
       ⧘⧙elm-tooling validate⧘
           Validate the closest elm-tooling.json
 
-      ⧘⧙elm-tooling download⧘
+      ⧘⧙elm-tooling install⧘
           Download the tools in the closest elm-tooling.json to:
           ⧘⧙/Users/you/.elm/elm-tooling⧘
+          And create links to them in node_modules/.bin/
 
-      ⧘⧙elm-tooling postinstall⧘
-          Download the tools in the closest elm-tooling.json
-          and create links to them in node_modules/.bin/
+      ⧘⧙npx elm --help⧘
+          Example on how to run installed tools
 
       ⧘⧙Environment variables:⧘
           ⧘⧙ELM_HOME⧘
               Customize where tools will be downloaded.
               The Elm compiler uses this variable too for where to store packages.
 
-          ⧘⧙NO_ELM_TOOLING_POSTINSTALL⧘
-              Disable the postinstall command.
+          ⧘⧙NO_ELM_TOOLING_INSTALL⧘
+              Disable the install command.
 
           ⧘⧙NO_COLOR⧘
               Disable colored output.
@@ -78,21 +78,21 @@ describe("help", () => {
       elm-tooling validate
           Validate the closest elm-tooling.json
 
-      elm-tooling download
+      elm-tooling install
           Download the tools in the closest elm-tooling.json to:
           /test/elm-tooling
+          And create links to them in node_modules/.bin/
 
-      elm-tooling postinstall
-          Download the tools in the closest elm-tooling.json
-          and create links to them in node_modules/.bin/
+      npx elm --help
+          Example on how to run installed tools
 
       Environment variables:
           ELM_HOME
               Customize where tools will be downloaded.
               The Elm compiler uses this variable too for where to store packages.
 
-          NO_ELM_TOOLING_POSTINSTALL
-              Disable the postinstall command.
+          NO_ELM_TOOLING_INSTALL
+              Disable the install command.
 
           NO_COLOR
               Disable colored output.

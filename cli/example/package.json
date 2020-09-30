@@ -2,7 +2,7 @@
   "private": true,
   "name": "example-app",
   "scripts": {
-    "postinstall": "elm-tooling postinstall",
+    "postinstall": "elm-tooling install",
     "build": "parcel build index.html",
     "start": "parcel watch index.html"
   },

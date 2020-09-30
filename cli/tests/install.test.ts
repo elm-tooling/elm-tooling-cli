@@ -11,9 +11,9 @@ import {
   stringSnapshotSerializer,
 } from "./helpers";
 
-const FIXTURES_DIR = path.join(__dirname, "fixtures", "postinstall");
+const FIXTURES_DIR = path.join(__dirname, "fixtures", "install");
 
-function cleanPostinstall(string: string): string {
+function cleanInstall(string: string): string {
   return (
     string
       // Remove Windows differences.
@@ -24,7 +24,7 @@ function cleanPostinstall(string: string): string {
   );
 }
 
-async function postinstallSuccessHelper(
+async function installSuccessHelper(
   fixture: string,
   env?: Env
 ): Promise<{ stdout: string; bin: string }> {
@@ -33,7 +33,7 @@ async function postinstallSuccessHelper(
   const stdout = new MemoryWriteStream();
   const stderr = new MemoryWriteStream();
 
-  const exitCode = await elmToolingCli(["postinstall"], {
+  const exitCode = await elmToolingCli(["install"], {
     cwd: dir,
     env: { ELM_HOME: dir, ...env },
     stdin: new FailReadStream(),
@@ -64,16 +64,16 @@ async function postinstallSuccessHelper(
         .join("\n")
     : "(does not exist)";
 
-  return { stdout: cleanPostinstall(clean(stdout.content)), bin: clean(bin) };
+  return { stdout: cleanInstall(clean(stdout.content)), bin: clean(bin) };
 }
 
-async function postinstallFailHelper(fixture: string): Promise<string> {
+async function installFailHelper(fixture: string): Promise<string> {
   const dir = path.join(FIXTURES_DIR, fixture);
 
   const stdout = new MemoryWriteStream();
   const stderr = new MemoryWriteStream();
 
-  const exitCode = await elmToolingCli(["postinstall"], {
+  const exitCode = await elmToolingCli(["install"], {
     cwd: dir,
     env: { ELM_HOME: dir },
     stdin: new FailReadStream(),
@@ -85,43 +85,43 @@ async function postinstallFailHelper(fixture: string): Promise<string> {
   expect(stdout.content).not.toBe("");
   expect(exitCode).toBe(1);
 
-  return cleanPostinstall(clean(stderr.content));
+  return cleanInstall(clean(stderr.content));
 }
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);
 
-describe("postinstall", () => {
+describe("install", () => {
   test("nothing to do (empty tools field)", async () => {
-    const { stdout, bin } = await postinstallSuccessHelper("empty-tools-field");
+    const { stdout, bin } = await installSuccessHelper("empty-tools-field");
     expect(stdout).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/postinstall/empty-tools-field/elm-tooling.json⧘
+        ⧘⧙/Users/you/project/fixtures/install/empty-tools-field/elm-tooling.json⧘
         The "tools" field is empty. Nothing to download.
 
       `);
     expect(bin).toMatchInlineSnapshot(`(does not exist)`);
   });
 
-  test("nothing to do (NO_ELM_TOOLING_POSTINSTALL)", async () => {
-    const { stdout, bin } = await postinstallSuccessHelper("would-download", {
-      NO_ELM_TOOLING_POSTINSTALL: "",
+  test("nothing to do (NO_ELM_TOOLING_INSTALL)", async () => {
+    const { stdout, bin } = await installSuccessHelper("would-download", {
+      NO_ELM_TOOLING_INSTALL: "",
     });
     expect(stdout).toMatchInlineSnapshot(``);
     expect(bin).toMatchInlineSnapshot(`(does not exist)`);
   });
 
   test("node_modules/.bin is a file", async () => {
-    expect(await postinstallFailHelper("node_modules-bin-is-a-file"))
+    expect(await installFailHelper("node_modules-bin-is-a-file"))
       .toMatchInlineSnapshot(`
-      Failed to create /Users/you/project/fixtures/postinstall/node_modules-bin-is-a-file/node_modules/.bin:
-      EEXIST: file already exists, mkdir '/Users/you/project/fixtures/postinstall/node_modules-bin-is-a-file/node_modules/.bin'
+      Failed to create /Users/you/project/fixtures/install/node_modules-bin-is-a-file/node_modules/.bin:
+      EEXIST: file already exists, mkdir '/Users/you/project/fixtures/install/node_modules-bin-is-a-file/node_modules/.bin'
 
     `);
   });
 
   test("node_modules/.bin/elm is a folder", async () => {
-    expect(await postinstallFailHelper("executable-is-folder"))
+    expect(await installFailHelper("executable-is-folder"))
       .toMatchInlineSnapshot(`
-      Failed to remove old link for elm at /Users/you/project/fixtures/postinstall/executable-is-folder/node_modules/.bin/elm:
+      Failed to remove old link for elm at /Users/you/project/fixtures/install/executable-is-folder/node_modules/.bin/elm:
       EISDIR: fake error
 
     `);
@@ -136,13 +136,13 @@ describe("postinstall", () => {
       }
     }
 
-    const { stdout, bin } = await postinstallSuccessHelper(fixture);
+    const { stdout, bin } = await installSuccessHelper(fixture);
     expect(stdout).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling.json⧘
-      ⧘⧙elm 0.19.1⧘ already exists: ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm⧘
-      ⧘⧙elm-format 0.8.3⧘ already exists: ⧘⧙/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format⧘
-      ⧘⧙elm 0.19.1⧘ link created: ⧘⧙/Users/you/project/fixtures/postinstall/create/node_modules/.bin/elm -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm⧘
-      ⧘⧙elm-format 0.8.3⧘ link created: ⧘⧙/Users/you/project/fixtures/postinstall/create/node_modules/.bin/elm-format -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧘⧙/Users/you/project/fixtures/install/create/elm-tooling.json⧘
+      ⧘⧙elm 0.19.1⧘ already exists: ⧘⧙/Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm⧘
+      ⧘⧙elm-format 0.8.3⧘ already exists: ⧘⧙/Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧘⧙elm 0.19.1⧘ link created: ⧘⧙/Users/you/project/fixtures/install/create/node_modules/.bin/elm -> /Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm⧘
+      ⧘⧙elm-format 0.8.3⧘ link created: ⧘⧙/Users/you/project/fixtures/install/create/node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format⧘
 
     `);
     if (IS_WINDOWS) {
@@ -150,31 +150,31 @@ describe("postinstall", () => {
       expect(bin).toMatchInlineSnapshot(`
         elm
           #!/bin/sh
-          '/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm' "$@"
+          '/Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm' "$@"
           
         elm-format
           #!/bin/sh
-          '/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format' "$@"
+          '/Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format' "$@"
           
         elm-format.cmd
           @ECHO off
           
-          "/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format" %*
+          "/Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format" %*
           
           
         elm-format.ps1
           #!/usr/bin/env pwsh
-          & '/Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format' $args
+          & '/Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format' $args
           
         elm.cmd
           @ECHO off
           
-          "/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm" %*
+          "/Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm" %*
           
           
         elm.ps1
           #!/usr/bin/env pwsh
-          & '/Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm' $args
+          & '/Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm' $args
           
         elmx
           not elm
@@ -183,17 +183,15 @@ describe("postinstall", () => {
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
       expect(bin).toMatchInlineSnapshot(`
-        elm -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm/0.19.1/elm
-        elm-format -> /Users/you/project/fixtures/postinstall/create/elm-tooling/elm-format/0.8.3/elm-format
+        elm -> /Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm
+        elm-format -> /Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format
         elmx
           not elm
           
       `);
     }
 
-    const { stdout: stdout2, bin: bin2 } = await postinstallSuccessHelper(
-      fixture
-    );
+    const { stdout: stdout2, bin: bin2 } = await installSuccessHelper(fixture);
     expect(stdout2).toBe(stdout);
     expect(bin2).toBe(bin);
   });

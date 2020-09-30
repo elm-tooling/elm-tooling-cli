@@ -93,13 +93,7 @@ export default function validate(
 
 const missingToolsText = `
 ${dim("To download missing tools:")}
-${indent(
-  `
-elm-tooling download
-${dim("or:")}
-elm-tooling postinstall
-`.trim()
-)}
+${indent("elm-tooling install")}
 `.trim();
 
 function getEntrypointsErrors(

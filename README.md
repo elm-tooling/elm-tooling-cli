@@ -9,7 +9,7 @@ Known support:
 | [elm-language-server] |       ✅        |           |          ✅          |
 | [elm-tooling]         |       ✅        |    ✅     |          ✅          |
 
-Note: Anything that supports finding `elm` and `elm-format` in your local `node_modules/.bin/` folder can indirectly use the `"tools"` field via [elm-tooling postinstall].
+Note: Anything that supports finding `elm` and `elm-format` in your local `node_modules/.bin/` folder can indirectly use the `"tools"` field via [elm-tooling install].
 
 ## File location
 
@@ -119,7 +119,7 @@ On a typical Windows setup (with a user called “John”), they would be:
 
 Note that on Windows the `.exe` file extension is used, while on Linux and macOS no file extension is used.
 
-An earlier version of this document stored all tools in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several binaries per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
+An earlier version of this document stored all tools in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several executables per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
 
 Consumers of `elm-tooling.json` must use the specified tools and must not use fallbacks if they are missing. Missing tools must be an error, or (if appropriate, and with the user’s permission) cause a download of the tool. Downloads should have security in mind.
 
@@ -174,5 +174,5 @@ The above logs provide:
 Public domain
 
 [elm-language-server]: https://github.com/elm-tooling/elm-language-server
-[elm-tooling postinstall]: https://github.com/lydell/elm-tooling.json/blob/master/cli#elm-tooling-postinstall
+[elm-tooling install]: https://github.com/lydell/elm-tooling.json/blob/master/cli#elm-tooling-install
 [elm-tooling]: https://github.com/lydell/elm-tooling.json/blob/master/cli

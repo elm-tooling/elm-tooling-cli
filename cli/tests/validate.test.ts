@@ -199,9 +199,7 @@ describe("validate", () => {
             File does not exist: /Users/you/project/fixtures/validate/missing-tools/elm-tooling/elm-format/0.8.3/elm-format
 
         ⧘⧙To download missing tools:⧘
-            elm-tooling download
-            ⧘⧙or:⧘
-            elm-tooling postinstall
+            elm-tooling install
 
         ⧘⧙Documentation:⧘
             https://github.com/lydell/elm-tooling.json
