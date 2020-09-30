@@ -1,7 +1,7 @@
 /* eslint-disable jest/expect-expect */
 
 import { run as runAllDownloads } from "../scripts/test-all-downloads";
-import { run as runEnsure } from "../scripts/test-ensure";
+import { run as runGetExecutable } from "../scripts/test-getExecutable";
 import { run as runIntegration } from "../scripts/test-integration";
 
 jest.setTimeout(20000);
@@ -22,7 +22,7 @@ const ENV_NAME = "SCRIPTS_COVERAGE";
 if (ENV_NAME in process.env) {
   test("test-all-downloads.ts", wrap(runAllDownloads));
   test("test-integration.ts", wrap(runIntegration));
-  test("test-ensure.ts", wrap(runEnsure));
+  test("test-getExecutable.ts", wrap(runGetExecutable));
 } else {
   test(`scripts.test.ts is a no-op unless the env var ${ENV_NAME} is set`, () => {
     // Do nothing

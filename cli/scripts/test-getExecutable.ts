@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import ensure from "../ensure";
+import getExecutable from "../getExecutable";
 
 const WORK_DIR = path.join(__dirname, "all-downloads");
 
@@ -22,8 +22,8 @@ export async function run(): Promise<void> {
     },
   };
 
-  const absolutePath1 = await ensure(options);
-  const absolutePath2 = await ensure(options);
+  const absolutePath1 = await getExecutable(options);
+  const absolutePath2 = await getExecutable(options);
 
   if (absolutePath1 !== absolutePath2) {
     throw new Error(pathError(absolutePath1, absolutePath2));

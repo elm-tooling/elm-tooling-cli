@@ -583,7 +583,7 @@ function callOnProgressIfReasonable(
   }
 }
 
-export async function ensure({
+export async function getExecutable({
   name,
   version,
   cwd = process.cwd(),

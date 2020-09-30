@@ -1,11 +1,11 @@
 import * as path from "path";
 
-import ensure from "../ensure";
+import getExecutable from "../getExecutable";
 import { clean, IS_WINDOWS, stringSnapshotSerializer } from "./helpers";
 
-const FIXTURES_DIR = path.join(__dirname, "fixtures", "ensure");
+const FIXTURES_DIR = path.join(__dirname, "fixtures", "getExecutable");
 
-async function ensureHelper({
+async function getExecutableHelper({
   fixture,
   name,
   version,
@@ -16,7 +16,7 @@ async function ensureHelper({
 }): Promise<string> {
   const dir = path.join(FIXTURES_DIR, fixture);
 
-  return ensure({
+  return getExecutable({
     name,
     version,
     cwd: dir,
@@ -31,10 +31,10 @@ async function ensureHelper({
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);
 
-describe("ensure", () => {
+describe("getExecutable", () => {
   test("unknown tool", () =>
     expect(
-      ensureHelper({
+      getExecutableHelper({
         fixture: "should-not-matter",
         name: "elmx",
         version: "^0.0.0",
@@ -46,7 +46,7 @@ describe("ensure", () => {
 
   test("unknown version (range)", () =>
     expect(
-      ensureHelper({
+      getExecutableHelper({
         fixture: "should-not-matter",
         name: "elm",
         version: "^1337.1.0",
@@ -58,7 +58,7 @@ describe("ensure", () => {
 
   test("unknown exact version", () =>
     expect(
-      ensureHelper({
+      getExecutableHelper({
         fixture: "should-not-matter",
         name: "elm",
         version: "=0.1.0",
@@ -70,7 +70,7 @@ describe("ensure", () => {
 
   test("missing range character", () =>
     expect(
-      ensureHelper({
+      getExecutableHelper({
         fixture: "should-not-matter",
         name: "elm",
         version: "0.19.0",
@@ -81,7 +81,7 @@ describe("ensure", () => {
 
   test("missing semver number", () =>
     expect(
-      ensureHelper({
+      getExecutableHelper({
         fixture: "should-not-matter",
         name: "elm",
         version: "^0.19",
@@ -91,7 +91,7 @@ describe("ensure", () => {
     ));
 
   test("error finding executable", () => {
-    const promise = ensureHelper({
+    const promise = getExecutableHelper({
       fixture: "folder-that-actually-is-a-file",
       name: "elm",
       version: "^0.19.1",
@@ -100,24 +100,24 @@ describe("ensure", () => {
     if (IS_WINDOWS) {
       // eslint-disable-next-line jest/no-conditional-expect
       return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
-        `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/ensure/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1'`
+        `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1'`
       );
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
       return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
-        `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/ensure/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1`
+        `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1`
       );
     }
   });
 
   test("already downloaded", () =>
     expect(
-      ensureHelper({
+      getExecutableHelper({
         fixture: "already-downloaded",
         name: "elm-format",
         version: "^0.8.1-rc1",
       })
     ).resolves.toMatchInlineSnapshot(
-      `/Users/you/project/fixtures/ensure/already-downloaded/elm-tooling/elm-format/0.8.4/elm-format`
+      `/Users/you/project/fixtures/getExecutable/already-downloaded/elm-tooling/elm-format/0.8.4/elm-format`
     ));
 });

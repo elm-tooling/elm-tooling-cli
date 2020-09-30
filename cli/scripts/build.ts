@@ -26,7 +26,7 @@ type FileToCopy = {
 const FILES_TO_COPY: Array<FileToCopy> = [
   { src: "LICENSE" },
   { src: "index.d.ts" },
-  { src: "ensure.d.ts" },
+  { src: "getExecutable.d.ts" },
   { src: "package-real.json", dest: "package.json" },
   {
     src: "README.md",
@@ -73,6 +73,6 @@ function adjustDefaultExport(content: string): string {
 }
 
 modifyFile(path.join(BUILD, "index.js"), adjustDefaultExport);
-modifyFile(path.join(BUILD, "ensure.js"), adjustDefaultExport);
+modifyFile(path.join(BUILD, "getExecutable.js"), adjustDefaultExport);
 
 fs.chmodSync(path.join(BUILD, "index.js"), "755");

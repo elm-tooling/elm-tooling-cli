@@ -1,4 +1,4 @@
-export default function ensure(options: {
+export default function getExecutable(options: {
   name: string;
   version: string;
   cwd?: string;

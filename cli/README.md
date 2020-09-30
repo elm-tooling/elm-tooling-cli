@@ -17,7 +17,7 @@ The CLI for [elm-tooling.json]. Create and validate `elm-tooling.json`. Install 
 - [CI](#ci)
 - [API](#api)
   - [elmToolingCli](#elmtoolingcli)
-  - [ensure](#ensure)
+  - [getExecutable](#getexecutable)
 - [Adding elm-tooling to an existing project](#adding-elm-tooling-to-an-existing-project)
 - [Creating a new project with elm-tooling](#creating-a-new-project-with-elm-tooling)
 - [License](#license)
@@ -179,7 +179,7 @@ export default function elmToolingCli(
 
 The default options use values from the `process` global.
 
-### ensure
+### getExecutable
 
 This function lets npm packages depend on tools distributed as platform specific executables.
 
@@ -189,7 +189,7 @@ It makes sure that a tool choice exists on disk and then returns the absolute pa
 - If the user has the same tool in their `elm-tooling.json`, they will get maximum parallel downloading on clean installs.
 
 ```ts
-export default function ensure(options: {
+export default function getExecutable(options: {
   name: string;
   version: string;
   cwd?: string;
@@ -210,10 +210,10 @@ If you need several tools you can use `Promise.all` to download them all in para
 Example:
 
 ```js
-import ensure from "elm-tooling/ensure";
+import getExecutable from "elm-tooling/getExecutable";
 import * as child_process from "child_process";
 
-ensure({
+getExecutable({
   name: "elm",
   version: "~0.19.0",
   onProgress: (percentage) => {

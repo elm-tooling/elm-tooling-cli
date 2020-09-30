@@ -4,7 +4,7 @@
   "scripts": {
     "doctoc": "doctoc README.md",
     "pretest": "prettier --check . && eslint . --report-unused-disable-directives",
-    "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts && ts-node scripts/test-ensure.ts",
+    "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts && ts-node scripts/test-getExecutable.ts",
     "posttest": "npm run build",
     "build": "ts-node scripts/build.ts"
   },

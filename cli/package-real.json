@@ -8,7 +8,7 @@
   "type": "commonjs",
   "exports": {
     ".": "./index.js",
-    "./ensure": "./ensure.js"
+    "./getExecutable": "./getExecutable.js"
   },
   "bin": "./index.js",
   "keywords": ["elm", "elm-format", "elm-tooling", "elm-tooling.json"]
