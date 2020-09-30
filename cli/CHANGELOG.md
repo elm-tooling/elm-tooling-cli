@@ -1,3 +1,12 @@
+### Version 0.4.0 (2020-09-30)
+
+- Renamed: `elm-tooling postinstall` is now called `elm-tooling install`.
+- Removed: `elm-tooling download`. There’s no use case for it yet. Use `elm-tooling install` instead. (Technically the command is still there but it’s not part of the public API and might be removed for real at any time.)
+- Added: Support for `elm-json` (latest version as of this writing).
+- Added: `getExecutable` for npm packages that want to depend on `elm-json` (or other tools).
+- Improved: `elm-tooling validate` now checks that `/` is used rather than `\` in entrypoints.
+- Improved: `elm-tooling help` now shows the version of `elm-tooling`.
+
 ### Version 0.3.0 (2020-09-24)
 
 - Added: elm-format 0.8.4.
