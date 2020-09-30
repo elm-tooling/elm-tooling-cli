@@ -19,6 +19,8 @@ ${bold("elm-tooling install")}
 ${bold("npx elm --help")}
     Example on how to run installed tools
 
+${dim("---")}
+
 ${bold("Environment variables:")}
     ${bold("ELM_HOME")}
         Customize where tools will be downloaded.
@@ -32,5 +34,8 @@ ${bold("Environment variables:")}
 
 ${bold("Documentation:")}
     https://github.com/lydell/elm-tooling.json/tree/master/cli
+
+${bold("Version:")}
+    %VERSION%
 `.trim();
 }

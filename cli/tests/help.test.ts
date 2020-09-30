@@ -47,6 +47,8 @@ describe("help", () => {
       ⧘⧙npx elm --help⧘
           Example on how to run installed tools
 
+      ⧘⧙---⧘
+
       ⧘⧙Environment variables:⧘
           ⧘⧙ELM_HOME⧘
               Customize where tools will be downloaded.
@@ -60,6 +62,9 @@ describe("help", () => {
 
       ⧘⧙Documentation:⧘
           https://github.com/lydell/elm-tooling.json/tree/master/cli
+
+      ⧘⧙Version:⧘
+          %VERSION%
 
     `);
 
@@ -86,6 +91,8 @@ describe("help", () => {
       npx elm --help
           Example on how to run installed tools
 
+      ---
+
       Environment variables:
           ELM_HOME
               Customize where tools will be downloaded.
@@ -99,6 +106,9 @@ describe("help", () => {
 
       Documentation:
           https://github.com/lydell/elm-tooling.json/tree/master/cli
+
+      Version:
+          %VERSION%
 
     `);
   });

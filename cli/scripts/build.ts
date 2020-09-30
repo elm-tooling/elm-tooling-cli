@@ -74,5 +74,8 @@ function adjustDefaultExport(content: string): string {
 
 modifyFile(path.join(BUILD, "index.js"), adjustDefaultExport);
 modifyFile(path.join(BUILD, "getExecutable.js"), adjustDefaultExport);
+modifyFile(path.join(BUILD, "commands", "help.js"), (content) =>
+  content.replace(/%VERSION%/g, PKG.version)
+);
 
 fs.chmodSync(path.join(BUILD, "index.js"), "755");
