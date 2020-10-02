@@ -285,6 +285,18 @@ function parseEntrypoints(
       };
     }
 
+    if (!entrypoint.endsWith(".elm")) {
+      return {
+        tag: "Left",
+        value: {
+          path: [index],
+          message: `Expected the string to end with ".elm" but got: ${JSON.stringify(
+            entrypoint
+          )}`,
+        },
+      };
+    }
+
     const absolutePath = path.join(
       path.dirname(elmToolingJsonPath),
       entrypoint
