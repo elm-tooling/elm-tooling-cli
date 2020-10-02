@@ -1,3 +1,7 @@
+### Version 0.4.1 (2020-10-02)
+
+- Updated: Some links point to the `main` branch instead of `master`.
+
 ### Version 0.4.0 (2020-09-30)
 
 - Renamed: `elm-tooling postinstall` is now called `elm-tooling install`.
