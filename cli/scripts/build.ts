@@ -6,7 +6,7 @@ const DIR = path.dirname(__dirname);
 const BUILD = path.join(DIR, "build");
 
 const READ_MORE =
-  "**[➡️ Full readme](https://github.com/lydell/elm-tooling.json/tree/main/cli)**";
+  "**[➡️ Full readme](https://github.com/lydell/elm-tooling.json/tree/main/cli#readme)**";
 
 type Package = {
   version: string;

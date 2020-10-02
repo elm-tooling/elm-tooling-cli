@@ -61,7 +61,7 @@ describe("help", () => {
               Disable colored output.
 
       ⧘⧙Documentation:⧘
-          https://github.com/lydell/elm-tooling.json/tree/main/cli
+          https://github.com/lydell/elm-tooling.json/tree/main/cli#readme
 
       ⧘⧙Version:⧘
           %VERSION%
@@ -105,7 +105,7 @@ describe("help", () => {
               Disable colored output.
 
       Documentation:
-          https://github.com/lydell/elm-tooling.json/tree/main/cli
+          https://github.com/lydell/elm-tooling.json/tree/main/cli#readme
 
       Version:
           %VERSION%
