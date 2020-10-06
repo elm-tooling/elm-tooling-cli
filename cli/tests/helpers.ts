@@ -2,13 +2,19 @@ import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
 
+import type { ReadStream } from "../helpers/mixed";
+
 export const IS_WINDOWS = os.platform() === "win32";
 
-export class FailReadStream extends stream.Readable {
+export class FailReadStream extends stream.Readable implements ReadStream {
   _read(size: number): void {
     throw new Error(
       `Expected FailReadStream not to be read but tried to read ${size} bytes.`
     );
+  }
+
+  setRawMode(): void {
+    // Do nothing
   }
 }
 

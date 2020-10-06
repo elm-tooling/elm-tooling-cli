@@ -55,7 +55,9 @@ export default async function download(
       switch (parseResult.tools?.tag) {
         case undefined:
           logger.log(bold(parseResult.elmToolingJsonPath));
-          logger.log(`The "tools" field is missing. Nothing to download.`);
+          logger.log(
+            `The "tools" field is missing. To add tools: elm-tooling tools`
+          );
           return { tag: "Exit", statusCode: 0 };
 
         case "Error":
@@ -79,7 +81,7 @@ async function downloadTools(
   tools: Tools
 ): Promise<DownloadResult> {
   if (tools.existing.length === 0 && tools.missing.length === 0) {
-    logger.log(`The "tools" field is empty. Nothing to download.`);
+    logger.log(`The "tools" field is empty. To add tools: elm-tooling tools`);
     return { tag: "Exit", statusCode: 0 };
   }
 

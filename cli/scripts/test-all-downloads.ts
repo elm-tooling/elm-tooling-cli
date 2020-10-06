@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as readline from "readline";
 import * as stream from "stream";
 
 import elmToolingCli from "..";
@@ -110,9 +109,9 @@ export async function run(): Promise<void> {
         stdin: process.stdin,
         stdout: new stream.Writable({
           write(chunk: string | Buffer, _encoding, callback) {
-            readline.cursorTo(process.stdout, 0, hasWritten ? y + 1 : y);
+            process.stdout.cursorTo(0, hasWritten ? y + 1 : y);
             process.stdout.write(chunk);
-            readline.cursorTo(process.stdout, 0, calculateHeight(variants));
+            process.stdout.cursorTo(0, calculateHeight(variants));
             hasWritten = true;
             callback();
           },
@@ -137,7 +136,7 @@ export async function run(): Promise<void> {
     })
   );
 
-  readline.cursorTo(process.stdout, 0, calculateHeight(variants));
+  process.stdout.cursorTo(0, calculateHeight(variants));
 
   if (stderr.content.length > 0) {
     process.stderr.write(`All stderr outputs:\n${stderr.content}`);

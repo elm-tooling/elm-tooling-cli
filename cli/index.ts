@@ -1,31 +1,47 @@
 #!/usr/bin/env node
 
-import type { Readable, Writable } from "stream";
+import type { Writable } from "stream";
 
 import download from "./commands/download";
 import help from "./commands/help";
 import init from "./commands/init";
 import install from "./commands/install";
+import tools from "./commands/tools";
 import validate from "./commands/validate";
-import { Logger, makeLogger } from "./helpers/logger";
-import type { Env } from "./helpers/mixed";
+import { makeLogger } from "./helpers/logger";
+import type { Env, ReadStream } from "./helpers/mixed";
 
-async function run(
-  argv: Array<string>,
-  cwd: string,
-  env: Env,
-  logger: Logger
+type Options = {
+  cwd: string;
+  env: Env;
+  stdin: ReadStream;
+  stdout: Writable;
+  stderr: Writable;
+};
+
+export default async function elmToolingCli(
+  args: Array<string>,
+  // istanbul ignore next
+  { cwd, env, stdin, stdout, stderr }: Options = {
+    cwd: process.cwd(),
+    env: process.env,
+    stdin: process.stdin,
+    stdout: process.stdout,
+    stderr: process.stderr,
+  }
 ): Promise<number> {
+  const logger = makeLogger({ env, stdout, stderr });
+
   // So far no command takes any further arguments.
   // Let each command handle this when needed.
-  if (argv.length > 1) {
+  if (args.length > 1) {
     logger.error(
-      `Expected a single argument but got: ${argv.slice(1).join(" ")}`
+      `Expected a single argument but got: ${args.slice(1).join(" ")}`
     );
     return 1;
   }
 
-  switch (argv[0]) {
+  switch (args[0]) {
     case undefined:
     case "-h":
     case "-help":
@@ -53,32 +69,13 @@ async function run(
     case "install":
       return install(cwd, env, logger);
 
+    case "tools":
+      return tools(cwd, env, logger, stdin, stdout);
+
     default:
-      logger.error(`Unknown command: ${argv[0]}`);
+      logger.error(`Unknown command: ${args[0]}`);
       return 1;
   }
-}
-
-type Options = {
-  cwd: string;
-  env: Env;
-  stdin: Readable; // Currently unused but specified to avoid breaking changes in the future.
-  stdout: Writable;
-  stderr: Writable;
-};
-
-export default async function elmToolingCli(
-  args: Array<string>,
-  // istanbul ignore next
-  { cwd, env, stdout, stderr }: Options = {
-    cwd: process.cwd(),
-    env: process.env,
-    stdin: process.stdin,
-    stdout: process.stdout,
-    stderr: process.stderr,
-  }
-): Promise<number> {
-  return run(args, cwd, env, makeLogger({ env, stdout, stderr }));
 }
 
 // istanbul ignore if

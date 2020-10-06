@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import type { Readable } from "stream";
 
 export type NonEmptyArray<T> = [T, ...Array<T>];
 
@@ -8,6 +9,11 @@ export type ElmTooling = {
   tools?: {
     [name: string]: string;
   };
+};
+
+export type ReadStream = Readable & {
+  // TODO: Sync this with the other places.
+  setRawMode: (mode: boolean) => void;
 };
 
 export const KNOWN_FIELDS: Array<keyof ElmTooling> = ["entrypoints", "tools"];

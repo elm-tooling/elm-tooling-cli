@@ -11,6 +11,9 @@ ${bold("elm-tooling init")}
 ${bold("elm-tooling validate")}
     Validate the closest elm-tooling.json
 
+${bold("elm-tooling tools")}
+    Add, remove or update tools
+
 ${bold("elm-tooling install")}
     Download the tools in the closest elm-tooling.json to:
     ${dim(getElmToolingInstallPath(cwd, env))}

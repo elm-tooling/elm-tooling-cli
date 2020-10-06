@@ -4,6 +4,7 @@ import type { Writable } from "stream";
 import { Env, removeColor } from "./mixed";
 
 export type Logger = {
+  handleColor: (string: string) => string;
   log: (message: string) => void;
   error: (message: string) => void;
   progress: (message: string) => void;
@@ -25,6 +26,7 @@ export function makeLogger({
     NO_COLOR ? removeColor(string) : string;
 
   return {
+    handleColor,
     log(message) {
       previousProgress = undefined;
       stdout.write(`${handleColor(message)}\n`);
