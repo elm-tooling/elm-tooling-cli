@@ -103,7 +103,7 @@ async function start(
     const redraw = ({ moveCursor }: { moveCursor: boolean }): void => {
       readline.moveCursor(stdout, -cursor.x, -cursor.y);
       const content = logger.handleColor(
-        `\n${draw(state.tools)}\n\n${instructions}\n`
+        `${draw(state.tools)}\n\n${instructions}\n`
       );
       stdout.write(content);
 
@@ -119,6 +119,7 @@ async function start(
       }
     };
 
+    logger.log("");
     redraw({ moveCursor: true });
     stdin.setRawMode(true);
     stdin.resume();
@@ -209,7 +210,8 @@ function getCursorLine(cursorTool: ToolChoice): number {
   }
 
   return (
-    2 * (nameIndex + 1) +
+    1 +
+    2 * nameIndex +
     versionIndex +
     names
       .slice(0, nameIndex)
