@@ -105,7 +105,9 @@ async function start(
 
     const redraw = ({ moveCursor }: { moveCursor: boolean }): void => {
       readline.moveCursor(stdout, -cursor.x, -cursor.y);
-      const content = `\n${logger.handleColor(draw(state.tools))}\n`;
+      const content = logger.handleColor(
+        `\n${draw(state.tools)}\n\n${instructions}\n`
+      );
       stdout.write(content);
 
       const y = getCursorLine(state.cursorTool);
@@ -133,12 +135,14 @@ async function start(
 
         case "Exit":
           redraw({ moveCursor: false });
+          logger.log("");
           logger.log("Nothing changed.");
           resolve(0);
           break;
 
         case "Save":
           redraw({ moveCursor: false });
+          logger.log("");
           if (toolsEqual(tools, state.tools)) {
             logger.log("Nothing changed.");
           } else {
@@ -170,25 +174,24 @@ function draw(tools: Array<ToolChoice>): string {
       const selectedIndex = versions.findIndex((version) =>
         tools.some((tool) => tool.name === name && tool.version === version)
       );
-      return `${bold(name)}\n${versions
+      const versionsString = versions
         .map((version, index) => {
           const marker = index === selectedIndex ? bold("x") : " ";
           return `  ${dim("[")}${marker}${dim("]")} ${
             index === selectedIndex ? version : dim(version)
           }`;
         })
-        .join("\n")}`;
+        .join("\n");
+      return `${bold(name)}\n${versionsString}`;
     })
-    .concat(
-      [
-        `${bold("Up")}/${bold("down")} to move`,
-        `${bold("Space")} to toggle`,
-        `${bold("Enter")} to save`,
-        "",
-      ].join("\n")
-    )
     .join("\n\n");
 }
+
+const instructions = `
+${bold("Up")}/${bold("Down")} to move
+${bold("Space")} to toggle
+${bold("Enter")} to save
+`.trim();
 
 function getCursorLine(cursorTool: ToolChoice): number {
   const names = Object.keys(KNOWN_TOOLS);
