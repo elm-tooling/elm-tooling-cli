@@ -4,7 +4,13 @@ import * as readline from "readline";
 
 import { KNOWN_TOOLS } from "../helpers/known-tools";
 import type { Logger } from "../helpers/logger";
-import { bold, ElmTooling, isRecord, NonEmptyArray } from "../helpers/mixed";
+import {
+  bold,
+  ElmTooling,
+  isRecord,
+  NonEmptyArray,
+  toJSON,
+} from "../helpers/mixed";
 import { getOSName, isWindows } from "../helpers/parse";
 
 export default async function init(
@@ -54,7 +60,7 @@ export default async function init(
     tools,
   };
 
-  fs.writeFileSync(absolutePath, `${JSON.stringify(json, null, 4)}\n`);
+  fs.writeFileSync(absolutePath, toJSON(json));
   logger.log(bold(absolutePath));
   logger.log("Created! Open it in a text editor and have a look!");
   return 0;

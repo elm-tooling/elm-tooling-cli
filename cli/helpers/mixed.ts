@@ -11,14 +11,18 @@ export type ElmTooling = {
   };
 };
 
+export const KNOWN_FIELDS: Array<keyof ElmTooling> = ["entrypoints", "tools"];
+
+export type Env = Record<string, string | undefined>;
+
 export type ReadStream = Readable & {
   // TODO: Sync this with the other places.
   setRawMode: (mode: boolean) => void;
 };
 
-export const KNOWN_FIELDS: Array<keyof ElmTooling> = ["entrypoints", "tools"];
-
-export type Env = Record<string, string | undefined>;
+export function toJSON(json: unknown): string {
+  return `${JSON.stringify(json, null, 4)}\n`;
+}
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

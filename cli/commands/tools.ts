@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as readline from "readline";
 import type { Writable } from "stream";
 
@@ -9,6 +10,7 @@ import {
   elmToolingJsonDocumentationLink,
   Env,
   ReadStream,
+  toJSON,
 } from "../helpers/mixed";
 import {
   findReadAndParseElmToolingJson,
@@ -36,6 +38,13 @@ export default async function toolsCommand(
       return 1;
 
     case "Parsed": {
+      const save = (tools: Array<ToolChoice>): void =>
+        updateElmToolingJson(
+          parseResult.elmToolingJsonPath,
+          parseResult.originalObject,
+          tools
+        );
+
       switch (parseResult.tools?.tag) {
         case "Error":
           logger.error(bold(parseResult.elmToolingJsonPath));
@@ -47,17 +56,20 @@ export default async function toolsCommand(
 
         case undefined:
           logger.log(bold(parseResult.elmToolingJsonPath));
-          return start(logger.handleColor, stdin, stdout, []);
+          return start(logger, stdin, stdout, [], save);
 
         case "Parsed":
           logger.log(bold(parseResult.elmToolingJsonPath));
           return start(
-            logger.handleColor,
+            logger,
             stdin,
             stdout,
-            parseResult.tools.parsed.existing
-              .concat(parseResult.tools.parsed.missing)
-              .sort((a, b) => a.name.localeCompare(b.name))
+            sortTools(
+              parseResult.tools.parsed.existing.concat(
+                parseResult.tools.parsed.missing
+              )
+            ),
+            save
           );
       }
     }
@@ -74,10 +86,11 @@ type State = {
 type Cmd = "None" | "Exit" | "Save";
 
 async function start(
-  handleColor: Logger["handleColor"],
+  logger: Logger,
   stdin: ReadStream,
   stdout: Writable,
-  tools: Array<Tool>
+  tools: Array<Tool>,
+  save: (tools: Array<ToolChoice>) => void
 ): Promise<number> {
   return new Promise((resolve) => {
     stdin.setRawMode(true);
@@ -92,7 +105,7 @@ async function start(
 
     const redraw = ({ moveCursor }: { moveCursor: boolean }): void => {
       readline.moveCursor(stdout, -cursor.x, -cursor.y);
-      const content = `\n${handleColor(draw(state.tools))}\n`;
+      const content = `\n${logger.handleColor(draw(state.tools))}\n`;
       stdout.write(content);
 
       const y = getCursorLine(state.cursorTool);
@@ -117,14 +130,32 @@ async function start(
         case "None":
           redraw({ moveCursor: true });
           break;
+
         case "Exit":
           redraw({ moveCursor: false });
-          stdout.write("Nothing changed.\n");
+          logger.log("Nothing changed.");
           resolve(0);
           break;
+
         case "Save":
           redraw({ moveCursor: false });
-          // TODO: Save
+          if (toolsEqual(tools, state.tools)) {
+            logger.log("Nothing changed.");
+          } else {
+            try {
+              save(state.tools);
+            } catch (errorAny) {
+              const error = errorAny as Error;
+              logger.error(`Failed to save: ${error.message}`);
+              resolve(1);
+              break;
+            }
+            if (state.tools.length === 0) {
+              logger.log("Saved!");
+            } else {
+              logger.log("Saved! To install: elm-tooling install");
+            }
+          }
           resolve(0);
           break;
       }
@@ -252,4 +283,34 @@ function toggleTool(
   );
   const filtered = tools.filter((tool) => tool.name !== cursorTool.name);
   return isSelected ? filtered : [...filtered, cursorTool];
+}
+
+function updateElmToolingJson(
+  elmToolingJsonPath: string,
+  originalObject: Record<string, unknown>,
+  toolsList: Array<ToolChoice>
+): void {
+  const tools =
+    toolsList.length === 0
+      ? undefined
+      : Object.fromEntries(
+          sortTools(toolsList).map(({ name, version }) => [name, version])
+        );
+
+  fs.writeFileSync(elmToolingJsonPath, toJSON({ ...originalObject, tools }));
+}
+
+function sortTools<T extends ToolChoice>(tools: Array<T>): Array<T> {
+  return tools.slice().sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function toolsEqual(a: Array<ToolChoice>, b: Array<ToolChoice>): boolean {
+  return (
+    a.length === b.length &&
+    a.every((toolA) =>
+      b.some(
+        (toolB) => toolA.name === toolB.name && toolA.version === toolB.version
+      )
+    )
+  );
 }
