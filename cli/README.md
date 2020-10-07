@@ -10,6 +10,7 @@ The CLI for [elm-tooling.json]. Create and validate `elm-tooling.json`. Install 
 - [Commands](#commands)
   - [elm-tooling init](#elm-tooling-init)
   - [elm-tooling validate](#elm-tooling-validate)
+  - [elm-tooling tools](#elm-tooling-tools)
   - [elm-tooling install](#elm-tooling-install)
     - [Example](#example)
     - [Comparison with the regular npm packages](#comparison-with-the-regular-npm-packages)
@@ -56,6 +57,10 @@ Create a sample `elm-tooling.json` in the current directory. It tries to guess s
 ### elm-tooling validate
 
 Validate the closest `elm-tooling.json`. If you’re having trouble with some program not reading your `elm-tooling.json` correctly, try `elm-tooling validate` to check if you’ve made any mistakes.
+
+### elm-tooling tools
+
+Interactively add, remove and update tools in your `elm-tooling.json`. This is an alternative to editing the `"tools"` field by hand.
 
 ### elm-tooling install
 
