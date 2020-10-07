@@ -4,7 +4,7 @@ import * as stream from "stream";
 
 import elmToolingCli from "..";
 import { KNOWN_TOOLS } from "../helpers/known-tools";
-import type { ElmTooling } from "../helpers/mixed";
+import type { ElmTooling, WriteStream } from "../helpers/mixed";
 
 const WORK_DIR = path.join(__dirname, "all-downloads");
 const EXPECTED_FILE = path.join(__dirname, "all-downloads.expected.txt");
@@ -58,7 +58,9 @@ function calculateHeight<T>(variants: Array<Array<T>>): number {
   return variants.reduce((sum, otherTools) => sum + otherTools.length + 2, 0);
 }
 
-class MemoryWriteStream extends stream.Writable {
+class MemoryWriteStream extends stream.Writable implements WriteStream {
+  isTTY = true;
+
   content = "";
 
   _write(
@@ -67,6 +69,31 @@ class MemoryWriteStream extends stream.Writable {
     callback: (error?: Error | null) => void
   ): void {
     this.content += chunk.toString();
+    callback();
+  }
+}
+
+class CurorWriteStream extends stream.Writable implements WriteStream {
+  constructor(
+    private variants: Array<Array<readonly [string, string]>>,
+    private y: number
+  ) {
+    super();
+  }
+
+  isTTY = true;
+
+  private hasWritten = false;
+
+  _write(
+    chunk: string | Buffer,
+    _encoding: BufferEncoding,
+    callback: (error?: Error | null) => void
+  ): void {
+    process.stdout.cursorTo(0, this.hasWritten ? this.y + 1 : this.y);
+    process.stdout.write(chunk);
+    process.stdout.cursorTo(0, calculateHeight(this.variants));
+    this.hasWritten = true;
     callback();
   }
 }
@@ -93,10 +120,6 @@ export async function run(): Promise<void> {
         tools: Object.fromEntries(tools),
       };
 
-      const y = calculateHeight(variants.slice(0, index));
-
-      let hasWritten = false;
-
       fs.mkdirSync(dir);
       fs.writeFileSync(
         path.join(dir, "elm-tooling.json"),
@@ -107,15 +130,10 @@ export async function run(): Promise<void> {
         cwd: dir,
         env: { ELM_HOME: dir },
         stdin: process.stdin,
-        stdout: new stream.Writable({
-          write(chunk: string | Buffer, _encoding, callback) {
-            process.stdout.cursorTo(0, hasWritten ? y + 1 : y);
-            process.stdout.write(chunk);
-            process.stdout.cursorTo(0, calculateHeight(variants));
-            hasWritten = true;
-            callback();
-          },
-        }),
+        stdout: new CurorWriteStream(
+          variants,
+          calculateHeight(variants.slice(0, index))
+        ),
         stderr,
       }).then(
         (exitCode) => {

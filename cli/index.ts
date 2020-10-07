@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-import type { Writable } from "stream";
-
 import download from "./commands/download";
 import help from "./commands/help";
 import init from "./commands/init";
@@ -9,14 +7,14 @@ import install from "./commands/install";
 import tools from "./commands/tools";
 import validate from "./commands/validate";
 import { makeLogger } from "./helpers/logger";
-import type { Env, ReadStream } from "./helpers/mixed";
+import type { Env, ReadStream, WriteStream } from "./helpers/mixed";
 
 type Options = {
   cwd: string;
   env: Env;
   stdin: ReadStream;
-  stdout: Writable;
-  stderr: Writable;
+  stdout: WriteStream;
+  stderr: WriteStream;
 };
 
 export default async function elmToolingCli(

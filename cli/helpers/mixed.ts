@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import type { Readable } from "stream";
+import type { Readable, Writable } from "stream";
 
 export type NonEmptyArray<T> = [T, ...Array<T>];
 
@@ -16,8 +16,12 @@ export const KNOWN_FIELDS: Array<keyof ElmTooling> = ["entrypoints", "tools"];
 export type Env = Record<string, string | undefined>;
 
 export type ReadStream = Readable & {
-  // TODO: Sync this with the other places.
+  isTTY: boolean;
   setRawMode: (mode: boolean) => void;
+};
+
+export type WriteStream = Writable & {
+  isTTY: boolean;
 };
 
 export function toJSON(json: unknown): string {

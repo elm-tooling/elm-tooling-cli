@@ -7,6 +7,8 @@ import type { ReadStream } from "../helpers/mixed";
 export const IS_WINDOWS = os.platform() === "win32";
 
 export class FailReadStream extends stream.Readable implements ReadStream {
+  isTTY = true;
+
   _read(size: number): void {
     throw new Error(
       `Expected FailReadStream not to be read but tried to read ${size} bytes.`

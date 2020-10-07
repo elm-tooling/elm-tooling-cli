@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as readline from "readline";
-import type { Writable } from "stream";
 
 import { KNOWN_TOOLS } from "../helpers/known-tools";
 import type { Logger } from "../helpers/logger";
@@ -11,6 +10,7 @@ import {
   Env,
   ReadStream,
   toJSON,
+  WriteStream,
 } from "../helpers/mixed";
 import {
   findReadAndParseElmToolingJson,
@@ -23,7 +23,7 @@ export default async function toolsCommand(
   env: Env,
   logger: Logger,
   stdin: ReadStream,
-  stdout: Writable
+  stdout: WriteStream
 ): Promise<number> {
   const parseResult = findReadAndParseElmToolingJson(cwd, env);
 
@@ -88,7 +88,7 @@ type Cmd = "None" | "Exit" | "Save";
 async function start(
   logger: Logger,
   stdin: ReadStream,
-  stdout: Writable,
+  stdout: WriteStream,
   tools: Array<Tool>,
   save: (tools: Array<ToolChoice>) => void
 ): Promise<number> {
