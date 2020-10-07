@@ -206,13 +206,13 @@ function getCursorLine(cursorTool: ToolChoice): number {
     return 1;
   }
 
-  const previous =
+  return (
     2 * (nameIndex + 1) +
+    versionIndex +
     names
       .slice(0, nameIndex)
-      .reduce((sum, name2) => sum + Object.keys(KNOWN_TOOLS[name2]).length, 0);
-
-  return previous + versionIndex;
+      .reduce((sum, name2) => sum + Object.keys(KNOWN_TOOLS[name2]).length, 0)
+  );
 }
 
 function getDefaultCursorTool(): ToolChoice {
