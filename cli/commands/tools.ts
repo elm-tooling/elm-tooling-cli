@@ -55,9 +55,9 @@ export default async function toolsCommand(
             logger.handleColor,
             stdin,
             stdout,
-            parseResult.tools.parsed.existing.concat(
-              parseResult.tools.parsed.missing
-            )
+            parseResult.tools.parsed.existing
+              .concat(parseResult.tools.parsed.missing)
+              .sort((a, b) => a.name.localeCompare(b.name))
           );
       }
     }
@@ -85,7 +85,6 @@ async function start(
 
     let state: State = {
       tools,
-      // TODO: Is it safe to take the first one, or do we have to sort first?
       cursorTool: tools.length > 0 ? tools[0] : getDefaultCursorTool(),
     };
 

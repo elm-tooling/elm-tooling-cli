@@ -39,7 +39,7 @@ export default async function init(
       ? /* istanbul ignore next */ undefined
       : Object.fromEntries(
           Object.keys(KNOWN_TOOLS)
-            .sort()
+            .sort((a, b) => a.localeCompare(b))
             .map((name) => {
               const versions = Object.keys(KNOWN_TOOLS[name]);
               return [name, versions[versions.length - 1]];
@@ -85,7 +85,7 @@ async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
 
   const entrypoints = results
     .flatMap((result) => (result instanceof Error ? [] : result))
-    .sort();
+    .sort((a, b) => a.localeCompare(b));
 
   if (entrypoints.length === 0) {
     throw new Error("Expected at least 1 entrypoint but got 0.");
