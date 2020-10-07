@@ -120,7 +120,7 @@ async function start(
           break;
         case "Exit":
           redraw({ moveCursor: false });
-          // TODO: Exit
+          stdout.write("Nothing changed.\n");
           resolve(0);
           break;
         case "Save":
