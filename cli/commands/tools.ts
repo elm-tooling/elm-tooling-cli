@@ -93,12 +93,7 @@ async function start(
 
     const redraw = (): void => {
       readline.moveCursor(stdout, -cursor.x, -cursor.y);
-      const content = `\n${handleColor(draw(state.tools))}\n\n${JSON.stringify(
-        cursor
-      )}\n${JSON.stringify({
-        name: state.cursorTool.name,
-        version: state.cursorTool.version,
-      })}\n`;
+      const content = `\n${handleColor(draw(state.tools))}\n`;
       stdout.write(content);
 
       const y = getCursorLine(state.cursorTool);
@@ -145,9 +140,7 @@ function draw(tools: Array<ToolChoice>): string {
         .map((version, index) => {
           const marker = index === selectedIndex ? bold("x") : " ";
           return `  ${dim("[")}${marker}${dim("]")} ${
-            index === selectedIndex || index === versions.length - 1
-              ? version
-              : dim(version)
+            index === selectedIndex ? version : dim(version)
           }`;
         })
         .join("\n")}`;
@@ -163,6 +156,31 @@ function draw(tools: Array<ToolChoice>): string {
     .join("\n\n");
 }
 
+function getCursorLine(cursorTool: ToolChoice): number {
+  const names = Object.keys(KNOWN_TOOLS);
+  const nameIndex = names.indexOf(cursorTool.name);
+
+  if (nameIndex === -1) {
+    return 1;
+  }
+
+  const name = names[nameIndex];
+  const versions = Object.keys(KNOWN_TOOLS[name]);
+  const versionIndex = versions.indexOf(cursorTool.version);
+
+  if (versionIndex === -1) {
+    return 1;
+  }
+
+  const previous =
+    2 * (nameIndex + 1) +
+    names
+      .slice(0, nameIndex)
+      .reduce((sum, name2) => sum + Object.keys(KNOWN_TOOLS[name2]).length, 0);
+
+  return previous + versionIndex;
+}
+
 function getDefaultCursorTool(): ToolChoice {
   const [name] = Object.keys(KNOWN_TOOLS);
   const versions = Object.keys(KNOWN_TOOLS[name]);
@@ -170,30 +188,10 @@ function getDefaultCursorTool(): ToolChoice {
   return { name, version };
 }
 
-function getCursorLine(cursorTool: ToolChoice): number {
-  const names = Object.keys(KNOWN_TOOLS);
-  const nameIndex = names.indexOf(cursorTool.name);
-  if (nameIndex === -1) {
-    return 1;
-  }
-  const name = names[nameIndex];
-  const versions = Object.keys(KNOWN_TOOLS[name]);
-  const versionIndex = versions.indexOf(cursorTool.version);
-  if (versionIndex === -1) {
-    return 1;
-  }
-  const previous = names
-    .slice(0, nameIndex)
-    .reduce(
-      (sum, name2) => sum + 2 + Object.keys(KNOWN_TOOLS[name2]).length,
-      0
-    );
-  return 1 + previous + versionIndex;
-}
-
 function update(keypress: string, state: State): [State, Cmd] {
   switch (keypress) {
     case "\x03": // ctrl+c
+    case "q":
       return [state, "Exit"];
 
     case "\x1b[A": // up
@@ -214,6 +212,8 @@ function update(keypress: string, state: State): [State, Cmd] {
       return [state, "Save"];
 
     case " ": // space
+    case "x":
+    case "o":
       return [
         { ...state, tools: toggleTool(state.cursorTool, state.tools) },
         "None",
@@ -236,18 +236,17 @@ function updateCursorTool(delta: number, cursorTool: ToolChoice): ToolChoice {
     return cursorTool;
   }
   const nextIndex = index + delta;
-  return nextIndex <= 0 || nextIndex >= all.length - 1
-    ? cursorTool
-    : all[nextIndex];
+  return nextIndex < 0 || nextIndex >= all.length ? cursorTool : all[nextIndex];
 }
 
 function toggleTool(
   cursorTool: ToolChoice,
   tools: Array<ToolChoice>
 ): Array<ToolChoice> {
-  const filtered = tools.filter(
+  const isSelected = tools.some(
     (tool) =>
-      !(tool.name === cursorTool.name && tool.version === cursorTool.version)
+      tool.name === cursorTool.name && tool.version === cursorTool.version
   );
-  return filtered.length === tools.length ? [...tools, cursorTool] : filtered;
+  const filtered = tools.filter((tool) => tool.name !== cursorTool.name);
+  return isSelected ? filtered : [...filtered, cursorTool];
 }
