@@ -2,7 +2,7 @@ import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
 
-import type { ReadStream } from "../helpers/mixed";
+import type { ReadStream, WriteStream } from "../helpers/mixed";
 
 export const IS_WINDOWS = os.platform() === "win32";
 
@@ -20,7 +20,9 @@ export class FailReadStream extends stream.Readable implements ReadStream {
   }
 }
 
-export class MemoryWriteStream extends stream.Writable {
+export class MemoryWriteStream extends stream.Writable implements WriteStream {
+  isTTY = true;
+
   content = "";
 
   _write(

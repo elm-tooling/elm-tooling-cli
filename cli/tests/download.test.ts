@@ -60,7 +60,7 @@ describe("download", () => {
       expect(await downloadSuccessHelper("empty-object-two-levels-up/one/two"))
         .toMatchInlineSnapshot(`
         ⧘⧙/Users/you/project/fixtures/download/empty-object-two-levels-up/elm-tooling.json⧘
-        The "tools" field is missing. Nothing to download.
+        The "tools" field is missing. To add tools: elm-tooling tools
 
       `);
     });
@@ -69,7 +69,7 @@ describe("download", () => {
       expect(await downloadSuccessHelper("empty-tools-field"))
         .toMatchInlineSnapshot(`
         ⧘⧙/Users/you/project/fixtures/download/empty-tools-field/elm-tooling.json⧘
-        The "tools" field is empty. Nothing to download.
+        The "tools" field is empty. To add tools: elm-tooling tools
 
       `);
     });

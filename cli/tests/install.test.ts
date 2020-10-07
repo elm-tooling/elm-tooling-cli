@@ -94,10 +94,10 @@ describe("install", () => {
   test("nothing to do (empty tools field)", async () => {
     const { stdout, bin } = await installSuccessHelper("empty-tools-field");
     expect(stdout).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/install/empty-tools-field/elm-tooling.json⧘
-        The "tools" field is empty. Nothing to download.
+      ⧘⧙/Users/you/project/fixtures/install/empty-tools-field/elm-tooling.json⧘
+      The "tools" field is empty. To add tools: elm-tooling tools
 
-      `);
+    `);
     expect(bin).toMatchInlineSnapshot(`(does not exist)`);
   });
 

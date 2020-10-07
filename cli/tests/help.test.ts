@@ -39,10 +39,13 @@ describe("help", () => {
       ⧘⧙elm-tooling validate⧘
           Validate the closest elm-tooling.json
 
+      ⧘⧙elm-tooling tools⧘
+          Add, remove and update tools
+
       ⧘⧙elm-tooling install⧘
           Download the tools in the closest elm-tooling.json to:
           ⧘⧙/Users/you/.elm/elm-tooling⧘
-          And create links to them in node_modules/.bin/
+          And create links to them in the closest node_modules/.bin/
 
       ⧘⧙npx elm --help⧘
           Example on how to run installed tools
@@ -51,14 +54,14 @@ describe("help", () => {
 
       ⧘⧙Environment variables:⧘
           ⧘⧙ELM_HOME⧘
-              Customize where tools will be downloaded.
-              The Elm compiler uses this variable too for where to store packages.
+              Customize where tools will be downloaded
+              (The Elm compiler uses this variable too for where to store packages.)
 
           ⧘⧙NO_ELM_TOOLING_INSTALL⧘
-              Disable the install command.
+              Disable the install command
 
           ⧘⧙NO_COLOR⧘
-              Disable colored output.
+              Disable colored output
 
       ⧘⧙Documentation:⧘
           https://github.com/lydell/elm-tooling.json/tree/main/cli#readme
@@ -83,10 +86,13 @@ describe("help", () => {
       elm-tooling validate
           Validate the closest elm-tooling.json
 
+      elm-tooling tools
+          Add, remove and update tools
+
       elm-tooling install
           Download the tools in the closest elm-tooling.json to:
           /test/elm-tooling
-          And create links to them in node_modules/.bin/
+          And create links to them in the closest node_modules/.bin/
 
       npx elm --help
           Example on how to run installed tools
@@ -95,14 +101,14 @@ describe("help", () => {
 
       Environment variables:
           ELM_HOME
-              Customize where tools will be downloaded.
-              The Elm compiler uses this variable too for where to store packages.
+              Customize where tools will be downloaded
+              (The Elm compiler uses this variable too for where to store packages.)
 
           NO_ELM_TOOLING_INSTALL
-              Disable the install command.
+              Disable the install command
 
           NO_COLOR
-              Disable colored output.
+              Disable colored output
 
       Documentation:
           https://github.com/lydell/elm-tooling.json/tree/main/cli#readme
