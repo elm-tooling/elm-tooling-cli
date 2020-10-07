@@ -93,9 +93,6 @@ async function start(
   save: (tools: Array<ToolChoice>) => void
 ): Promise<number> {
   return new Promise((resolve) => {
-    stdin.setRawMode(true);
-    stdin.resume();
-
     let state: State = {
       tools,
       cursorTool: tools.length > 0 ? tools[0] : getDefaultCursorTool(),
@@ -123,6 +120,8 @@ async function start(
     };
 
     redraw({ moveCursor: true });
+    stdin.setRawMode(true);
+    stdin.resume();
 
     stdin.on("data", (buffer: Buffer) => {
       const [nextState, cmd] = update(buffer.toString(), state);
