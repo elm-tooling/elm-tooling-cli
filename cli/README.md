@@ -62,6 +62,10 @@ Validate the closest `elm-tooling.json`. If you’re having trouble with some pr
 
 Interactively add, remove and update tools in your `elm-tooling.json`. This is an alternative to editing the `"tools"` field by hand.
 
+Not seeing the latest version of a tool? Update to the latest version of `elm-tooling`!
+
+Still not seeing it? Open an issue!
+
 ### elm-tooling install
 
 Download the [tools] in the closest `elm-tooling.json` and create links to them in `node_modules/.bin/`.
