@@ -91,7 +91,7 @@ async function start(
 
     let cursor: { x: number; y: number } = { x: 0, y: 0 };
 
-    const redraw = (): void => {
+    const redraw = ({ moveCursor }: { moveCursor: boolean }): void => {
       readline.moveCursor(stdout, -cursor.x, -cursor.y);
       const content = `\n${handleColor(draw(state.tools))}\n`;
       stdout.write(content);
@@ -99,28 +99,32 @@ async function start(
       const y = getCursorLine(state.cursorTool);
       cursor = { x: 3, y };
 
-      readline.moveCursor(
-        stdout,
-        cursor.x,
-        -(content.split("\n").length - 1 - cursor.y)
-      );
+      if (moveCursor) {
+        readline.moveCursor(
+          stdout,
+          cursor.x,
+          -(content.split("\n").length - 1 - cursor.y)
+        );
+      }
     };
 
-    redraw();
+    redraw({ moveCursor: true });
 
     stdin.on("data", (buffer: Buffer) => {
       const [nextState, cmd] = update(buffer.toString(), state);
       state = nextState;
-      redraw();
 
       switch (cmd) {
         case "None":
+          redraw({ moveCursor: true });
           break;
         case "Exit":
+          redraw({ moveCursor: false });
           // TODO: Exit
           resolve(0);
           break;
         case "Save":
+          redraw({ moveCursor: false });
           // TODO: Save
           resolve(0);
           break;
