@@ -25,7 +25,7 @@ async function toolsHelper(
   expect(stderr.content).toBe("");
   expect(exitCode).toBe(0);
 
-  return clean(stdout.lines.join("\n"));
+  return clean(stdout.getOutput());
 }
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);
@@ -53,7 +53,7 @@ describe("tools", () => {
       ⧙Enter⧘ to save
          
       Nothing changed.
-
+      ▊
     `);
   });
 });

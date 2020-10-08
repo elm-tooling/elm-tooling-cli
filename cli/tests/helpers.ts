@@ -85,9 +85,9 @@ function parseCursorMove(
 export class CursorWriteStream extends stream.Writable implements WriteStream {
   isTTY = true;
 
-  lines: Array<string> = [];
+  private lines: Array<string> = [];
 
-  cursor = { x: 0, y: 0 };
+  private cursor = { x: 0, y: 0 };
 
   _write(
     chunk: string | Buffer,
@@ -111,6 +111,7 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
                 )} + ${JSON.stringify({ dx, dy })} = ${JSON.stringify(cursor)}`
               )
             );
+            break;
           } else {
             this.cursor = cursor;
           }
@@ -132,6 +133,16 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
       }
     }
     callback();
+  }
+
+  getOutput(): string {
+    const line = this.lines[this.cursor.y];
+    const char = line[this.cursor.x] === "x" ? "☒" : "▊";
+    return [
+      ...this.lines.slice(0, this.cursor.y),
+      line.slice(0, this.cursor.x) + char + line.slice(this.cursor.x + 1),
+      ...this.lines.slice(this.cursor.y + 1),
+    ].join("\n");
   }
 }
 
