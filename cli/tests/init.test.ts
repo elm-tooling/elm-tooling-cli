@@ -73,7 +73,7 @@ describe("init", () => {
     const { stdout, json } = await initSuccessHelper("package");
 
     expect(stdout).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/init/package/elm-tooling.json⧘
+      ⧙/Users/you/project/fixtures/init/package/elm-tooling.json⧘
       Created! Open it in a text editor and have a look!
 
     `);
@@ -94,7 +94,7 @@ describe("init", () => {
     const { stdout, json } = await initSuccessHelper("application");
 
     expect(stdout).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/init/application/elm-tooling.json⧘
+      ⧙/Users/you/project/fixtures/init/application/elm-tooling.json⧘
       Created! Open it in a text editor and have a look!
 
     `);
@@ -135,7 +135,7 @@ describe("init", () => {
 
   test("already exists", async () => {
     expect(await initFailHelper("already-exists")).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/init/already-exists/elm-tooling.json⧘
+      ⧙/Users/you/project/fixtures/init/already-exists/elm-tooling.json⧘
       Already exists!
 
     `);
@@ -144,7 +144,7 @@ describe("init", () => {
   test("already exists as folder", async () => {
     expect(await initFailHelper("already-exists-as-folder"))
       .toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/init/already-exists-as-folder/elm-tooling.json⧘
+      ⧙/Users/you/project/fixtures/init/already-exists-as-folder/elm-tooling.json⧘
       Already exists!
 
     `);

@@ -94,7 +94,7 @@ describe("install", () => {
   test("nothing to do (empty tools field)", async () => {
     const { stdout, bin } = await installSuccessHelper("empty-tools-field");
     expect(stdout).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/install/empty-tools-field/elm-tooling.json⧘
+      ⧙/Users/you/project/fixtures/install/empty-tools-field/elm-tooling.json⧘
       The "tools" field is empty. To add tools: elm-tooling tools
 
     `);
@@ -138,11 +138,11 @@ describe("install", () => {
 
     const { stdout, bin } = await installSuccessHelper(fixture);
     expect(stdout).toMatchInlineSnapshot(`
-      ⧘⧙/Users/you/project/fixtures/install/create/elm-tooling.json⧘
-      ⧘⧙elm 0.19.1⧘ already exists: ⧘⧙/Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm⧘
-      ⧘⧙elm-format 0.8.3⧘ already exists: ⧘⧙/Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format⧘
-      ⧘⧙elm 0.19.1⧘ link created: ⧘⧙/Users/you/project/fixtures/install/create/node_modules/.bin/elm -> /Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm⧘
-      ⧘⧙elm-format 0.8.3⧘ link created: ⧘⧙/Users/you/project/fixtures/install/create/node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧙/Users/you/project/fixtures/install/create/elm-tooling.json⧘
+      ⧙elm 0.19.1⧘ already exists: ⧙/Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm⧘
+      ⧙elm-format 0.8.3⧘ already exists: ⧙/Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧙elm 0.19.1⧘ link created: ⧙/Users/you/project/fixtures/install/create/node_modules/.bin/elm -> /Users/you/project/fixtures/install/create/elm-tooling/elm/0.19.1/elm⧘
+      ⧙elm-format 0.8.3⧘ link created: ⧙/Users/you/project/fixtures/install/create/node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create/elm-tooling/elm-format/0.8.3/elm-format⧘
 
     `);
     if (IS_WINDOWS) {

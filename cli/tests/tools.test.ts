@@ -33,24 +33,24 @@ expect.addSnapshotSerializer(stringSnapshotSerializer);
 describe("tools", () => {
   test("first test", async () => {
     expect(await toolsHelper(["tools"], ["q"])).toMatchInlineSnapshot(`
-      ⧘⧙/Users/lydell/src/elm-tooling.json/cli/elm-tooling.json⧘
+      ⧙/Users/lydell/src/elm-tooling.json/cli/elm-tooling.json⧘
 
-      ⧘⧙elm⧘
-        ⧘⧙[⧘ ⧘⧙]⧘ ⧘⧙0.19.0⧘
-        ⧘⧙[⧘⧘⧙x⧘⧘⧙]⧘ 0.19.1
+      ⧙elm⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
+        ⧙[⧘⧙x⧘⧙]⧘ 0.19.1
 
-      ⧘⧙elm-format⧘
-        ⧘⧙[⧘ ⧘⧙]⧘ ⧘⧙0.8.1⧘
-        ⧘⧙[⧘ ⧘⧙]⧘ ⧘⧙0.8.2⧘
-        ⧘⧙[⧘ ⧘⧙]⧘ ⧘⧙0.8.3⧘
-        ⧘⧙[⧘⧘⧙x⧘⧘⧙]⧘ 0.8.4
+      ⧙elm-format⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
+        ⧙[⧘⧙x⧘⧙]⧘ 0.8.4
 
-      ⧘⧙elm-json⧘
-        ⧘⧙[⧘⧘⧙x⧘⧘⧙]⧘ 0.2.8
+      ⧙elm-json⧘
+        ⧙[⧘⧙x⧘⧙]⧘ 0.2.8
 
-      ⧘⧙Up⧘/⧘⧙Down⧘ to move
-      ⧘⧙Space⧘ to toggle
-      ⧘⧙Enter⧘ to save
+      ⧙Up⧘/⧙Down⧘ to move
+      ⧙Space⧘ to toggle
+      ⧙Enter⧘ to save
          
       Nothing changed.
 

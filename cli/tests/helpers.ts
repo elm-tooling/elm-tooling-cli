@@ -143,8 +143,8 @@ export function clean(string: string): string {
   const cleaned = string
     .split(__dirname)
     .join(path.join(root, "Users", "you", "project"))
-    .replace(/\x1B\[0?m/g, "⧘")
-    .replace(/\x1B\[\d+m/g, "⧙");
+    .replace(/(?:\x1B\[0?m)?\x1B\[(?!0)\d+m/g, "⧙")
+    .replace(/\x1B\[0?m/g, "⧘");
 
   // Convert Windows-style paths to Unix-style paths so we can use the same snapshots.
   return IS_WINDOWS
