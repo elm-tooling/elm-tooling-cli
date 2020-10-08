@@ -20,6 +20,32 @@ export class FailReadStream extends stream.Readable implements ReadStream {
   }
 }
 
+export class RawReadStream extends stream.Readable implements ReadStream {
+  isRaw = false;
+
+  isTTY = true;
+
+  private index = 0;
+
+  constructor(private chars: Array<string>) {
+    super();
+  }
+
+  _read(size: number): void {
+    if (!this.isRaw) {
+      throw new Error(
+        `Expected \`.setRawMode(true)\` to be called before reading, but tried to read ${size} bytes with \`.isRaw = false\`.`
+      );
+    }
+    this.push(this.chars[this.index]);
+    this.index++;
+  }
+
+  setRawMode(isRaw: boolean): void {
+    this.isRaw = isRaw;
+  }
+}
+
 export class MemoryWriteStream extends stream.Writable implements WriteStream {
   isTTY = true;
 
@@ -31,6 +57,80 @@ export class MemoryWriteStream extends stream.Writable implements WriteStream {
     callback: (error?: Error | null) => void
   ): void {
     this.content += chunk.toString();
+    callback();
+  }
+}
+
+const cursorMove = /^\x1b\[(\d+)([ABCD])$/;
+const split = /(\n|\x1b\[\d+[ABCD])/;
+
+function parseCursorMove(
+  num: number,
+  char: string
+): { dx: number; dy: number } {
+  switch (char) {
+    case "A":
+      return { dx: 0, dy: -num };
+    case "B":
+      return { dx: 0, dy: num };
+    case "C":
+      return { dx: num, dy: 0 };
+    case "D":
+      return { dx: -num, dy: 0 };
+    default:
+      throw new Error(`Unknown cursor move char: ${char}`);
+  }
+}
+
+export class CursorWriteStream extends stream.Writable implements WriteStream {
+  isTTY = true;
+
+  lines: Array<string> = [];
+
+  cursor = { x: 0, y: 0 };
+
+  _write(
+    chunk: string | Buffer,
+    _encoding: BufferEncoding,
+    callback: (error?: Error | null) => void
+  ): void {
+    const parts = chunk.toString().split(split);
+    for (const part of parts) {
+      if (part === "\n") {
+        this.cursor = { x: 0, y: this.cursor.y + 1 };
+      } else {
+        const match = cursorMove.exec(part);
+        if (match !== null) {
+          const { dx, dy } = parseCursorMove(Number(match[1]), match[2]);
+          const cursor = { x: this.cursor.x + dx, y: this.cursor.y + dy };
+          if (cursor.x < 0 || cursor.y < 0) {
+            callback(
+              new Error(
+                `Cursor out of bounds: ${JSON.stringify(
+                  this.cursor
+                )} + ${JSON.stringify({ dx, dy })} = ${JSON.stringify(cursor)}`
+              )
+            );
+          } else {
+            this.cursor = cursor;
+          }
+        } else {
+          const yDiff = this.cursor.y - this.lines.length + 1;
+          if (yDiff > 0) {
+            this.lines.push(...Array.from({ length: yDiff }, () => ""));
+          }
+          const line = this.lines[this.cursor.y];
+          const xDiff = this.cursor.x - line.length;
+          const paddedLine = xDiff > 0 ? line + " ".repeat(xDiff) : line;
+          const nextLine =
+            paddedLine.slice(0, this.cursor.x) +
+            part +
+            paddedLine.slice(this.cursor.x + part.length);
+          this.lines[this.cursor.y] = nextLine;
+          this.cursor = { x: this.cursor.x + part.length, y: this.cursor.y };
+        }
+      }
+    }
     callback();
   }
 }
