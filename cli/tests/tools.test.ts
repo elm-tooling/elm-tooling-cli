@@ -18,6 +18,7 @@ async function toolsHelper(
 ): Promise<{ stdout: string; json: string }> {
   const dir = path.join(FIXTURES_DIR, fixture);
   const elmToolingJsonPath = path.join(dir, "elm-tooling.json");
+  const original = fs.readFileSync(elmToolingJsonPath, "utf8");
 
   const stdout = new CursorWriteStream();
   const stderr = new MemoryWriteStream();
@@ -30,12 +31,18 @@ async function toolsHelper(
     stderr,
   });
 
+  const json = fs.readFileSync(elmToolingJsonPath, "utf8");
+
+  if (json !== original) {
+    fs.writeFileSync(elmToolingJsonPath, original);
+  }
+
   expect(stderr.content).toBe("");
   expect(exitCode).toBe(0);
 
   return {
     stdout: clean(stdout.getOutput()),
-    json: fs.readFileSync(elmToolingJsonPath, "utf8"),
+    json,
   };
 }
 
@@ -147,5 +154,46 @@ describe("tools", () => {
     `);
 
     expect(await toolsHelper(fixture, ["\x03"])).toEqual({ stdout, json });
+  });
+
+  test("change elm version", async () => {
+    const { stdout, json } = await toolsHelper("change-elm-version", [
+      "k",
+      " ",
+      "\r",
+    ]);
+
+    expect(stdout).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/tools/change-elm-version/elm-tooling.json⧘
+
+      ⧙elm⧘
+        ⧙[⧘⧙x⧘⧙]⧘ 0.19.0
+        ⧙[⧘ ⧙]⧘ ⧙0.19.1⧘
+
+      ⧙elm-format⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
+
+      ⧙elm-json⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+
+      ⧙Up⧘/⧙Down⧘ to move
+      ⧙Space⧘ to toggle
+      ⧙Enter⧘ to save
+         
+      Saved! To install: elm-tooling install
+      ▊
+    `);
+
+    expect(json).toMatchInlineSnapshot(`
+      {
+          "tools": {
+              "elm": "0.19.0"
+          }
+      }
+
+    `);
   });
 });
