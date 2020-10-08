@@ -63,6 +63,7 @@ export class MemoryWriteStream extends stream.Writable implements WriteStream {
 
 const cursorMove = /^\x1b\[(\d+)([ABCD])$/;
 const split = /(\n|\x1b\[\d+[ABCD])/;
+const color = /(\x1B\[\d*m)/g;
 
 function parseCursorMove(
   num: number,
@@ -80,6 +81,28 @@ function parseCursorMove(
     default:
       throw new Error(`Unknown cursor move char: ${char}`);
   }
+}
+
+function colorAwareSlice(
+  string: string,
+  start: number,
+  end: number = string.length
+): string {
+  let result = "";
+  let index = 0;
+  for (const [i, part] of string.split(color).entries()) {
+    if (i % 2 === 0) {
+      for (const char of part.split("")) {
+        if (index >= start && index < end) {
+          result += char;
+        }
+        index++;
+      }
+    } else if (index > start && index <= end) {
+      result += part;
+    }
+  }
+  return result;
 }
 
 export class CursorWriteStream extends stream.Writable implements WriteStream {
@@ -121,12 +144,12 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
             this.lines.push(...Array.from({ length: yDiff }, () => ""));
           }
           const line = this.lines[this.cursor.y];
-          const xDiff = this.cursor.x - line.length;
+          const xDiff = this.cursor.x - line.replace(color, "").length;
           const paddedLine = xDiff > 0 ? line + " ".repeat(xDiff) : line;
           const nextLine =
-            paddedLine.slice(0, this.cursor.x) +
+            colorAwareSlice(paddedLine, 0, this.cursor.x) +
             part +
-            paddedLine.slice(this.cursor.x + part.length);
+            colorAwareSlice(paddedLine, this.cursor.x + part.length);
           this.lines[this.cursor.y] = nextLine;
           this.cursor = { x: this.cursor.x + part.length, y: this.cursor.y };
         }
@@ -137,10 +160,14 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
 
   getOutput(): string {
     const line = this.lines[this.cursor.y];
-    const char = line[this.cursor.x] === "x" ? "☒" : "▊";
+    const char = colorAwareSlice(line, this.cursor.x, this.cursor.x + 1);
+    const marker = char.startsWith("x") ? "☒" : "▊";
     return [
       ...this.lines.slice(0, this.cursor.y),
-      line.slice(0, this.cursor.x) + char + line.slice(this.cursor.x + 1),
+      colorAwareSlice(line, 0, this.cursor.x) +
+        marker +
+        char.slice(1) +
+        colorAwareSlice(line, this.cursor.x + 1),
       ...this.lines.slice(this.cursor.y + 1),
     ].join("\n");
   }

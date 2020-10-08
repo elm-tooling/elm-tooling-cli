@@ -83,7 +83,7 @@ type State = {
   cursorTool: ToolChoice;
 };
 
-type Cmd = "None" | "Exit" | "Save";
+type Cmd = "None" | "Exit" | "Save" | "TestExit";
 
 async function start(
   logger: Logger,
@@ -160,6 +160,11 @@ async function start(
               logger.log("Saved! To install: elm-tooling install");
             }
           }
+          resolve(0);
+          break;
+
+        case "TestExit":
+          redraw({ moveCursor: true });
           resolve(0);
           break;
       }
@@ -256,6 +261,9 @@ function update(keypress: string, state: State): [State, Cmd] {
         { ...state, tools: toggleTool(state.cursorTool, state.tools) },
         "None",
       ];
+
+    case "test-exit":
+      return [state, "TestExit"];
 
     default:
       return [state, "None"];
