@@ -73,7 +73,6 @@ describe("tools", () => {
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
-         
     `);
 
     expect(json).toMatchInlineSnapshot(`
@@ -106,7 +105,6 @@ describe("tools", () => {
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
-         
     `);
 
     expect(json).toMatchInlineSnapshot(`
@@ -143,7 +141,7 @@ describe("tools", () => {
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
-         
+
       Nothing changed.
       ▊
     `);
@@ -182,7 +180,7 @@ describe("tools", () => {
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
-         
+
       Saved! To install: elm-tooling install
       ▊
     `);

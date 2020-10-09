@@ -99,8 +99,11 @@ function colorAwareSlice(
         index++;
       }
     } else if (
-      (index > start || (start === 0 && index === 0)) &&
-      index <= end
+      start === 0 && end === 0
+        ? false
+        : start === 0
+        ? index >= 0 && index <= end
+        : index > start && index <= end
     ) {
       result += part;
     }
@@ -165,7 +168,7 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
   }
 
   getOutput(): string {
-    const line = this.lines[this.cursor.y];
+    const line = this.lines[this.cursor.y] ?? "";
     const char = colorAwareSlice(line, this.cursor.x, this.cursor.x + 1);
     const marker = char.startsWith("x") ? "☒" : "▊";
     return [
