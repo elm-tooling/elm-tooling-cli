@@ -98,7 +98,10 @@ function colorAwareSlice(
         }
         index++;
       }
-    } else if (index > start && index <= end) {
+    } else if (
+      (index > start || (start === 0 && index === 0)) &&
+      index <= end
+    ) {
       result += part;
     }
   }
@@ -119,7 +122,9 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
   ): void {
     const parts = chunk.toString().split(split);
     for (const part of parts) {
-      if (part === "\n") {
+      if (part === "") {
+        // Do nothing.
+      } else if (part === "\n") {
         this.cursor = { x: 0, y: this.cursor.y + 1 };
       } else {
         const match = cursorMove.exec(part);
@@ -134,7 +139,7 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
                 )} + ${JSON.stringify({ dx, dy })} = ${JSON.stringify(cursor)}`
               )
             );
-            break;
+            return;
           } else {
             this.cursor = cursor;
           }
@@ -146,12 +151,13 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
           const line = this.lines[this.cursor.y];
           const xDiff = this.cursor.x - line.replace(color, "").length;
           const paddedLine = xDiff > 0 ? line + " ".repeat(xDiff) : line;
+          const partLength = part.replace(color, "").length;
           const nextLine =
             colorAwareSlice(paddedLine, 0, this.cursor.x) +
             part +
-            colorAwareSlice(paddedLine, this.cursor.x + part.length);
+            colorAwareSlice(paddedLine, this.cursor.x + partLength);
           this.lines[this.cursor.y] = nextLine;
-          this.cursor = { x: this.cursor.x + part.length, y: this.cursor.y };
+          this.cursor = { x: this.cursor.x + partLength, y: this.cursor.y };
         }
       }
     }
