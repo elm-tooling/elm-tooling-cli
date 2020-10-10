@@ -61,6 +61,7 @@ export class MemoryWriteStream extends stream.Writable implements WriteStream {
   }
 }
 
+const cursorToggle = /\x1B\[\?25[hl]/g;
 const cursorMove = /^\x1b\[(\d+)([ABCD])$/;
 const split = /(\n|\x1b\[\d+[ABCD])/;
 const color = /(\x1B\[\d*m)/g;
@@ -123,7 +124,7 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {
-    const parts = chunk.toString().split(split);
+    const parts = chunk.toString().replace(cursorToggle, "").split(split);
     for (const part of parts) {
       if (part === "") {
         // Do nothing.

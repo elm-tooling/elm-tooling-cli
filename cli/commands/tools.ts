@@ -18,6 +18,9 @@ import {
   Tool,
 } from "../helpers/parse";
 
+const HIDE_CURSOR = "\x1B[?25l";
+const SHOW_CURSOR = "\x1B[?25h";
+
 export default async function toolsCommand(
   cwd: string,
   env: Env,
@@ -106,7 +109,10 @@ async function start(
     let cursor: { x: number; y: number } = { x: 0, y: 0 };
 
     const redraw = ({ moveCursor }: { moveCursor: boolean }): void => {
+      // Temporarily hide cursor to avoid seeing it briefly jump around on Windows.
+      stdout.write(HIDE_CURSOR);
       readline.moveCursor(stdout, -cursor.x, -cursor.y);
+
       const content = logger.handleColor(
         `${draw(state.tools)}\n\n${instructions}\n`
       );
@@ -122,6 +128,8 @@ async function start(
           -(content.split("\n").length - 1 - cursor.y)
         );
       }
+
+      stdout.write(SHOW_CURSOR);
     };
 
     logger.log("");
