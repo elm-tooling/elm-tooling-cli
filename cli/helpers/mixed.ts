@@ -74,7 +74,9 @@ export function partitionMap<T, Left, Right>(
 
 export const EXECUTABLE = "755";
 
-const RESET_COLOR = "\x1B[0m";
+export const HIDE_CURSOR = "\x1B[?25l";
+export const SHOW_CURSOR = "\x1B[?25h";
+export const RESET_COLOR = "\x1B[0m";
 
 export function bold(string: string): string {
   return `${RESET_COLOR}\x1B[1m${string}${RESET_COLOR}`;

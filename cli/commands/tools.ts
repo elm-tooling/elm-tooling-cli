@@ -8,7 +8,9 @@ import {
   dim,
   elmToolingJsonDocumentationLink,
   Env,
+  HIDE_CURSOR,
   ReadStream,
+  SHOW_CURSOR,
   toJSON,
   WriteStream,
 } from "../helpers/mixed";
@@ -17,9 +19,6 @@ import {
   printFieldErrors,
   Tool,
 } from "../helpers/parse";
-
-const HIDE_CURSOR = "\x1B[?25l";
-const SHOW_CURSOR = "\x1B[?25h";
 
 export default async function toolsCommand(
   cwd: string,

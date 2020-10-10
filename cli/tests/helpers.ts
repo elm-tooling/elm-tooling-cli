@@ -2,7 +2,12 @@ import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
 
-import type { ReadStream, WriteStream } from "../helpers/mixed";
+import {
+  HIDE_CURSOR,
+  ReadStream,
+  SHOW_CURSOR,
+  WriteStream,
+} from "../helpers/mixed";
 
 export const IS_WINDOWS = os.platform() === "win32";
 
@@ -61,9 +66,8 @@ export class MemoryWriteStream extends stream.Writable implements WriteStream {
   }
 }
 
-const cursorToggle = /\x1B\[\?25[hl]/g;
 const cursorMove = /^\x1B\[(\d+)([ABCD])$/;
-const split = /(\n|\x1B\[\d+[ABCD])/;
+const split = /(\n|\x1B\[\d+[ABCD]|\x1B\[\?25[hl])/;
 const color = /(\x1B\[\d*m)/g;
 
 function parseCursorMove(
@@ -119,49 +123,67 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
 
   private cursor = { x: 0, y: 0 };
 
+  private cursorVisible = true;
+
   _write(
     chunk: string | Buffer,
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {
-    const parts = chunk.toString().replace(cursorToggle, "").split(split);
+    const parts = chunk.toString().split(split);
     for (const part of parts) {
-      if (part === "") {
-        // Do nothing.
-      } else if (part === "\n") {
-        this.cursor = { x: 0, y: this.cursor.y + 1 };
-      } else {
-        const match = cursorMove.exec(part);
-        if (match !== null) {
-          const { dx, dy } = parseCursorMove(Number(match[1]), match[2]);
-          const cursor = { x: this.cursor.x + dx, y: this.cursor.y + dy };
-          if (cursor.x < 0 || cursor.y < 0) {
-            callback(
-              new Error(
-                `Cursor out of bounds: ${JSON.stringify(
-                  this.cursor
-                )} + ${JSON.stringify({ dx, dy })} = ${JSON.stringify(cursor)}`
-              )
-            );
-            return;
+      switch (part) {
+        case "":
+          // Do nothing.
+          break;
+
+        case "\n":
+          this.cursor = { x: 0, y: this.cursor.y + 1 };
+          break;
+
+        case HIDE_CURSOR:
+          this.cursorVisible = false;
+          break;
+
+        case SHOW_CURSOR:
+          this.cursorVisible = true;
+          break;
+
+        default: {
+          const match = cursorMove.exec(part);
+          if (match !== null) {
+            const { dx, dy } = parseCursorMove(Number(match[1]), match[2]);
+            const cursor = { x: this.cursor.x + dx, y: this.cursor.y + dy };
+            if (cursor.x < 0 || cursor.y < 0) {
+              callback(
+                new Error(
+                  `Cursor out of bounds: ${JSON.stringify(
+                    this.cursor
+                  )} + ${JSON.stringify({ dx, dy })} = ${JSON.stringify(
+                    cursor
+                  )}`
+                )
+              );
+              return;
+            } else {
+              this.cursor = cursor;
+            }
           } else {
-            this.cursor = cursor;
+            const yDiff = this.cursor.y - this.lines.length + 1;
+            if (yDiff > 0) {
+              this.lines.push(...Array.from({ length: yDiff }, () => ""));
+            }
+            const line = this.lines[this.cursor.y];
+            const xDiff = this.cursor.x - line.replace(color, "").length;
+            const paddedLine = xDiff > 0 ? line + " ".repeat(xDiff) : line;
+            const partLength = part.replace(color, "").length;
+            const nextLine =
+              colorAwareSlice(paddedLine, 0, this.cursor.x) +
+              part +
+              colorAwareSlice(paddedLine, this.cursor.x + partLength);
+            this.lines[this.cursor.y] = nextLine;
+            this.cursor = { x: this.cursor.x + partLength, y: this.cursor.y };
           }
-        } else {
-          const yDiff = this.cursor.y - this.lines.length + 1;
-          if (yDiff > 0) {
-            this.lines.push(...Array.from({ length: yDiff }, () => ""));
-          }
-          const line = this.lines[this.cursor.y];
-          const xDiff = this.cursor.x - line.replace(color, "").length;
-          const paddedLine = xDiff > 0 ? line + " ".repeat(xDiff) : line;
-          const partLength = part.replace(color, "").length;
-          const nextLine =
-            colorAwareSlice(paddedLine, 0, this.cursor.x) +
-            part +
-            colorAwareSlice(paddedLine, this.cursor.x + partLength);
-          this.lines[this.cursor.y] = nextLine;
-          this.cursor = { x: this.cursor.x + partLength, y: this.cursor.y };
         }
       }
     }
@@ -169,6 +191,10 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
   }
 
   getOutput(): string {
+    if (!this.cursorVisible) {
+      return this.lines.join("\n");
+    }
+
     const line = this.lines[this.cursor.y] ?? "";
     const char = colorAwareSlice(line, this.cursor.x, this.cursor.x + 1);
     const marker = char.startsWith("x") ? "☒" : "▊";
