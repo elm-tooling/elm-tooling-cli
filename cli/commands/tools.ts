@@ -250,14 +250,14 @@ function update(keypress: string, state: State): [State, Cmd] {
     case "q":
       return [state, "Exit"];
 
-    case "\x1b[A": // up
+    case "\x1B[A": // up
     case "k":
       return [
         { ...state, cursorTool: updateCursorTool(-1, state.cursorTool) },
         "None",
       ];
 
-    case "\x1b[B": // down
+    case "\x1B[B": // down
     case "j":
       return [
         { ...state, cursorTool: updateCursorTool(1, state.cursorTool) },

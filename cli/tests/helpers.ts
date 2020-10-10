@@ -62,8 +62,8 @@ export class MemoryWriteStream extends stream.Writable implements WriteStream {
 }
 
 const cursorToggle = /\x1B\[\?25[hl]/g;
-const cursorMove = /^\x1b\[(\d+)([ABCD])$/;
-const split = /(\n|\x1b\[\d+[ABCD])/;
+const cursorMove = /^\x1B\[(\d+)([ABCD])$/;
+const split = /(\n|\x1B\[\d+[ABCD])/;
 const color = /(\x1B\[\d*m)/g;
 
 function parseCursorMove(
