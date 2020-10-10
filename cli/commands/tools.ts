@@ -25,6 +25,11 @@ export default async function toolsCommand(
   stdin: ReadStream,
   stdout: WriteStream
 ): Promise<number> {
+  if (!stdin.isTTY) {
+    logger.error("This command requires stdin to be a TTY.");
+    return 1;
+  }
+
   const parseResult = findReadAndParseElmToolingJson(cwd, env);
 
   switch (parseResult.tag) {
