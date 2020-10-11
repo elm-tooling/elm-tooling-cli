@@ -12,7 +12,7 @@ import {
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "tools");
 
-async function toolsHelper(
+async function toolsSuccessHelper(
   fixture: string,
   chars: Array<string>
 ): Promise<{ stdout: string; json: string }> {
@@ -50,7 +50,7 @@ expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("tools", () => {
   test("default cursor position when no tools", async () => {
-    const { stdout, json } = await toolsHelper("empty-elm-tooling", [
+    const { stdout, json } = await toolsSuccessHelper("empty-elm-tooling", [
       "test-exit",
     ]);
 
@@ -82,7 +82,7 @@ describe("tools", () => {
   });
 
   test("default cursor position when tools are provided", async () => {
-    const { stdout, json } = await toolsHelper("some-elm-tooling", [
+    const { stdout, json } = await toolsSuccessHelper("some-elm-tooling", [
       "test-exit",
     ]);
 
@@ -119,7 +119,7 @@ describe("tools", () => {
   });
 
   test("move cursor up past the edge", async () => {
-    const { stdout, json } = await toolsHelper("empty-elm-tooling", [
+    const { stdout, json } = await toolsSuccessHelper("empty-elm-tooling", [
       ...Array.from({ length: 100 }, () => "k"),
       "test-exit",
     ]);
@@ -152,7 +152,7 @@ describe("tools", () => {
   });
 
   test("move cursor down past the edge", async () => {
-    const { stdout, json } = await toolsHelper("empty-elm-tooling", [
+    const { stdout, json } = await toolsSuccessHelper("empty-elm-tooling", [
       ...Array.from({ length: 100 }, () => "j"),
       "test-exit",
     ]);
@@ -186,7 +186,7 @@ describe("tools", () => {
 
   test("moves cursor to the end on exit", async () => {
     const fixture = "empty-elm-tooling";
-    const { stdout, json } = await toolsHelper(fixture, ["q"]);
+    const { stdout, json } = await toolsSuccessHelper(fixture, ["q"]);
 
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/tools/empty-elm-tooling/elm-tooling.json⧘
@@ -217,12 +217,19 @@ describe("tools", () => {
 
     `);
 
-    expect(await toolsHelper(fixture, ["\x03"])).toEqual({ stdout, json });
+    expect(await toolsSuccessHelper(fixture, ["\x03"])).toEqual({
+      stdout,
+      json,
+    });
   });
 
   test("moves cursor to the end on unchanged save", async () => {
     const fixture = "some-elm-tooling";
-    const { stdout, json } = await toolsHelper(fixture, ["x", "x", "\r"]);
+    const { stdout, json } = await toolsSuccessHelper(fixture, [
+      "x",
+      "x",
+      "\r",
+    ]);
 
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/tools/some-elm-tooling/elm-tooling.json⧘
@@ -262,7 +269,7 @@ describe("tools", () => {
 
   test("toggle then exit", async () => {
     const fixture = "some-elm-tooling";
-    const { stdout, json } = await toolsHelper(fixture, ["x", "q"]);
+    const { stdout, json } = await toolsSuccessHelper(fixture, ["x", "q"]);
 
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/tools/some-elm-tooling/elm-tooling.json⧘
@@ -301,7 +308,7 @@ describe("tools", () => {
   });
 
   test("change elm version", async () => {
-    const { stdout, json } = await toolsHelper("change-elm-version", [
+    const { stdout, json } = await toolsSuccessHelper("change-elm-version", [
       "k",
       " ",
       "\r",
@@ -345,7 +352,10 @@ describe("tools", () => {
   });
 
   test("removing last tool removes the entire field", async () => {
-    const { stdout, json } = await toolsHelper("remove-last-tool", ["o", "\r"]);
+    const { stdout, json } = await toolsSuccessHelper("remove-last-tool", [
+      "o",
+      "\r",
+    ]);
 
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/tools/remove-last-tool/elm-tooling.json⧘
