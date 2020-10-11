@@ -1,7 +1,6 @@
 {
-  "before": 1,
   "tools": {
     "elm": "0.19.1"
   },
-  "after": 2
+  "entrypoints": ["./src/Main.elm"]
 }
