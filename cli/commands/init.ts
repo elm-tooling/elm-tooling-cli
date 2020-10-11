@@ -7,14 +7,17 @@ import type { Logger } from "../helpers/logger";
 import {
   bold,
   ElmTooling,
+  Env,
+  findClosest,
   isRecord,
   NonEmptyArray,
   toJSON,
 } from "../helpers/mixed";
-import { getOSName, isWindows } from "../helpers/parse";
+import { getOSName, getToolThrowing, isWindows } from "../helpers/parse";
 
 export default async function init(
   cwd: string,
+  env: Env,
   logger: Logger
 ): Promise<number> {
   const absolutePath = path.join(cwd, "elm-tooling.json");
@@ -43,7 +46,8 @@ export default async function init(
   const tools =
     getOSName() instanceof Error
       ? /* istanbul ignore next */ undefined
-      : Object.fromEntries(
+      : tryGuessToolsFromNodeModules(cwd, env) ??
+        Object.fromEntries(
           Object.keys(KNOWN_TOOLS)
             .sort((a, b) => a.localeCompare(b))
             .map((name) => {
@@ -167,4 +171,61 @@ async function isMainFile(file: string): Promise<boolean> {
       resolve(found);
     });
   });
+}
+
+function tryGuessToolsFromNodeModules(
+  cwd: string,
+  env: Env
+): Record<string, string> | undefined {
+  const nodeModulesPath = findClosest("node_modules", cwd);
+  // istanbul ignore if
+  if (nodeModulesPath === undefined) {
+    return undefined;
+  }
+
+  const pairs: Array<[string, string]> = Object.keys(KNOWN_TOOLS).flatMap(
+    (name) => {
+      try {
+        const pkg: unknown = JSON.parse(
+          fs.readFileSync(
+            path.join(nodeModulesPath, name, "package.json"),
+            "utf8"
+          )
+        );
+
+        const version =
+          isRecord(pkg) && typeof pkg.version === "string"
+            ? pkg.version
+            : undefined;
+        if (version === undefined) {
+          return [];
+        }
+
+        // Exact version match.
+        if (Object.hasOwnProperty.call(KNOWN_TOOLS[name], version)) {
+          return [[name, version]];
+        }
+
+        // Support for example 0.19.1-3 -> 0.19.1.
+        const alternateVersion = version.split(/[+-]/)[0];
+        if (Object.hasOwnProperty.call(KNOWN_TOOLS[name], alternateVersion)) {
+          return [[name, alternateVersion]];
+        }
+
+        // If we find for example elm-json@0.2.7 in node_modules, try to find a
+        // supported semver-matching elm-json version such as 0.2.8.
+        const tool = getToolThrowing({
+          name,
+          version: `^${version}`,
+          cwd,
+          env,
+        });
+        return [[tool.name, tool.version]];
+      } catch (_error) {
+        return [];
+      }
+    }
+  );
+
+  return pairs.length > 0 ? Object.fromEntries(pairs) : undefined;
 }

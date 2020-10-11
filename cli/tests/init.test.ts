@@ -149,4 +149,81 @@ describe("init", () => {
 
     `);
   });
+
+  describe("tools in node_modules are detected", () => {
+    test("exact version, version with suffix and missing tool", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "some-tools-in-node_modules"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+          ⧙/Users/you/project/fixtures/init/some-tools-in-node_modules/elm-tooling.json⧘
+          Created! Open it in a text editor and have a look!
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+              {
+                  "entrypoints": [
+                      "./src/Main.elm"
+                  ],
+                  "tools": {
+                      "elm": "0.19.1",
+                      "elm-format": "0.8.3"
+                  }
+              }
+
+          `);
+    });
+
+    test("semver resolution", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "semver-in-node_modules"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+          ⧙/Users/you/project/fixtures/init/semver-in-node_modules/elm-tooling.json⧘
+          Created! Open it in a text editor and have a look!
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+              {
+                  "entrypoints": [
+                      "./src/Main.elm"
+                  ],
+                  "tools": {
+                      "elm-json": "0.2.8"
+                  }
+              }
+
+          `);
+    });
+
+    test("bad package.json in node_modules are ignored", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "bad-package-json-in-node_modules"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+          ⧙/Users/you/project/fixtures/init/bad-package-json-in-node_modules/elm-tooling.json⧘
+          Created! Open it in a text editor and have a look!
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+        {
+            "entrypoints": [
+                "./src/Main.elm"
+            ],
+            "tools": {
+                "elm": "0.19.1",
+                "elm-format": "0.8.4",
+                "elm-json": "0.2.8"
+            }
+        }
+
+      `);
+    });
+  });
 });

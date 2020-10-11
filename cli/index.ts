@@ -49,7 +49,7 @@ export default async function elmToolingCli(
       return 0;
 
     case "init":
-      return init(cwd, logger);
+      return init(cwd, env, logger);
 
     case "validate":
       return validate(cwd, env, logger);
