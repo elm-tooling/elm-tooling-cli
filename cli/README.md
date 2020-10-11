@@ -270,7 +270,11 @@ getExecutable({
 
 2. Create an `elm-tooling.json`: `npx elm-tooling init`
 
-3. Edit `elm-tooling.json`. For example, if you previously installed `elm` and `elm-format` using `npm`, copy their versions from `package.json` to `elm-tooling.json`. Then you can remove them from `package.json`. You also need to edit `"entrypoints"` in `elm-tooling.json` to match your project – `elm-tooling init` tries to detect them but might fail.
+3. Edit `elm-tooling.json`:
+
+   - `elm-tooling init` tries to guess which tools you already depend on via `npm` by looking inside the closest `node_modules/` folder (if any). Check if `elm-tooling init` got it right, and then remove tools (such as `elm` and `elm-format`) from your `package.json`.
+
+   - `elm-tooling init` also tries to detect your entrypoints, but might fail. Have a look at `"entrypoints"` and make sure that they match your project.
 
 4. Install the tools in `elm-tooling.json`: `npx elm-tooling install`
 
