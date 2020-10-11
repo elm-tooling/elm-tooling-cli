@@ -214,6 +214,7 @@ function getCursorLine(cursorTool: ToolChoice): number {
   const names = Object.keys(KNOWN_TOOLS);
   const nameIndex = names.indexOf(cursorTool.name);
 
+  // istanbul ignore if
   if (nameIndex === -1) {
     return 1;
   }
@@ -222,6 +223,7 @@ function getCursorLine(cursorTool: ToolChoice): number {
   const versions = Object.keys(KNOWN_TOOLS[name]);
   const versionIndex = versions.indexOf(cursorTool.version);
 
+  // istanbul ignore if
   if (versionIndex === -1) {
     return 1;
   }
@@ -290,6 +292,7 @@ function updateCursorTool(delta: number, cursorTool: ToolChoice): ToolChoice {
     (tool) =>
       tool.name === cursorTool.name && tool.version === cursorTool.version
   );
+  // istanbul ignore if
   if (index === -1) {
     return cursorTool;
   }

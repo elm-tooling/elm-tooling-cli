@@ -392,6 +392,39 @@ describe("tools", () => {
     `);
   });
 
+  test("pressing some other key does nothing", async () => {
+    const { stdout, json } = await toolsSuccessHelper("empty-elm-tooling", [
+      "ä",
+      "test-exit",
+    ]);
+
+    expect(stdout).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/tools/empty-elm-tooling/elm-tooling.json⧘
+
+      ⧙elm⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
+        ⧙[⧘▊⧙]⧘ ⧙0.19.1⧘
+
+      ⧙elm-format⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
+
+      ⧙elm-json⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+
+      ⧙Up⧘/⧙Down⧘ to move
+      ⧙Space⧘ to toggle
+      ⧙Enter⧘ to save
+    `);
+
+    expect(json).toMatchInlineSnapshot(`
+      {}
+
+    `);
+  });
+
   test("not a tty", async () => {
     const dir = path.join(FIXTURES_DIR, "does-not-exist");
 
