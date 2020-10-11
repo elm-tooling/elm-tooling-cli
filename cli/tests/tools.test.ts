@@ -505,6 +505,8 @@ describe("tools", () => {
 
     test("readonly", async () => {
       const dir = path.join(FIXTURES_DIR, "readonly");
+      const elmToolingJsonPath = path.join(dir, "elm-tooling.json");
+      fs.chmodSync(elmToolingJsonPath, "0444"); // readonly
 
       const stdout = new CursorWriteStream();
       const stderr = new MemoryWriteStream();
