@@ -151,7 +151,7 @@ describe("tools", () => {
 
   test("move cursor up past the edge", async () => {
     const { stdout, json } = await toolsSuccessHelper("empty-elm-tooling", [
-      ...Array.from({ length: 100 }, () => "k"),
+      ...Array.from({ length: 100 }, () => "\x1B[A"),
       "test-exit",
     ]);
 
@@ -184,7 +184,7 @@ describe("tools", () => {
 
   test("move cursor down past the edge", async () => {
     const { stdout, json } = await toolsSuccessHelper("empty-elm-tooling", [
-      ...Array.from({ length: 100 }, () => "j"),
+      ...Array.from({ length: 100 }, () => "\x1B[B"),
       "test-exit",
     ]);
 
@@ -340,6 +340,8 @@ describe("tools", () => {
 
   test("change elm version", async () => {
     const { stdout, json } = await toolsSuccessHelper("change-elm-version", [
+      "j",
+      "k",
       "k",
       " ",
       "\r",
