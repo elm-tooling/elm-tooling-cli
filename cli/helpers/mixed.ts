@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import type { Readable, Writable } from "stream";
 
 export type NonEmptyArray<T> = [T, ...Array<T>];
 
@@ -13,6 +14,19 @@ export type ElmTooling = {
 export const KNOWN_FIELDS: Array<keyof ElmTooling> = ["entrypoints", "tools"];
 
 export type Env = Record<string, string | undefined>;
+
+export type ReadStream = Readable & {
+  isTTY: boolean;
+  setRawMode: (mode: boolean) => void;
+};
+
+export type WriteStream = Writable & {
+  isTTY: boolean;
+};
+
+export function toJSON(json: unknown): string {
+  return `${JSON.stringify(json, null, 4)}\n`;
+}
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -60,7 +74,9 @@ export function partitionMap<T, Left, Right>(
 
 export const EXECUTABLE = "755";
 
-const RESET_COLOR = "\x1B[0m";
+export const HIDE_CURSOR = "\x1B[?25l";
+export const SHOW_CURSOR = "\x1B[?25h";
+export const RESET_COLOR = "\x1B[0m";
 
 export function bold(string: string): string {
   return `${RESET_COLOR}\x1B[1m${string}${RESET_COLOR}`;

@@ -1,9 +1,9 @@
 import * as readline from "readline";
-import type { Writable } from "stream";
 
-import { Env, removeColor } from "./mixed";
+import { Env, removeColor, WriteStream } from "./mixed";
 
 export type Logger = {
+  handleColor: (string: string) => string;
   log: (message: string) => void;
   error: (message: string) => void;
   progress: (message: string) => void;
@@ -17,14 +17,15 @@ export function makeLogger({
   stderr,
 }: {
   env: Env;
-  stdout: Writable;
-  stderr: Writable;
+  stdout: WriteStream;
+  stderr: WriteStream;
 }): Logger {
   const NO_COLOR = "NO_COLOR" in env;
   const handleColor = (string: string): string =>
     NO_COLOR ? removeColor(string) : string;
 
   return {
+    handleColor,
     log(message) {
       previousProgress = undefined;
       stdout.write(`${handleColor(message)}\n`);

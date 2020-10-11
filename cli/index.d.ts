@@ -1,12 +1,21 @@
-import * as stream from "stream";
+import type { Readable, Writable } from "stream";
+
+type ReadStream = Readable & {
+  isTTY: boolean;
+  setRawMode: (mode: boolean) => void;
+};
+
+type WriteStream = Writable & {
+  isTTY: boolean;
+};
 
 export default function elmToolingCli(
   args: Array<string>,
   options?: {
     cwd: string;
     env: Record<string, string | undefined>;
-    stdin: stream.Readable;
-    stdout: stream.Writable;
-    stderr: stream.Writable;
+    stdin: ReadStream;
+    stdout: WriteStream;
+    stderr: WriteStream;
   }
 ): Promise<number>;

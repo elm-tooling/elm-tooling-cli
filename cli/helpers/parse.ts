@@ -43,6 +43,7 @@ export type ParseResult =
   | {
       tag: "Parsed";
       elmToolingJsonPath: string;
+      originalObject: Record<string, unknown>;
       unknownFields: Array<string>;
       entrypoints?: FieldResult<NonEmptyArray<Entrypoint>>;
       tools?: FieldResult<Tools>;
@@ -108,6 +109,7 @@ export function findReadAndParseElmToolingJson(
 
   const result: ParseResult = {
     tag: "Parsed",
+    originalObject: json,
     elmToolingJsonPath,
     unknownFields: [],
   };

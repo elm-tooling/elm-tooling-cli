@@ -59,8 +59,8 @@ describe("download", () => {
     test("empty object two levels up", async () => {
       expect(await downloadSuccessHelper("empty-object-two-levels-up/one/two"))
         .toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/download/empty-object-two-levels-up/elm-tooling.json⧘
-        The "tools" field is missing. Nothing to download.
+        ⧙/Users/you/project/fixtures/download/empty-object-two-levels-up/elm-tooling.json⧘
+        The "tools" field is missing. To add tools: elm-tooling tools
 
       `);
     });
@@ -68,8 +68,8 @@ describe("download", () => {
     test("empty tools field", async () => {
       expect(await downloadSuccessHelper("empty-tools-field"))
         .toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/download/empty-tools-field/elm-tooling.json⧘
-        The "tools" field is empty. Nothing to download.
+        ⧙/Users/you/project/fixtures/download/empty-tools-field/elm-tooling.json⧘
+        The "tools" field is empty. To add tools: elm-tooling tools
 
       `);
     });
@@ -77,9 +77,9 @@ describe("download", () => {
     test("already downloaded", async () => {
       expect(await downloadSuccessHelper("already-downloaded"))
         .toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling.json⧘
-        ⧘⧙elm 0.19.1⧘ already exists: ⧘⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling/elm/0.19.1/elm⧘
-        ⧘⧙elm-format 0.8.3⧘ already exists: ⧘⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling/elm-format/0.8.3/elm-format⧘
+        ⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling.json⧘
+        ⧙elm 0.19.1⧘ already exists: ⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling/elm/0.19.1/elm⧘
+        ⧙elm-format 0.8.3⧘ already exists: ⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling/elm-format/0.8.3/elm-format⧘
 
       `);
     });
@@ -89,14 +89,14 @@ describe("download", () => {
     test("wrong field type (ignores errors for other fields)", async () => {
       expect(await downloadFailHelper("wrong-field-types"))
         .toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/download/wrong-field-types/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/download/wrong-field-types/elm-tooling.json⧘
 
-        ⧘⧙1⧘ error
+        ⧙1⧘ error
 
-        ⧘⧙tools⧘
+        ⧙tools⧘
             Expected an object but got: ["elm","elm-format"]
 
-        ⧘⧙Documentation:⧘
+        ⧙Documentation:⧘
             https://github.com/lydell/elm-tooling.json
 
       `);
@@ -104,19 +104,19 @@ describe("download", () => {
 
     test("unknown tools/versions", async () => {
       expect(await downloadFailHelper("unknown")).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/download/unknown/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/download/unknown/elm-tooling.json⧘
 
-        ⧘⧙2⧘ errors
+        ⧙2⧘ errors
 
-        ⧘⧙tools["elm-compiler"]⧘
+        ⧙tools["elm-compiler"]⧘
             Unknown tool
             Known tools: elm, elm-format, elm-json
 
-        ⧘⧙tools["elm-format"]⧘
+        ⧙tools["elm-format"]⧘
             Unknown version: 0.8
             Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4
 
-        ⧘⧙Documentation:⧘
+        ⧙Documentation:⧘
             https://github.com/lydell/elm-tooling.json
 
       `);
@@ -134,7 +134,7 @@ describe("download", () => {
 
     test("is folder", async () => {
       expect(await downloadFailHelper("is-folder")).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/download/is-folder/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/download/is-folder/elm-tooling.json⧘
         Failed to read file as JSON:
         EISDIR: illegal operation on a directory, read
 
@@ -143,7 +143,7 @@ describe("download", () => {
 
     test("bad json", async () => {
       expect(await downloadFailHelper("bad-json")).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/download/bad-json/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/download/bad-json/elm-tooling.json⧘
         Failed to read file as JSON:
         Unexpected end of JSON input
 
@@ -152,7 +152,7 @@ describe("download", () => {
 
     test("not an object", async () => {
       expect(await downloadFailHelper("not-an-object")).toMatchInlineSnapshot(`
-        ⧘⧙/Users/you/project/fixtures/download/not-an-object/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/download/not-an-object/elm-tooling.json⧘
         Expected an object but got: ["tools",{"elm":"0.19.1"}]
 
       `);
