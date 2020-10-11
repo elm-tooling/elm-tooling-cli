@@ -455,11 +455,50 @@ describe("tools", () => {
     `);
   });
 
-  test("not a tty", async () => {
-    expect(await toolsFailHelper("does-not-exist", { isTTY: false }))
-      .toMatchInlineSnapshot(`
-      This command requires stdin to be a TTY.
+  describe("errors", () => {
+    test("not a tty", async () => {
+      expect(await toolsFailHelper("does-not-exist", { isTTY: false }))
+        .toMatchInlineSnapshot(`
+              This command requires stdin to be a TTY.
 
-    `);
+          `);
+    });
+
+    test("not found", async () => {
+      expect(await toolsFailHelperAbsolute(path.parse(__dirname).root))
+        .toMatchInlineSnapshot(`
+        No elm-tooling.json found. To create one: elm-tooling init
+
+      `);
+    });
+
+    test("bad json", async () => {
+      expect(await toolsFailHelper("bad-json")).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/tools/bad-json/elm-tooling.json⧘
+        Failed to read file as JSON:
+        Unexpected end of JSON input
+
+      `);
+    });
+
+    test("unknown tools/versions", async () => {
+      expect(await toolsFailHelper("unknown")).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/tools/unknown/elm-tooling.json⧘
+
+        ⧙2⧘ errors
+
+        ⧙tools["elm-compiler"]⧘
+            Unknown tool
+            Known tools: elm, elm-format, elm-json
+
+        ⧙tools["elm-format"]⧘
+            Unknown version: 0.8
+            Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4
+
+        ⧙Documentation:⧘
+            https://github.com/lydell/elm-tooling.json
+
+      `);
+    });
   });
 });
