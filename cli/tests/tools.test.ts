@@ -500,5 +500,49 @@ describe("tools", () => {
 
       `);
     });
+
+    test("readonly", async () => {
+      const dir = path.join(FIXTURES_DIR, "readonly");
+
+      const stdout = new CursorWriteStream();
+      const stderr = new MemoryWriteStream();
+
+      const exitCode = await elmToolingCli(["tools"], {
+        cwd: dir,
+        env: { ELM_HOME: dir },
+        stdin: new RawReadStream(["x", "\r"]),
+        stdout,
+        stderr,
+      });
+
+      expect(exitCode).toBe(1);
+
+      expect(clean(stdout.getOutput())).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/tools/readonly/elm-tooling.json⧘
+
+        ⧙elm⧘
+          ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
+          ⧙[⧘⧙x⧘⧙]⧘ 0.19.1
+
+        ⧙elm-format⧘
+          ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
+          ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
+          ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
+          ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
+
+        ⧙elm-json⧘
+          ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+
+        ⧙Up⧘/⧙Down⧘ to move
+        ⧙Space⧘ to toggle
+        ⧙Enter⧘ to save
+        ▊
+      `);
+
+      expect(clean(stderr.content)).toMatchInlineSnapshot(`
+        Failed to save: EACCES: permission denied, open '/Users/you/project/fixtures/tools/readonly/elm-tooling.json'
+
+      `);
+    });
   });
 });
