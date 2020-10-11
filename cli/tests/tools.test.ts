@@ -5,6 +5,7 @@ import elmToolingCli from "../index";
 import {
   clean,
   CursorWriteStream,
+  FailReadStream,
   MemoryWriteStream,
   RawReadStream,
   stringSnapshotSerializer,
@@ -387,6 +388,31 @@ describe("tools", () => {
               "./src/Main.elm"
           ]
       }
+
+    `);
+  });
+
+  test("not a tty", async () => {
+    const dir = path.join(FIXTURES_DIR, "does-not-exist");
+
+    const stdin = new FailReadStream();
+    stdin.isTTY = false;
+    const stdout = new MemoryWriteStream();
+    const stderr = new MemoryWriteStream();
+
+    const exitCode = await elmToolingCli(["tools"], {
+      cwd: dir,
+      env: { ELM_HOME: dir },
+      stdin,
+      stdout,
+      stderr,
+    });
+
+    expect(stdout.content).toBe("");
+    expect(exitCode).toBe(1);
+
+    expect(stderr.content).toMatchInlineSnapshot(`
+      This command requires stdin to be a TTY.
 
     `);
   });
