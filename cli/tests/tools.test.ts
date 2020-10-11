@@ -47,6 +47,36 @@ async function toolsSuccessHelper(
   };
 }
 
+async function toolsFailHelper(
+  fixture: string,
+  options?: { isTTY?: boolean }
+): Promise<string> {
+  return toolsFailHelperAbsolute(path.join(FIXTURES_DIR, fixture), options);
+}
+
+async function toolsFailHelperAbsolute(
+  dir: string,
+  { isTTY = true }: { isTTY?: boolean } = {}
+): Promise<string> {
+  const stdin = new FailReadStream();
+  stdin.isTTY = isTTY;
+  const stdout = new MemoryWriteStream();
+  const stderr = new MemoryWriteStream();
+
+  const exitCode = await elmToolingCli(["tools"], {
+    cwd: dir,
+    env: { ELM_HOME: dir },
+    stdin,
+    stdout,
+    stderr,
+  });
+
+  expect(stdout.content).toBe("");
+  expect(exitCode).toBe(1);
+
+  return clean(stderr.content);
+}
+
 expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("tools", () => {
@@ -426,25 +456,8 @@ describe("tools", () => {
   });
 
   test("not a tty", async () => {
-    const dir = path.join(FIXTURES_DIR, "does-not-exist");
-
-    const stdin = new FailReadStream();
-    stdin.isTTY = false;
-    const stdout = new MemoryWriteStream();
-    const stderr = new MemoryWriteStream();
-
-    const exitCode = await elmToolingCli(["tools"], {
-      cwd: dir,
-      env: { ELM_HOME: dir },
-      stdin,
-      stdout,
-      stderr,
-    });
-
-    expect(stdout.content).toBe("");
-    expect(exitCode).toBe(1);
-
-    expect(stderr.content).toMatchInlineSnapshot(`
+    expect(await toolsFailHelper("does-not-exist", { isTTY: false }))
+      .toMatchInlineSnapshot(`
       This command requires stdin to be a TTY.
 
     `);
