@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
-import download from "./commands/download";
+import install from "./commands/download";
 import help from "./commands/help";
 import init from "./commands/init";
-import install from "./commands/install";
 import tools from "./commands/tools";
 import validate from "./commands/validate";
 import { makeLogger } from "./helpers/logger";
@@ -53,16 +52,6 @@ export default async function elmToolingCli(
 
     case "validate":
       return validate(cwd, env, logger);
-
-    case "download": {
-      const result = await download(cwd, env, logger);
-      switch (result.tag) {
-        case "Exit":
-          return result.statusCode;
-        case "Success":
-          return 0;
-      }
-    }
 
     case "install":
       return install(cwd, env, logger);
