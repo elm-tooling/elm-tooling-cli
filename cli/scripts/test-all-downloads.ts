@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as readline from "readline";
 import * as stream from "stream";
 
 import elmToolingCli from "..";
@@ -90,9 +91,9 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {
-    process.stdout.cursorTo(0, this.hasWritten ? this.y + 1 : this.y);
+    readline.cursorTo(process.stdout, 0, this.hasWritten ? this.y + 1 : this.y);
     process.stdout.write(chunk);
-    process.stdout.cursorTo(0, calculateHeight(this.variants));
+    readline.cursorTo(process.stdout, 0, calculateHeight(this.variants));
     this.hasWritten = true;
     callback();
   }
@@ -154,7 +155,7 @@ export async function run(): Promise<void> {
     })
   );
 
-  process.stdout.cursorTo(0, calculateHeight(variants));
+  readline.cursorTo(process.stdout, 0, calculateHeight(variants));
 
   if (stderr.content.length > 0) {
     process.stderr.write(`All stderr outputs:\n${stderr.content}`);
