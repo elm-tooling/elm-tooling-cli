@@ -1,39 +1,46 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { bold, dim, EXECUTABLE } from "./mixed";
+import { bold, dim, EXECUTABLE, indent } from "./mixed";
 import { isWindows, Tool } from "./parse";
 
 export function linkTool(
+  cwd: string,
   nodeModulesBinPath: string,
   tool: Tool
 ): string | Error {
   const linkPath = path.join(nodeModulesBinPath, tool.name);
+  const relativeLinkPath = path.relative(cwd, nodeModulesBinPath);
+  const possiblyRelativeLinkPath = relativeLinkPath.startsWith("node_modules")
+    ? relativeLinkPath
+    : linkPath;
 
   // Just like npm, these overwrite whatever links are already in
   // `node_modules/.bin/`. Most likely it’s either old links from for example
   // the `elm` npm package, or links from previous runs of this script.
   const [linkPathPresentationString, what] = isWindows
     ? // istanbul ignore next
-      [symlinkShimWindows(tool, linkPath), "shims"]
-    : [symlink(tool, linkPath), "link"];
+      [symlinkShimWindows(tool, linkPath, possiblyRelativeLinkPath), "shims"]
+    : [symlink(tool, linkPath, possiblyRelativeLinkPath), "link"];
 
   if (linkPathPresentationString instanceof Error) {
     return new Error(linkPathPresentationString.message);
   }
 
   if (linkPathPresentationString === undefined) {
-    return `${bold(`${tool.name} ${tool.version}`)} ${what}: ${dim(
-      "all good"
-    )}`;
+    return `${bold(`${tool.name} ${tool.version}`)}: ${dim("all good")}`;
   }
 
   return `${bold(`${tool.name} ${tool.version}`)} ${what} created: ${dim(
     `${linkPathPresentationString} -> ${tool.absolutePath}`
-  )}`;
+  )}\n${indent(`To run: npx ${tool.name}`)}`;
 }
 
-function symlink(tool: Tool, linkPath: string): string | Error | undefined {
+function symlink(
+  tool: Tool,
+  linkPath: string,
+  possiblyRelativeLinkPath: string
+): string | Error | undefined {
   try {
     if (fs.readlinkSync(linkPath) === tool.absolutePath) {
       return undefined;
@@ -62,20 +69,21 @@ function symlink(tool: Tool, linkPath: string): string | Error | undefined {
     );
   }
 
-  return linkPath;
+  return possiblyRelativeLinkPath;
 }
 
 // istanbul ignore next
 function symlinkShimWindows(
   tool: Tool,
-  linkPath: string
+  linkPath: string,
+  possiblyRelativeLinkPath: string
 ): string | Error | undefined {
   const items = [
     [linkPath, makeShScript(tool.absolutePath)],
     [`${linkPath}.cmd`, makeCmdScript(tool.absolutePath)],
     [`${linkPath}.ps1`, makePs1Script(tool.absolutePath)],
   ];
-  const linkPathPresentationString = `${linkPath}{,.cmd,.ps1}`;
+  const linkPathPresentationString = `${possiblyRelativeLinkPath}{,.cmd,.ps1}`;
 
   try {
     if (

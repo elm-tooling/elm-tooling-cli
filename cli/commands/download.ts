@@ -142,7 +142,7 @@ async function installTools(
           () => {
             toolsProgress[index] = 1;
             redraw();
-            return linkTool(nodeModulesBinPath, tool);
+            return linkTool(cwd, nodeModulesBinPath, tool);
           },
           (error: Error) => {
             toolsProgress[index] = "ERR!";
@@ -152,7 +152,7 @@ async function installTools(
         )
       )
     )),
-    ...tools.existing.map((tool) => linkTool(nodeModulesBinPath, tool)),
+    ...tools.existing.map((tool) => linkTool(cwd, nodeModulesBinPath, tool)),
   ];
 
   const messages = results.flatMap((result) =>
@@ -165,7 +165,9 @@ async function installTools(
 
   redraw();
 
-  logger.log(messages.join("\n"));
+  if (messages.length > 0) {
+    logger.log(messages.join("\n"));
+  }
 
   if (installErrors.length > 0) {
     logger.error("");
