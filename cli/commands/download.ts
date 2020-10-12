@@ -70,8 +70,12 @@ export default async function install(
           return 1;
 
         case "Parsed":
-          logger.log(bold(parseResult.elmToolingJsonPath));
-          return installTools(cwd, logger, parseResult.tools.parsed);
+          return installTools(
+            cwd,
+            logger,
+            parseResult.elmToolingJsonPath,
+            parseResult.tools.parsed
+          );
       }
     }
   }
@@ -80,11 +84,13 @@ export default async function install(
 async function installTools(
   cwd: string,
   logger: Logger,
+  elmToolingJsonPath: string,
   tools: Tools
 ): Promise<number> {
   if (tools.existing.length === 0 && tools.missing.length === 0) {
+    logger.log(bold(elmToolingJsonPath));
     logger.log(`The "tools" field is empty. To add tools: elm-tooling tools`);
-    return 1;
+    return 0;
   }
 
   const nodeModulesPath = findClosest("node_modules", cwd);
@@ -130,6 +136,7 @@ async function installTools(
     }
   };
 
+  logger.log(bold(elmToolingJsonPath));
   redraw();
 
   const results: Array<string | Error | undefined> = [
