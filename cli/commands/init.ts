@@ -67,6 +67,7 @@ export default async function init(
   fs.writeFileSync(absolutePath, toJSON(json));
   logger.log(bold(absolutePath));
   logger.log("Created! Open it in a text editor and have a look!");
+  logger.log("To install tools: elm-tooling install");
   return 0;
 }
 

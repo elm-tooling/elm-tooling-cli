@@ -75,6 +75,7 @@ describe("init", () => {
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/init/package/elm-tooling.json⧘
       Created! Open it in a text editor and have a look!
+      To install tools: elm-tooling install
 
     `);
 
@@ -96,6 +97,7 @@ describe("init", () => {
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/init/application/elm-tooling.json⧘
       Created! Open it in a text editor and have a look!
+      To install tools: elm-tooling install
 
     `);
 
@@ -157,8 +159,9 @@ describe("init", () => {
       );
 
       expect(stdout).toMatchInlineSnapshot(`
-          ⧙/Users/you/project/fixtures/init/some-tools-in-node_modules/elm-tooling.json⧘
-          Created! Open it in a text editor and have a look!
+        ⧙/Users/you/project/fixtures/init/some-tools-in-node_modules/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
 
       `);
 
@@ -182,8 +185,9 @@ describe("init", () => {
       );
 
       expect(stdout).toMatchInlineSnapshot(`
-          ⧙/Users/you/project/fixtures/init/semver-in-node_modules/elm-tooling.json⧘
-          Created! Open it in a text editor and have a look!
+        ⧙/Users/you/project/fixtures/init/semver-in-node_modules/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
 
       `);
 
@@ -206,8 +210,9 @@ describe("init", () => {
       );
 
       expect(stdout).toMatchInlineSnapshot(`
-          ⧙/Users/you/project/fixtures/init/bad-package-json-in-node_modules/elm-tooling.json⧘
-          Created! Open it in a text editor and have a look!
+        ⧙/Users/you/project/fixtures/init/bad-package-json-in-node_modules/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
 
       `);
 
