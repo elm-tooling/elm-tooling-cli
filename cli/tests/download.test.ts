@@ -227,6 +227,11 @@ describe("install", () => {
         fs.unlinkSync(path.join(binDir, item));
       }
     }
+    if (IS_WINDOWS) {
+      fs.writeFileSync(path.join(binDir, "elm"), "something else");
+    } else {
+      fs.symlinkSync("somewhere-else", path.join(binDir, "elm"));
+    }
 
     const { stdout, bin } = await installSuccessHelper(fixture);
     expect(stdout).toMatchInlineSnapshot(`
