@@ -12,7 +12,7 @@ import {
   stringSnapshotSerializer,
 } from "./helpers";
 
-const FIXTURES_DIR = path.join(__dirname, "fixtures", "download");
+const FIXTURES_DIR = path.join(__dirname, "fixtures", "install");
 
 function cleanInstall(string: string): string {
   return (
@@ -102,7 +102,7 @@ describe("install", () => {
         "empty-object-two-levels-up/one/two"
       );
       expect(stdout).toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/empty-object-two-levels-up/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/install/empty-object-two-levels-up/elm-tooling.json⧘
         The "tools" field is missing. To add tools: elm-tooling tools
 
       `);
@@ -112,7 +112,7 @@ describe("install", () => {
     test("empty tools field", async () => {
       const { stdout, bin } = await installSuccessHelper("empty-tools-field");
       expect(stdout).toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/empty-tools-field/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/install/empty-tools-field/elm-tooling.json⧘
         The "tools" field is empty. To add tools: elm-tooling tools
 
       `);
@@ -132,7 +132,7 @@ describe("install", () => {
     test("wrong field type (ignores errors for other fields)", async () => {
       expect(await installFailHelper("wrong-field-types"))
         .toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/wrong-field-types/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/install/wrong-field-types/elm-tooling.json⧘
 
         ⧙1⧘ error
 
@@ -147,7 +147,7 @@ describe("install", () => {
 
     test("unknown tools/versions", async () => {
       expect(await installFailHelper("unknown")).toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/unknown/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/install/unknown/elm-tooling.json⧘
 
         ⧙2⧘ errors
 
@@ -177,7 +177,7 @@ describe("install", () => {
 
     test("elm-tooling.json is folder", async () => {
       expect(await installFailHelper("is-folder")).toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/is-folder/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/install/is-folder/elm-tooling.json⧘
         Failed to read file as JSON:
         EISDIR: fake error
 
@@ -186,7 +186,7 @@ describe("install", () => {
 
     test("bad json", async () => {
       expect(await installFailHelper("bad-json")).toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/bad-json/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/install/bad-json/elm-tooling.json⧘
         Failed to read file as JSON:
         Unexpected end of JSON input
 
@@ -195,7 +195,7 @@ describe("install", () => {
 
     test("not an object", async () => {
       expect(await installFailHelper("not-an-object")).toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/not-an-object/elm-tooling.json⧘
+        ⧙/Users/you/project/fixtures/install/not-an-object/elm-tooling.json⧘
         Expected an object but got: ["tools",{"elm":"0.19.1"}]
 
       `);
@@ -204,9 +204,9 @@ describe("install", () => {
     test("node_modules/.bin is a file", async () => {
       expect(await installFailHelper("node_modules-bin-is-a-file"))
         .toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/node_modules-bin-is-a-file/elm-tooling.json⧘
-        Failed to create /Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin:
-        EEXIST: file already exists, mkdir '/Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin'
+        ⧙/Users/you/project/fixtures/install/node_modules-bin-is-a-file/elm-tooling.json⧘
+        Failed to create /Users/you/project/fixtures/install/node_modules-bin-is-a-file/node_modules/.bin:
+        EEXIST: file already exists, mkdir '/Users/you/project/fixtures/install/node_modules-bin-is-a-file/node_modules/.bin'
 
       `);
     });
@@ -214,7 +214,7 @@ describe("install", () => {
     test("node_modules/.bin/elm is a folder", async () => {
       expect(await installFailHelper("executable-is-folder"))
         .toMatchInlineSnapshot(`
-        ⟪⧙/Users/you/project/fixtures/download/executable-is-folder/elm-tooling.json⧘
+        ⟪⧙/Users/you/project/fixtures/install/executable-is-folder/elm-tooling.json⧘
         ⟫
         ⧙1⧘ error
 
@@ -242,10 +242,10 @@ describe("install", () => {
     const { stdout, bin } = await installSuccessHelper(fixture);
 
     expect(stdout).toMatchInlineSnapshot(`
-      ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
-      ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin/elm -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm⧘
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
+      ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin/elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm⧘
           To run: npx elm
-      ⧙elm-format 0.8.3⧘ link created: ⧙node_modules/.bin/elm-format -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧙elm-format 0.8.3⧘ link created: ⧙node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
           To run: npx elm-format
 
     `);
@@ -255,31 +255,31 @@ describe("install", () => {
       expect(bin).toMatchInlineSnapshot(`
         elm
           #!/bin/sh
-          '/Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm' "$@"
+          '/Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm' "$@"
           
         elm-format
           #!/bin/sh
-          '/Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format' "$@"
+          '/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format' "$@"
           
         elm-format.cmd
           @ECHO off
           
-          "/Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format" %*
+          "/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format" %*
           
           
         elm-format.ps1
           #!/usr/bin/env pwsh
-          & '/Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format' $args
+          & '/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format' $args
           
         elm.cmd
           @ECHO off
           
-          "/Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm" %*
+          "/Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm" %*
           
           
         elm.ps1
           #!/usr/bin/env pwsh
-          & '/Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm' $args
+          & '/Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm' $args
           
         elmx
           not elm
@@ -288,8 +288,8 @@ describe("install", () => {
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
       expect(bin).toMatchInlineSnapshot(`
-        elm -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm
-        elm-format -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format
+        elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm
+        elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format
         elmx
           not elm
           
@@ -299,7 +299,7 @@ describe("install", () => {
     const { stdout: stdout2, bin: bin2 } = await installSuccessHelper(fixture);
 
     expect(stdout2).toMatchInlineSnapshot(`
-      ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
       ⧙elm-format 0.8.3⧘: ⧙all good⧘
 
@@ -315,9 +315,9 @@ describe("install", () => {
     );
 
     expect(stdout3).toMatchInlineSnapshot(`
-      ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
-      ⧙elm-format 0.8.3⧘ link created: ⧙/Users/you/project/fixtures/download/create-links/node_modules/.bin/elm-format -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧙elm-format 0.8.3⧘ link created: ⧙/Users/you/project/fixtures/install/create-links/node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
           To run: npx elm-format
 
     `);

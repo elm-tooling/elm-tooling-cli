@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import install from "./commands/download";
 import help from "./commands/help";
 import init from "./commands/init";
+import install from "./commands/install";
 import tools from "./commands/tools";
 import validate from "./commands/validate";
 import { makeLogger } from "./helpers/logger";

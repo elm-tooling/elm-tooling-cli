@@ -1,3 +1,3 @@
-import { getExecutable } from "./commands/download";
+import { getExecutable } from "./commands/install";
 
 export default getExecutable;
