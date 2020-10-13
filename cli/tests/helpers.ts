@@ -249,8 +249,9 @@ export function clean(string: string): string {
   return IS_WINDOWS
     ? cleaned
         .replace(
-          /(?:[A-Z]:|node_modules)((?:\\[\w.-]+)+\\?)/g,
-          (_, fullPath: string) => fullPath.replace(/\\/g, "/")
+          /(?:[A-Z]:|(node_modules))((?:\\[\w.-]+)+\\?)/g,
+          (_, nodeModules: string = "", fullPath: string = "") =>
+            nodeModules + fullPath.replace(/\\/g, "/")
         )
         .replace(/\.exe\b/g, "")
     : cleaned;
