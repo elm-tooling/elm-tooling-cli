@@ -10,7 +10,7 @@ export function linkTool(
   tool: Tool
 ): string | Error {
   const linkPath = path.join(nodeModulesBinPath, tool.name);
-  const relativeLinkPath = path.relative(cwd, nodeModulesBinPath);
+  const relativeLinkPath = path.relative(cwd, linkPath);
   const possiblyRelativeLinkPath = relativeLinkPath.startsWith("node_modules")
     ? relativeLinkPath
     : linkPath;
@@ -55,7 +55,7 @@ function symlink(
     const error = errorAny as Error & { code?: string };
     if (error.code !== "ENOENT") {
       return new Error(
-        `Failed to remove old link for ${tool.name} at ${linkPath}:\n${error.message}`
+        `Failed to remove old link for ${tool.name} at ${possiblyRelativeLinkPath}:\n${error.message}`
       );
     }
   }
@@ -65,7 +65,7 @@ function symlink(
   } catch (errorAny) /* istanbul ignore next */ {
     const error = errorAny as Error & { code?: number };
     return new Error(
-      `Failed to create link for ${tool.name} at ${linkPath}:\n${error.message}`
+      `Failed to create link for ${tool.name} at ${possiblyRelativeLinkPath}:\n${error.message}`
     );
   }
 

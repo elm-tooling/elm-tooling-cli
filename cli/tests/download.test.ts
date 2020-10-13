@@ -217,7 +217,7 @@ describe("install", () => {
         ⟫
         ⧙1⧘ error
 
-        Failed to remove old link for elm at /Users/you/project/fixtures/download/executable-is-folder/node_modules/.bin/elm:
+        Failed to remove old link for elm at node_modules/.bin/elm:
         EISDIR: fake error
 
       `);
@@ -242,9 +242,9 @@ describe("install", () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
-      ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm⧘
+      ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin/elm -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm⧘
           To run: npx elm
-      ⧙elm-format 0.8.3⧘ link created: ⧙node_modules/.bin -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧙elm-format 0.8.3⧘ link created: ⧙node_modules/.bin/elm-format -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
           To run: npx elm-format
 
     `);
