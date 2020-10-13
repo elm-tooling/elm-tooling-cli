@@ -91,10 +91,17 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {
-    readline.cursorTo(process.stdout, 0, this.hasWritten ? this.y + 1 : this.y);
-    process.stdout.write(chunk);
-    readline.cursorTo(process.stdout, 0, calculateHeight(this.variants));
-    this.hasWritten = true;
+    // Only care about the first line and the progress, not the “link created” lines.
+    if (!this.hasWritten || chunk.toString().includes("%")) {
+      readline.cursorTo(
+        process.stdout,
+        0,
+        this.hasWritten ? this.y + 1 : this.y
+      );
+      process.stdout.write(chunk);
+      readline.cursorTo(process.stdout, 0, calculateHeight(this.variants));
+      this.hasWritten = true;
+    }
     callback();
   }
 }
