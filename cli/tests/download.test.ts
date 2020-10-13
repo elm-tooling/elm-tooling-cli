@@ -27,15 +27,20 @@ function cleanInstall(string: string): string {
 
 async function installSuccessHelper(
   fixture: string,
-  env?: Env
+  env?: Env,
+  cwdExtensionRelativeToFixtureDir?: string
 ): Promise<{ stdout: string; bin: string }> {
   const dir = path.join(FIXTURES_DIR, fixture);
+  const cwd =
+    cwdExtensionRelativeToFixtureDir === undefined
+      ? dir
+      : path.join(dir, cwdExtensionRelativeToFixtureDir);
 
   const stdout = new MemoryWriteStream();
   const stderr = new MemoryWriteStream();
 
   const exitCode = await elmToolingCli(["install"], {
-    cwd: dir,
+    cwd,
     env: { ELM_HOME: dir, ...env },
     stdin: new FailReadStream(),
     stdout,
@@ -234,6 +239,7 @@ describe("install", () => {
     }
 
     const { stdout, bin } = await installSuccessHelper(fixture);
+
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm⧘
@@ -299,5 +305,22 @@ describe("install", () => {
     `);
 
     expect(bin2).toBe(bin);
+
+    fs.unlinkSync(path.join(binDir, "elm-format"));
+    const { stdout: stdout3, bin: bin3 } = await installSuccessHelper(
+      fixture,
+      {},
+      "src"
+    );
+
+    expect(stdout3).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
+      ⧙elm 0.19.1⧘: ⧙all good⧘
+      ⧙elm-format 0.8.3⧘ link created: ⧙/Users/you/project/fixtures/download/create-links/node_modules/.bin/elm-format -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
+          To run: npx elm-format
+
+    `);
+
+    expect(bin3).toBe(bin);
   });
 });
