@@ -92,11 +92,18 @@ async function installTools(
     return 0;
   }
 
-  const nodeModulesPath = findClosest("node_modules", cwd);
+  const nodeModulesPath = findClosest(
+    "node_modules",
+    path.dirname(elmToolingJsonPath)
+  );
   if (nodeModulesPath === undefined) {
+    logger.error(bold(elmToolingJsonPath));
     logger.error(
-      "No node_modules/ folder found. Install your npm dependencies before running this script."
+      `No node_modules/ folder found upwards from: ${path.dirname(
+        elmToolingJsonPath
+      )}`
     );
+    logger.error("Install your npm dependencies before running this script.");
     return 1;
   }
 
@@ -105,6 +112,7 @@ async function installTools(
     fs.mkdirSync(nodeModulesBinPath, { recursive: true });
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
+    logger.error(bold(elmToolingJsonPath));
     logger.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
     return 1;
   }

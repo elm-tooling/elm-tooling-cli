@@ -29,7 +29,7 @@ async function installSuccessHelper(
   fixture: string,
   env?: Env,
   cwdExtensionRelativeToFixtureDir?: string
-): Promise<{ stdout: string; bin: string }> {
+): Promise<{ stdout: string; bin: string; cwd: string }> {
   const dir = path.join(FIXTURES_DIR, fixture);
   const cwd =
     cwdExtensionRelativeToFixtureDir === undefined
@@ -70,7 +70,7 @@ async function installSuccessHelper(
         .join("\n")
     : "(does not exist)";
 
-  return { stdout: cleanInstall(clean(stdout.content)), bin: clean(bin) };
+  return { stdout: cleanInstall(clean(stdout.content)), bin: clean(bin), cwd };
 }
 
 async function installFailHelper(fixture: string): Promise<string> {
@@ -204,10 +204,11 @@ describe("install", () => {
     test("node_modules/.bin is a file", async () => {
       expect(await installFailHelper("node_modules-bin-is-a-file"))
         .toMatchInlineSnapshot(`
-          Failed to create /Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin:
-          EEXIST: file already exists, mkdir '/Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin'
+        ⧙/Users/you/project/fixtures/download/node_modules-bin-is-a-file/elm-tooling.json⧘
+        Failed to create /Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin:
+        EEXIST: file already exists, mkdir '/Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin'
 
-        `);
+      `);
     });
 
     test("node_modules/.bin/elm is a folder", async () => {
@@ -307,7 +308,7 @@ describe("install", () => {
     expect(bin2).toBe(bin);
 
     fs.unlinkSync(path.join(binDir, "elm-format"));
-    const { stdout: stdout3, bin: bin3 } = await installSuccessHelper(
+    const { stdout: stdout3, bin: bin3, cwd } = await installSuccessHelper(
       fixture,
       {},
       "src"
@@ -322,5 +323,9 @@ describe("install", () => {
     `);
 
     expect(bin3).toBe(bin);
+
+    expect(fs.readdirSync(path.join(cwd, "node_modules"))).toEqual([
+      ".gitkeep",
+    ]);
   });
 });
