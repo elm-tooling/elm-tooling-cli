@@ -72,8 +72,6 @@ export function partitionMap<T, Left, Right>(
   return [left, right];
 }
 
-export const EXECUTABLE = "755";
-
 export const HIDE_CURSOR = "\x1B[?25l";
 export const SHOW_CURSOR = "\x1B[?25h";
 export const RESET_COLOR = "\x1B[0m";

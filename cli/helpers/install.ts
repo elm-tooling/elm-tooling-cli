@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { bold, dim, EXECUTABLE, indent } from "./mixed";
+import { bold, dim, indent } from "./mixed";
 import { isWindows, Tool } from "./parse";
 
 export function linkTool(
@@ -88,9 +88,7 @@ function symlinkShimWindows(
   try {
     if (
       items.every(
-        ([itemPath, content]) =>
-          fs.readFileSync(itemPath, "utf8") === content &&
-          fs.statSync(itemPath).mode.toString(8).endsWith(EXECUTABLE)
+        ([itemPath, content]) => fs.readFileSync(itemPath, "utf8") === content
       )
     ) {
       return undefined;
@@ -115,7 +113,6 @@ function symlinkShimWindows(
   try {
     for (const [itemPath, content] of items) {
       fs.writeFileSync(itemPath, content);
-      fs.chmodSync(itemPath, EXECUTABLE);
     }
   } catch (errorAny) {
     const error = errorAny as Error & { code?: number };
