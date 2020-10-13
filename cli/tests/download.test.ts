@@ -5,6 +5,7 @@ import type { Env } from "../helpers/mixed";
 import elmToolingCli from "../index";
 import {
   clean,
+  duoStream,
   FailReadStream,
   IS_WINDOWS,
   MemoryWriteStream,
@@ -72,21 +73,19 @@ async function installFailHelper(fixture: string): Promise<string> {
 }
 
 async function installFailHelperAbsolute(dir: string): Promise<string> {
-  const stdout = new MemoryWriteStream();
-  const stderr = new MemoryWriteStream();
+  const { markedStream, unmarkedStream } = duoStream();
 
   const exitCode = await elmToolingCli(["install"], {
     cwd: dir,
     env: { ELM_HOME: dir },
     stdin: new FailReadStream(),
-    stdout,
-    stderr,
+    stdout: markedStream,
+    stderr: unmarkedStream,
   });
 
-  // expect(stdout.content).toBe(""); // TODO
   expect(exitCode).toBe(1);
 
-  return cleanInstall(clean(stderr.content));
+  return cleanInstall(clean(unmarkedStream.content));
 }
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);
@@ -200,8 +199,8 @@ describe("install", () => {
     test("node_modules/.bin is a file", async () => {
       expect(await installFailHelper("node_modules-bin-is-a-file"))
         .toMatchInlineSnapshot(`
-            Failed to create /Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin:
-            EEXIST: file already exists, mkdir '/Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin'
+          Failed to create /Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin:
+          EEXIST: file already exists, mkdir '/Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin'
 
         `);
     });
@@ -209,13 +208,14 @@ describe("install", () => {
     test("node_modules/.bin/elm is a folder", async () => {
       expect(await installFailHelper("executable-is-folder"))
         .toMatchInlineSnapshot(`
+        ⟪⧙/Users/you/project/fixtures/download/executable-is-folder/elm-tooling.json⧘
+        ⟫
+        ⧙1⧘ error
 
-            ⧙1⧘ error
+        Failed to remove old link for elm at /Users/you/project/fixtures/download/executable-is-folder/node_modules/.bin/elm:
+        EISDIR: fake error
 
-            Failed to remove old link for elm at /Users/you/project/fixtures/download/executable-is-folder/node_modules/.bin/elm:
-            EISDIR: fake error
-
-        `);
+      `);
     });
   });
 
