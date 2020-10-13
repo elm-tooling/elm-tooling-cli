@@ -6,7 +6,6 @@ import {
   clean,
   CursorWriteStream,
   FailReadStream,
-  IS_WINDOWS,
   MemoryWriteStream,
   RawReadStream,
   stringSnapshotSerializer,
@@ -544,19 +543,16 @@ describe("tools", () => {
         ▊
       `);
 
-      if (IS_WINDOWS) {
-        // eslint-disable-next-line jest/no-conditional-expect
-        expect(clean(stderr.content)).toMatchInlineSnapshot(`
-          Failed to save: EPERM: operation not permitted, open '/Users/you/project/fixtures/tools/readonly/elm-tooling.json'
+      // Fails with EPERM on Windows, but EACCESS on Linux and Mac.
+      const stderrContent = clean(stderr.content).replace(
+        /(EPERM|EACCES):[^']*/g,
+        "EACCES: fake error "
+      );
 
-        `);
-      } else {
-        // eslint-disable-next-line jest/no-conditional-expect
-        expect(clean(stderr.content)).toMatchInlineSnapshot(`
-          Failed to save: EACCES: permission denied, open '/Users/you/project/fixtures/tools/readonly/elm-tooling.json'
+      expect(stderrContent).toMatchInlineSnapshot(`
+        Failed to save: EACCES: fake error '/Users/you/project/fixtures/tools/readonly/elm-tooling.json'
 
-        `);
-      }
+      `);
     });
   });
 });

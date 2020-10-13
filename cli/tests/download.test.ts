@@ -1,24 +1,47 @@
+import * as fs from "fs";
 import * as path from "path";
 
+import type { Env } from "../helpers/mixed";
 import elmToolingCli from "../index";
 import {
   clean,
+  duoStream,
   FailReadStream,
+  IS_WINDOWS,
   MemoryWriteStream,
   stringSnapshotSerializer,
 } from "./helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "download");
 
-async function downloadSuccessHelper(fixture: string): Promise<string> {
+function cleanInstall(string: string): string {
+  return (
+    string
+      // Remove Windows differences.
+      .replace(/shims/g, "link")
+      .replace(/\{[.,\w]+\}/g, "")
+      // Fails with EISDIR on Linux, but EPERM on Mac.
+      .replace(/(EPERM|EISDIR):.*/g, "EISDIR: fake error")
+  );
+}
+
+async function installSuccessHelper(
+  fixture: string,
+  env?: Env,
+  cwdExtensionRelativeToFixtureDir?: string
+): Promise<{ stdout: string; bin: string; cwd: string }> {
   const dir = path.join(FIXTURES_DIR, fixture);
+  const cwd =
+    cwdExtensionRelativeToFixtureDir === undefined
+      ? dir
+      : path.join(dir, cwdExtensionRelativeToFixtureDir);
 
   const stdout = new MemoryWriteStream();
   const stderr = new MemoryWriteStream();
 
-  const exitCode = await elmToolingCli(["download"], {
-    cwd: dir,
-    env: { ELM_HOME: dir },
+  const exitCode = await elmToolingCli(["install"], {
+    cwd,
+    env: { ELM_HOME: dir, ...env },
     stdin: new FailReadStream(),
     stdout,
     stderr,
@@ -27,67 +50,87 @@ async function downloadSuccessHelper(fixture: string): Promise<string> {
   expect(stderr.content).toBe("");
   expect(exitCode).toBe(0);
 
-  return clean(stdout.content);
+  const binDir = path.join(dir, "node_modules", ".bin");
+  const bin = fs.existsSync(binDir)
+    ? fs
+        .readdirSync(binDir, {
+          withFileTypes: true,
+        })
+        .map((entry) =>
+          entry.isSymbolicLink()
+            ? `${entry.name} -> ${fs.readlinkSync(
+                path.join(binDir, entry.name)
+              )}`
+            : entry.isFile()
+            ? `${entry.name}\n${fs
+                .readFileSync(path.join(binDir, entry.name), "utf8")
+                .replace(/^/gm, "  ")}`
+            : entry.name
+        )
+        .join("\n")
+    : "(does not exist)";
+
+  return { stdout: cleanInstall(clean(stdout.content)), bin: clean(bin), cwd };
 }
 
-async function downloadFailHelper(fixture: string): Promise<string> {
-  return downloadFailHelperAbsolute(path.join(FIXTURES_DIR, fixture));
+async function installFailHelper(fixture: string): Promise<string> {
+  return installFailHelperAbsolute(path.join(FIXTURES_DIR, fixture));
 }
 
-async function downloadFailHelperAbsolute(dir: string): Promise<string> {
-  const stdout = new MemoryWriteStream();
-  const stderr = new MemoryWriteStream();
+async function installFailHelperAbsolute(dir: string): Promise<string> {
+  const { markedStream, unmarkedStream } = duoStream();
 
-  const exitCode = await elmToolingCli(["download"], {
+  const exitCode = await elmToolingCli(["install"], {
     cwd: dir,
     env: { ELM_HOME: dir },
     stdin: new FailReadStream(),
-    stdout,
-    stderr,
+    stdout: markedStream,
+    stderr: unmarkedStream,
   });
 
-  expect(stdout.content).toBe("");
   expect(exitCode).toBe(1);
 
-  return clean(stderr.content);
+  return cleanInstall(clean(unmarkedStream.content));
 }
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);
 
-describe("download", () => {
+describe("install", () => {
   describe("nothing to do", () => {
     test("empty object two levels up", async () => {
-      expect(await downloadSuccessHelper("empty-object-two-levels-up/one/two"))
-        .toMatchInlineSnapshot(`
+      const { stdout, bin } = await installSuccessHelper(
+        "empty-object-two-levels-up/one/two"
+      );
+      expect(stdout).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/download/empty-object-two-levels-up/elm-tooling.json⧘
         The "tools" field is missing. To add tools: elm-tooling tools
 
       `);
+      expect(bin).toMatchInlineSnapshot(`(does not exist)`);
     });
 
     test("empty tools field", async () => {
-      expect(await downloadSuccessHelper("empty-tools-field"))
-        .toMatchInlineSnapshot(`
+      const { stdout, bin } = await installSuccessHelper("empty-tools-field");
+      expect(stdout).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/download/empty-tools-field/elm-tooling.json⧘
         The "tools" field is empty. To add tools: elm-tooling tools
 
       `);
+      expect(bin).toMatchInlineSnapshot(`(does not exist)`);
     });
 
-    test("already downloaded", async () => {
-      expect(await downloadSuccessHelper("already-downloaded"))
-        .toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling.json⧘
-        ⧙elm 0.19.1⧘ already exists: ⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling/elm/0.19.1/elm⧘
-        ⧙elm-format 0.8.3⧘ already exists: ⧙/Users/you/project/fixtures/download/already-downloaded/elm-tooling/elm-format/0.8.3/elm-format⧘
-
-      `);
+    test("NO_ELM_TOOLING_INSTALL", async () => {
+      const { stdout, bin } = await installSuccessHelper("would-download", {
+        NO_ELM_TOOLING_INSTALL: "",
+      });
+      expect(stdout).toMatchInlineSnapshot(``);
+      expect(bin).toMatchInlineSnapshot(`(does not exist)`);
     });
   });
 
   describe("invalid", () => {
     test("wrong field type (ignores errors for other fields)", async () => {
-      expect(await downloadFailHelper("wrong-field-types"))
+      expect(await installFailHelper("wrong-field-types"))
         .toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/download/wrong-field-types/elm-tooling.json⧘
 
@@ -103,7 +146,7 @@ describe("download", () => {
     });
 
     test("unknown tools/versions", async () => {
-      expect(await downloadFailHelper("unknown")).toMatchInlineSnapshot(`
+      expect(await installFailHelper("unknown")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/download/unknown/elm-tooling.json⧘
 
         ⧙2⧘ errors
@@ -125,24 +168,24 @@ describe("download", () => {
 
   describe("errors", () => {
     test("not found", async () => {
-      expect(await downloadFailHelperAbsolute(path.parse(__dirname).root))
+      expect(await installFailHelperAbsolute(path.parse(__dirname).root))
         .toMatchInlineSnapshot(`
         No elm-tooling.json found. To create one: elm-tooling init
 
       `);
     });
 
-    test("is folder", async () => {
-      expect(await downloadFailHelper("is-folder")).toMatchInlineSnapshot(`
+    test("elm-tooling.json is folder", async () => {
+      expect(await installFailHelper("is-folder")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/download/is-folder/elm-tooling.json⧘
         Failed to read file as JSON:
-        EISDIR: illegal operation on a directory, read
+        EISDIR: fake error
 
       `);
     });
 
     test("bad json", async () => {
-      expect(await downloadFailHelper("bad-json")).toMatchInlineSnapshot(`
+      expect(await installFailHelper("bad-json")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/download/bad-json/elm-tooling.json⧘
         Failed to read file as JSON:
         Unexpected end of JSON input
@@ -151,11 +194,138 @@ describe("download", () => {
     });
 
     test("not an object", async () => {
-      expect(await downloadFailHelper("not-an-object")).toMatchInlineSnapshot(`
+      expect(await installFailHelper("not-an-object")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/download/not-an-object/elm-tooling.json⧘
         Expected an object but got: ["tools",{"elm":"0.19.1"}]
 
       `);
     });
+
+    test("node_modules/.bin is a file", async () => {
+      expect(await installFailHelper("node_modules-bin-is-a-file"))
+        .toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/download/node_modules-bin-is-a-file/elm-tooling.json⧘
+        Failed to create /Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin:
+        EEXIST: file already exists, mkdir '/Users/you/project/fixtures/download/node_modules-bin-is-a-file/node_modules/.bin'
+
+      `);
+    });
+
+    test("node_modules/.bin/elm is a folder", async () => {
+      expect(await installFailHelper("executable-is-folder"))
+        .toMatchInlineSnapshot(`
+        ⟪⧙/Users/you/project/fixtures/download/executable-is-folder/elm-tooling.json⧘
+        ⟫
+        ⧙1⧘ error
+
+        Failed to remove old link for elm at node_modules/.bin/elm:
+        EISDIR: fake error
+
+      `);
+    });
+  });
+
+  test("create/overwrite links", async () => {
+    const fixture = "create-links";
+    const binDir = path.join(FIXTURES_DIR, fixture, "node_modules", ".bin");
+    for (const item of fs.readdirSync(binDir)) {
+      if (item !== "elmx") {
+        fs.unlinkSync(path.join(binDir, item));
+      }
+    }
+    if (IS_WINDOWS) {
+      fs.writeFileSync(path.join(binDir, "elm"), "something else");
+    } else {
+      fs.symlinkSync("somewhere-else", path.join(binDir, "elm"));
+    }
+
+    const { stdout, bin } = await installSuccessHelper(fixture);
+
+    expect(stdout).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
+      ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin/elm -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm⧘
+          To run: npx elm
+      ⧙elm-format 0.8.3⧘ link created: ⧙node_modules/.bin/elm-format -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
+          To run: npx elm-format
+
+    `);
+
+    if (IS_WINDOWS) {
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(bin).toMatchInlineSnapshot(`
+        elm
+          #!/bin/sh
+          '/Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm' "$@"
+          
+        elm-format
+          #!/bin/sh
+          '/Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format' "$@"
+          
+        elm-format.cmd
+          @ECHO off
+          
+          "/Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format" %*
+          
+          
+        elm-format.ps1
+          #!/usr/bin/env pwsh
+          & '/Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format' $args
+          
+        elm.cmd
+          @ECHO off
+          
+          "/Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm" %*
+          
+          
+        elm.ps1
+          #!/usr/bin/env pwsh
+          & '/Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm' $args
+          
+        elmx
+          not elm
+          
+      `);
+    } else {
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(bin).toMatchInlineSnapshot(`
+        elm -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm/0.19.1/elm
+        elm-format -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format
+        elmx
+          not elm
+          
+      `);
+    }
+
+    const { stdout: stdout2, bin: bin2 } = await installSuccessHelper(fixture);
+
+    expect(stdout2).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
+      ⧙elm 0.19.1⧘: ⧙all good⧘
+      ⧙elm-format 0.8.3⧘: ⧙all good⧘
+
+    `);
+
+    expect(bin2).toBe(bin);
+
+    fs.unlinkSync(path.join(binDir, "elm-format"));
+    const { stdout: stdout3, bin: bin3, cwd } = await installSuccessHelper(
+      fixture,
+      {},
+      "src"
+    );
+
+    expect(stdout3).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/download/create-links/elm-tooling.json⧘
+      ⧙elm 0.19.1⧘: ⧙all good⧘
+      ⧙elm-format 0.8.3⧘ link created: ⧙/Users/you/project/fixtures/download/create-links/node_modules/.bin/elm-format -> /Users/you/project/fixtures/download/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
+          To run: npx elm-format
+
+    `);
+
+    expect(bin3).toBe(bin);
+
+    expect(fs.readdirSync(path.join(cwd, "node_modules"))).toEqual([
+      ".gitkeep",
+    ]);
   });
 });

@@ -6,15 +6,15 @@ import * as path from "path";
 import * as zlib from "zlib";
 
 import type { AssetType } from "../helpers/known-tools";
+import { linkTool } from "../helpers/link";
 import type { Logger } from "../helpers/logger";
 import {
   bold,
   dim,
   elmToolingJsonDocumentationLink,
   Env,
-  EXECUTABLE,
+  findClosest,
   indent,
-  NonEmptyArray,
   printNumErrors,
   removeColor,
 } from "../helpers/mixed";
@@ -30,26 +30,26 @@ import {
 
 const EMPTY_STDERR = dim("(empty stderr)");
 
-type DownloadResult =
-  | { tag: "Exit"; statusCode: number }
-  | { tag: "Success"; tools: NonEmptyArray<Tool> };
-
-export default async function download(
+export default async function install(
   cwd: string,
   env: Env,
   logger: Logger
-): Promise<DownloadResult> {
+): Promise<number> {
+  if ("NO_ELM_TOOLING_INSTALL" in env) {
+    return 0;
+  }
+
   const parseResult = findReadAndParseElmToolingJson(cwd, env);
 
   switch (parseResult.tag) {
     case "ElmToolingJsonNotFound":
       logger.error(parseResult.message);
-      return { tag: "Exit", statusCode: 1 };
+      return 1;
 
     case "ReadAsJsonObjectError":
       logger.error(bold(parseResult.elmToolingJsonPath));
       logger.error(parseResult.message);
-      return { tag: "Exit", statusCode: 1 };
+      return 1;
 
     case "Parsed": {
       switch (parseResult.tools?.tag) {
@@ -58,7 +58,7 @@ export default async function download(
           logger.log(
             `The "tools" field is missing. To add tools: elm-tooling tools`
           );
-          return { tag: "Exit", statusCode: 0 };
+          return 0;
 
         case "Error":
           logger.error(bold(parseResult.elmToolingJsonPath));
@@ -66,35 +66,55 @@ export default async function download(
           logger.error(printFieldErrors(parseResult.tools.errors));
           logger.error("");
           logger.error(elmToolingJsonDocumentationLink);
-          return { tag: "Exit", statusCode: 1 };
+          return 1;
 
         case "Parsed":
-          logger.log(bold(parseResult.elmToolingJsonPath));
-          return downloadTools(logger, parseResult.tools.parsed);
+          return installTools(
+            cwd,
+            logger,
+            parseResult.elmToolingJsonPath,
+            parseResult.tools.parsed
+          );
       }
     }
   }
 }
 
-async function downloadTools(
+async function installTools(
+  cwd: string,
   logger: Logger,
+  elmToolingJsonPath: string,
   tools: Tools
-): Promise<DownloadResult> {
+): Promise<number> {
   if (tools.existing.length === 0 && tools.missing.length === 0) {
+    logger.log(bold(elmToolingJsonPath));
     logger.log(`The "tools" field is empty. To add tools: elm-tooling tools`);
-    return { tag: "Exit", statusCode: 0 };
+    return 0;
   }
 
-  for (const tool of tools.existing) {
-    logger.log(
-      `${bold(`${tool.name} ${tool.version}`)} already exists: ${dim(
-        tool.absolutePath
+  const nodeModulesPath = findClosest(
+    "node_modules",
+    path.dirname(elmToolingJsonPath)
+  );
+  if (nodeModulesPath === undefined) {
+    logger.error(bold(elmToolingJsonPath));
+    logger.error(
+      `No node_modules/ folder found upwards from: ${path.dirname(
+        elmToolingJsonPath
       )}`
     );
+    logger.error("Install your npm dependencies before running this script.");
+    return 1;
   }
 
-  if (tools.missing.length === 0) {
-    return { tag: "Success", tools: tools.existing as NonEmptyArray<Tool> };
+  const nodeModulesBinPath = path.join(nodeModulesPath, ".bin");
+  try {
+    fs.mkdirSync(nodeModulesBinPath, { recursive: true });
+  } catch (errorAny) {
+    const error = errorAny as Error & { code?: number };
+    logger.error(bold(elmToolingJsonPath));
+    logger.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
+    return 1;
   }
 
   for (const tool of tools.missing) {
@@ -104,64 +124,76 @@ async function downloadTools(
   const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
 
   const redraw = (): void => {
-    logger.progress(
-      tools.missing
-        .map((tool, index) => {
-          const progress = toolsProgress[index];
-          const progressString =
-            typeof progress === "string"
-              ? progress.padEnd(4)
-              : `${Math.round(progress * 100)
-                  .toString()
-                  .padStart(3)}%`;
-          return `${bold(progressString)} ${tool.name} ${tool.version}`;
-        })
-        .join("\n")
-    );
+    if (tools.missing.length > 0) {
+      logger.progress(
+        tools.missing
+          .map((tool, index) => {
+            const progress = toolsProgress[index];
+            const progressString =
+              typeof progress === "string"
+                ? progress.padEnd(4)
+                : `${Math.round(progress * 100)
+                    .toString()
+                    .padStart(3)}%`;
+            return `${bold(progressString)} ${tool.name} ${tool.version}`;
+          })
+          .join("\n")
+      );
+    }
   };
 
+  logger.log(bold(elmToolingJsonPath));
   redraw();
 
-  const results = await Promise.all(
-    tools.missing.map((tool, index) =>
-      downloadAndExtract(tool, (percentage) => {
-        toolsProgress[index] = percentage;
-        redraw();
-      }).then(
-        () => {
-          toolsProgress[index] = 1;
+  const results: Array<string | Error | undefined> = [
+    ...(await Promise.all(
+      tools.missing.map((tool, index) =>
+        downloadAndExtract(tool, (percentage) => {
+          toolsProgress[index] = percentage;
           redraw();
-        },
-        (error: Error) => {
-          toolsProgress[index] = "ERR!";
-          redraw();
-          return new Error(downloadAndExtractError(tool, error));
-        }
+        }).then(
+          () => {
+            toolsProgress[index] = 1;
+            redraw();
+            return linkTool(cwd, nodeModulesBinPath, tool);
+          },
+          (error: Error) => {
+            toolsProgress[index] = "ERR!";
+            redraw();
+            return new Error(downloadAndExtractError(tool, error));
+          }
+        )
       )
-    )
+    )),
+    ...tools.existing.map((tool) => linkTool(cwd, nodeModulesBinPath, tool)),
+  ];
+
+  const messages = results.flatMap((result) =>
+    typeof result === "string" ? result : []
   );
 
-  const downloadErrors = results.flatMap((result) =>
+  const installErrors = results.flatMap((result) =>
     result instanceof Error ? result : []
   );
 
   redraw();
 
-  if (downloadErrors.length > 0) {
+  if (messages.length > 0) {
+    logger.log(messages.join("\n"));
+  }
+
+  if (installErrors.length > 0) {
     logger.error("");
     logger.error(
       [
-        printNumErrors(downloadErrors.length),
-        ...downloadErrors.map((error) => error.message),
+        printNumErrors(installErrors.length),
+        ...installErrors.map((error) => error.message),
       ].join("\n\n")
     );
-    return { tag: "Exit", statusCode: 1 };
+    return 1;
   }
 
-  return {
-    tag: "Success",
-    tools: [...tools.existing, ...tools.missing] as NonEmptyArray<Tool>,
-  };
+  return 0;
 }
 
 async function downloadAndExtract(
@@ -430,7 +462,8 @@ function extractFile({
       gunzip.on("error", onError);
       write.on("error", onError);
       write.on("close", () => {
-        fs.chmod(file, EXECUTABLE, (error) => {
+        // Make executable.
+        fs.chmod(file, "755", (error) => {
           if (error === null) {
             onSuccess();
           } else {

@@ -66,6 +66,31 @@ export class MemoryWriteStream extends stream.Writable implements WriteStream {
   }
 }
 
+export function duoStream(): {
+  markedStream: WriteStream;
+  unmarkedStream: MemoryWriteStream;
+} {
+  const unmarkedStream = new MemoryWriteStream();
+
+  class MarkedWriteStream extends stream.Writable implements WriteStream {
+    isTTY = unmarkedStream.isTTY;
+
+    _write(
+      chunk: string | Buffer,
+      _encoding: BufferEncoding,
+      callback: (error?: Error | null) => void
+    ): void {
+      unmarkedStream.write(`⟪${chunk.toString()}⟫`);
+      callback();
+    }
+  }
+
+  return {
+    markedStream: new MarkedWriteStream(),
+    unmarkedStream,
+  };
+}
+
 const cursorMove = /^\x1B\[(\d+)([ABCD])$/;
 const split = /(\n|\x1B\[\d+[ABCD]|\x1B\[\?25[hl])/;
 const color = /(\x1B\[\d*m)/g;
@@ -223,8 +248,10 @@ export function clean(string: string): string {
   // Convert Windows-style paths to Unix-style paths so we can use the same snapshots.
   return IS_WINDOWS
     ? cleaned
-        .replace(/[A-Z]:((?:\\[\w.-]+)+\\?)/g, (_, fullPath: string) =>
-          fullPath.replace(/\\/g, "/")
+        .replace(
+          /(?:[A-Z]:|(node_modules))((?:\\[\w.-]+)+\\?)/g,
+          (_, nodeModules: string = "", fullPath: string = "") =>
+            nodeModules + fullPath.replace(/\\/g, "/")
         )
         .replace(/\.exe\b/g, "")
     : cleaned;

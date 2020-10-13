@@ -1,8 +1,6 @@
 import { bold, dim, Env } from "../helpers/mixed";
 import { getElmToolingInstallPath } from "../helpers/parse";
 
-// `elm-tooling download` is undocumented on purpose because currently there’s
-// no use case for it. It might be removed at any time.
 export default function help(cwd: string, env: Env): string {
   return `
 ${bold("elm-tooling init")}
