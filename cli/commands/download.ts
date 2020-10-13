@@ -94,7 +94,6 @@ async function installTools(
   }
 
   const nodeModulesPath = findClosest("node_modules", cwd);
-  // istanbul ignore if
   if (nodeModulesPath === undefined) {
     logger.error(
       "No node_modules/ folder found. Install your npm dependencies before running this script."
