@@ -1,6 +1,6 @@
 {
   "name": "elm-tooling",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "author": "Simon Lydell",
   "license": "MIT",
   "description": "The CLI for elm-tooling.json",

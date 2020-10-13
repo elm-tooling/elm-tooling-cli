@@ -1,3 +1,12 @@
+### Version 0.5.0 (2020-10-13)
+
+- Added: `elm-tooling tools`. Interactively add, remove and update tools.
+- Removed: The hidden `elm-tooling download` command is now removed for real.
+- Improved: `elm-tooling install` now has nicer output.
+- Improved: The output from most commands now suggest what command to run next.
+- Improved: `elm-tooling init` now tries to find what tools you had installed locally using `npm` before and uses those version in the `"tools"` field.
+- Improved: `elm-tooling validate` now checks that entrypoints end with `.elm`.
+
 ### Version 0.4.1 (2020-10-02)
 
 - Updated: Some links point to the `main` branch instead of `master`.
