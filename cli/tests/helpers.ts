@@ -248,8 +248,9 @@ export function clean(string: string): string {
   // Convert Windows-style paths to Unix-style paths so we can use the same snapshots.
   return IS_WINDOWS
     ? cleaned
-        .replace(/[A-Z]:((?:\\[\w.-]+)+\\?)/g, (_, fullPath: string) =>
-          fullPath.replace(/\\/g, "/")
+        .replace(
+          /(?:[A-Z]:|node_modules)((?:\\[\w.-]+)+\\?)/g,
+          (_, fullPath: string) => fullPath.replace(/\\/g, "/")
         )
         .replace(/\.exe\b/g, "")
     : cleaned;

@@ -19,7 +19,7 @@ function cleanInstall(string: string): string {
     string
       // Remove Windows differences.
       .replace(/shims/g, "link")
-      .replace(/\{[^.,\w]+\}/g, "")
+      .replace(/\{[.,\w]+\}/g, "")
       // Fails with EISDIR on Linux, but EPERM on Mac.
       .replace(/(EPERM|EISDIR):.*/g, "EISDIR: fake error")
   );
