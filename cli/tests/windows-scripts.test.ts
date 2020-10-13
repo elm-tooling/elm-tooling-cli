@@ -1,4 +1,4 @@
-import { makeCmdScript, makePs1Script, makeShScript } from "../helpers/install";
+import { makeCmdScript, makePs1Script, makeShScript } from "../helpers/link";
 import { stringSnapshotSerializer } from "./helpers";
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);
