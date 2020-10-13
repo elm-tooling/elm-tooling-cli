@@ -127,7 +127,7 @@ export async function run(): Promise<void> {
         JSON.stringify(elmToolingJson, null, 2)
       );
 
-      return elmToolingCli(["download"], {
+      return elmToolingCli(["install"], {
         cwd: dir,
         env: { ELM_HOME: dir },
         stdin: process.stdin,
