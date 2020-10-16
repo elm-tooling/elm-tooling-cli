@@ -2,6 +2,8 @@
 
 The CLI for [elm-tooling.json]. Create and validate `elm-tooling.json`. Install Elm tools.
 
+[elm-tooling.json]: https://github.com/lydell/elm-tooling.json
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -321,7 +323,6 @@ getExecutable({
 [child\_process.spawn]: https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
 [cli-api]: #elmtoolingcli
 [elm-review]: https://package.elm-lang.org/packages/jfmengels/elm-review/latest/
-[elm-tooling.json]: https://github.com/lydell/elm-tooling.json
 [example github actions workflow]: https://github.com/lydell/elm-tooling.json/blob/main/.github/workflows/example.yml
 [ignore-scripts]: https://docs.npmjs.com/using-npm/config#ignore-scripts
 [npm/npm-lifecycle#49]: https://github.com/npm/npm-lifecycle/issues/49
