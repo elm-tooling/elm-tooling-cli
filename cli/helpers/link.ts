@@ -56,6 +56,7 @@ export function unlinkTool(
         removeSymlinkShimWindows(tool, strategy.items)
       : removeSymlink(tool, strategy.linkPath);
 
+  // istanbul ignore if
   if (result instanceof Error) {
     return new Error(result.message);
   }

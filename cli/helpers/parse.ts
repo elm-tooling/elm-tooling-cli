@@ -180,6 +180,7 @@ function flatMapFieldResult<T, U>(
   f: (parsed: T) => FieldResult<U>
 ): FieldResult<U> {
   switch (fieldResult.tag) {
+    // istanbul ignore next
     case "Error":
       return fieldResult;
 
