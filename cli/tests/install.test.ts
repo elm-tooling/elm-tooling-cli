@@ -218,7 +218,7 @@ describe("install", () => {
         ⟫
         ⧙1⧘ error
 
-        Failed to remove old link for elm at node_modules/.bin/elm:
+        Failed to remove old link for elm at /Users/you/project/fixtures/install/executable-is-folder/node_modules/.bin/elm:
         EISDIR: fake error
 
       `);

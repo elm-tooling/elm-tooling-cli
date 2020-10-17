@@ -410,7 +410,7 @@ describe("tools", () => {
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
 
-      Saved!
+      Saved! To unlink: elm-tooling install
       ▊
     `);
 
