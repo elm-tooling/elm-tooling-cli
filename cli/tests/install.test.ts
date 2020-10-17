@@ -228,6 +228,18 @@ describe("install", () => {
   test("create/overwrite links", async () => {
     const fixture = "create-links";
     const binDir = path.join(FIXTURES_DIR, fixture, "node_modules", ".bin");
+    const elmToolingJsonPath = path.join(
+      FIXTURES_DIR,
+      fixture,
+      "elm-tooling.json"
+    );
+    const elmToolingJson = {
+      tools: {
+        elm: "0.19.1",
+        "elm-format": "0.8.3",
+      },
+    };
+
     for (const item of fs.readdirSync(binDir)) {
       if (item !== "elmx") {
         fs.unlinkSync(path.join(binDir, item));
@@ -239,9 +251,17 @@ describe("install", () => {
       fs.symlinkSync("somewhere-else", path.join(binDir, "elm"));
     }
 
+    fs.unlinkSync(elmToolingJsonPath);
     const { stdout, bin } = await installSuccessHelper(fixture);
 
-    expect(stdout).toMatchInlineSnapshot(`
+    expect(stdout).toMatchInlineSnapshot();
+
+    expect(bin).toMatchInlineSnapshot();
+
+    fs.writeFileSync(elmToolingJsonPath, JSON.stringify(elmToolingJson));
+    const { stdout: stdout1, bin: bin1 } = await installSuccessHelper(fixture);
+
+    expect(stdout1).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin/elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm⧘
           To run: npx elm
@@ -252,7 +272,7 @@ describe("install", () => {
 
     if (IS_WINDOWS) {
       // eslint-disable-next-line jest/no-conditional-expect
-      expect(bin).toMatchInlineSnapshot(`
+      expect(bin1).toMatchInlineSnapshot(`
         elm
           #!/bin/sh
           '/Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm' "$@"
@@ -287,7 +307,7 @@ describe("install", () => {
       `);
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
-      expect(bin).toMatchInlineSnapshot(`
+      expect(bin1).toMatchInlineSnapshot(`
         elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm
         elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format
         elmx
@@ -305,7 +325,7 @@ describe("install", () => {
 
     `);
 
-    expect(bin2).toBe(bin);
+    expect(bin2).toBe(bin1);
 
     fs.unlinkSync(path.join(binDir, "elm-format"));
     const { stdout: stdout3, bin: bin3, cwd } = await installSuccessHelper(
@@ -322,7 +342,7 @@ describe("install", () => {
 
     `);
 
-    expect(bin3).toBe(bin);
+    expect(bin3).toBe(bin1);
 
     expect(fs.readdirSync(path.join(cwd, "node_modules"))).toEqual([
       ".gitkeep",
