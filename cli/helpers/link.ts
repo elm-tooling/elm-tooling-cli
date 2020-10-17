@@ -171,10 +171,11 @@ function removeSymlink(tool: Tool, linkPath: string): UnlinkResult {
       fs.unlinkSync(linkPath);
       return "Removed";
     }
-  } catch (errorAny) /* istanbul ignore next */ {
+  } catch (errorAny) {
     const error = errorAny as Error & { code?: string };
     // If the path exists but is something else, let it be.
     // If the path does not exist there’s nothing to do.
+    // istanbul ignore if
     if (error.code !== "EINVAL" && error.code !== "ENOENT") {
       return new Error(
         `Failed to remove old link for ${tool.name} at ${linkPath}:\n${error.message}`
