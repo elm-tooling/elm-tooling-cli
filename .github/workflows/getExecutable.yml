@@ -1,0 +1,36 @@
+name: getExecutable
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x]
+
+    defaults:
+      run:
+        working-directory: cli
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: cache node_modules
+        id: cache-node_modules
+        uses: actions/cache@v2
+        with:
+          path: cli/node_modules
+          key: node_modules-${{ hashFiles('cli/package-lock.json') }}
+
+      - name: npm ci
+        if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: test
+        run: npx --no-install ts-node scripts/test-getExecutable.ts
