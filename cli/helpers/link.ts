@@ -36,6 +36,38 @@ export function linkTool(
   )}\n${indent(`To run: npx ${tool.name}`)}`;
 }
 
+export function unlinkTool(
+  cwd: string,
+  nodeModulesBinPath: string,
+  tool: Tool
+): string | Error | undefined {
+  const linkPath = path.join(nodeModulesBinPath, tool.name);
+  const relativeLinkPath = path.relative(cwd, linkPath);
+  const possiblyRelativeLinkPath = relativeLinkPath.startsWith("node_modules")
+    ? relativeLinkPath
+    : linkPath;
+
+  const [linkPathPresentationString, what] = isWindows
+    ? // istanbul ignore next
+      [
+        removeSymlinkShimWindows(tool, linkPath, possiblyRelativeLinkPath),
+        "shims",
+      ]
+    : [removeSymlink(tool, linkPath, possiblyRelativeLinkPath), "link"];
+
+  if (linkPathPresentationString instanceof Error) {
+    return new Error(linkPathPresentationString.message);
+  }
+
+  if (linkPathPresentationString === undefined) {
+    return undefined;
+  }
+
+  return `${bold(`${tool.name} ${tool.version}`)} ${what} removed: ${dim(
+    `${linkPathPresentationString}`
+  )}`;
+}
+
 function symlink(
   tool: Tool,
   linkPath: string,
@@ -63,13 +95,36 @@ function symlink(
   try {
     fs.symlinkSync(tool.absolutePath, linkPath);
   } catch (errorAny) /* istanbul ignore next */ {
-    const error = errorAny as Error & { code?: number };
+    const error = errorAny as Error;
     return new Error(
       `Failed to create link for ${tool.name} at ${possiblyRelativeLinkPath}:\n${error.message}`
     );
   }
 
   return possiblyRelativeLinkPath;
+}
+
+function removeSymlink(
+  tool: Tool,
+  linkPath: string,
+  possiblyRelativeLinkPath: string
+): string | Error | undefined {
+  try {
+    if (fs.readlinkSync(linkPath) === tool.absolutePath) {
+      fs.unlinkSync(linkPath);
+      return possiblyRelativeLinkPath;
+    }
+  } catch (errorAny) /* istanbul ignore next */ {
+    const error = errorAny as Error & { code?: string };
+    // If the path exists but is something else, let it be.
+    // If the path does not exist there’s nothing to do.
+    if (error.code !== "EINVAL" && error.code !== "ENOENT") {
+      return new Error(
+        `Failed to remove old link for ${tool.name} at ${possiblyRelativeLinkPath}:\n${error.message}`
+      );
+    }
+  }
+  return undefined;
 }
 
 // istanbul ignore next
@@ -115,13 +170,48 @@ function symlinkShimWindows(
       fs.writeFileSync(itemPath, content);
     }
   } catch (errorAny) {
-    const error = errorAny as Error & { code?: number };
+    const error = errorAny as Error;
     return new Error(
       `Failed to create shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
     );
   }
 
   return linkPathPresentationString;
+}
+
+// istanbul ignore next
+function removeSymlinkShimWindows(
+  tool: Tool,
+  linkPath: string,
+  possiblyRelativeLinkPath: string
+): string | Error | undefined {
+  const items = [
+    [linkPath, makeShScript(tool.absolutePath)],
+    [`${linkPath}.cmd`, makeCmdScript(tool.absolutePath)],
+    [`${linkPath}.ps1`, makePs1Script(tool.absolutePath)],
+  ];
+  const linkPathPresentationString = `${possiblyRelativeLinkPath}{,.cmd,.ps1}`;
+
+  try {
+    for (const [itemPath, content] of items) {
+      if (fs.readFileSync(itemPath, "utf8") === content) {
+        fs.unlinkSync(itemPath);
+        return linkPathPresentationString;
+      }
+    }
+  } catch (errorAny) {
+    const error = errorAny as Error & { code?: string };
+    // TODO: Try this on Windows.
+    // If the path exists but isn’t a file, let it be.
+    // If the path does not exists there’s nothing to do.
+    if (error.code !== "EPERM" && error.code !== "ENOENT") {
+      return new Error(
+        `Failed to remove old shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
+      );
+    }
+  }
+
+  return undefined;
 }
 
 // Windows-style paths works fine, at least in Git bash.

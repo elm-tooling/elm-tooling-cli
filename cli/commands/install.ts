@@ -111,7 +111,7 @@ async function installTools(
   try {
     fs.mkdirSync(nodeModulesBinPath, { recursive: true });
   } catch (errorAny) {
-    const error = errorAny as Error & { code?: number };
+    const error = errorAny as Error;
     logger.error(bold(elmToolingJsonPath));
     logger.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
     return 1;
