@@ -1,3 +1,8 @@
+### Version 0.6.0 (2020-10-17)
+
+- Improved: `elm-tooling install` now removes old links created by earlier runs of `elm-tooling install`.
+- Fixed: A broken link in the npm package readme.
+
 ### Version 0.5.0 (2020-10-13)
 
 - Added: `elm-tooling tools`. Interactively add, remove and update tools.
