@@ -1,16 +1,22 @@
 name: Example
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
 
-    # elm-tooling works cross-platform. Feel free to change/remove
-    # `${{ matrix.os }}` if you don’t need to run CI on multiple platforms.
+    # elm-tooling works cross-platform and with multiple Node.js versions. Feel
+    # free to change/remove `${{ matrix.os }}` and `${{ matrix.node-version }}`
+    # if you don’t need to run CI on multiple platforms and Node.js versions.
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
+        node-version: [12.x, 14.x]
 
     defaults:
       run:
@@ -31,7 +37,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           # Choose your Node.js version here:
-          node-version: "14"
+          node-version: "${{ matrix.node-version }}"
 
       # IGNORE START: This is just internal stuff specific for this repo.
       - name: Internal cache node_modules
@@ -39,7 +45,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: cli/node_modules
-          key: internal-node_modules-${{ matrix.os }}-${{ hashFiles('cli/package-lock.json') }}
+          key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('cli/package-lock.json') }}
       - name: Internal npm ci
         if: steps.internal-cache-node_modules.outputs.cache-hit != 'true'
         run: npm ci
@@ -55,7 +61,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: cli/example/node_modules
-          key: node_modules-${{ matrix.os }}-${{ hashFiles('cli/example/package-lock.json') }}
+          key: node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('cli/example/package-lock.json') }}
 
       # Re-use ~/.elm between runs until elm.json, elm-tooling.json or
       # review/elm.json changes. The Elm compiler saves downloaded Elm packages
