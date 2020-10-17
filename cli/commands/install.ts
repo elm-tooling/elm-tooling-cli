@@ -64,8 +64,7 @@ export default async function install(
               logger.error(bold(parseResult.elmToolingJsonPath));
               logger.error("");
               logger.error(printFieldErrors(osResult.errors));
-              logger.error("");
-              logger.error(elmToolingJsonDocumentationLink);
+              // The spec documentation link does not help here.
               return 1;
 
             case "Parsed":
