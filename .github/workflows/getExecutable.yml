@@ -1,4 +1,4 @@
-name: Example
+name: getExecutable
 
 on: [push, pull_request]
 
