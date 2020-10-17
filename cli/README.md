@@ -108,10 +108,10 @@ elm-tooling.json:
 
 ```diff
 +{
-+  "tools": {
-+    "elm": "0.19.1",
-+    "elm-format": "0.8.3"
-+  }
++    "tools": {
++        "elm": "0.19.1",
++        "elm-format": "0.8.3"
++    }
 +}
 ```
 
