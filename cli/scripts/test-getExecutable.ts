@@ -6,7 +6,7 @@ import getExecutable from "../getExecutable";
 const WORK_DIR = path.join(__dirname, "all-downloads");
 
 export async function run(): Promise<void> {
-  fs.rmdirSync(WORK_DIR, { recursive: true });
+  rmdirSyncRecursive(WORK_DIR);
   fs.mkdirSync(WORK_DIR);
 
   const progress: Array<number> = [];
@@ -70,6 +70,23 @@ Expected the same absolute path after both invocations.
 First:  ${absolutePath1}
 Second: ${absolutePath2}
   `.trim();
+}
+
+// Can be replaced by `fs.rmdirSync(dir, { recursive: true })` when we don’t
+// need to support Node.js 10 anymore.
+function rmdirSyncRecursive(dir: string): void {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isFile()) {
+      fs.unlinkSync(path.join(dir, entry.name));
+    } else if (entry.isDirectory()) {
+      rmdirSyncRecursive(path.join(dir, entry.name));
+    } else {
+      throw new Error(
+        `Unexpected entry that is neither file nor directory: ${entry.name}`
+      );
+    }
+  }
+  fs.rmdirSync(dir);
 }
 
 if (require.main === module) {
