@@ -251,16 +251,29 @@ describe("install", () => {
       fs.symlinkSync("somewhere-else", path.join(binDir, "elm"));
     }
 
-    fs.unlinkSync(elmToolingJsonPath);
+    if (fs.existsSync(elmToolingJsonPath)) {
+      fs.unlinkSync(elmToolingJsonPath);
+    }
     const { stdout, bin } = await installSuccessHelper(fixture);
 
-    expect(stdout).toMatchInlineSnapshot();
+    // Does not remove the `elm` link that was already there, but node made by elm-tooling.
+    expect(stdout).toMatchInlineSnapshot(`
+      ⧙/Users/lydell/src/elm-tooling.json/cli/elm-tooling.json⧘
+      The "tools" field is empty. To add tools: elm-tooling tools
 
-    expect(bin).toMatchInlineSnapshot();
+    `);
+
+    expect(bin).toMatchInlineSnapshot(`
+      elm -> somewhere-else
+      elmx
+        not elm
+        
+    `);
 
     fs.writeFileSync(elmToolingJsonPath, JSON.stringify(elmToolingJson));
     const { stdout: stdout1, bin: bin1 } = await installSuccessHelper(fixture);
 
+    // Overwrites elm, creates elm-format.
     expect(stdout1).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin/elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm⧘
@@ -318,6 +331,7 @@ describe("install", () => {
 
     const { stdout: stdout2, bin: bin2 } = await installSuccessHelper(fixture);
 
+    // Detects that’s there’s nothing to do.
     expect(stdout2).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
@@ -334,6 +348,7 @@ describe("install", () => {
       "src"
     );
 
+    // Works from a subdirectory and handles a combination of already done and create.
     expect(stdout3).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
@@ -347,5 +362,33 @@ describe("install", () => {
     expect(fs.readdirSync(path.join(cwd, "node_modules"))).toEqual([
       ".gitkeep",
     ]);
+
+    fs.writeFileSync(elmToolingJsonPath, "{}");
+    const { stdout: stdout4, bin: bin4 } = await installSuccessHelper(fixture);
+
+    // Removes tools even if no "tools" field.
+    expect(stdout4).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
+      ⧙elm 0.19.1⧘ link removed: ⧙node_modules/.bin/elm⧘
+      ⧙elm-format 0.8.3⧘ link removed: ⧙node_modules/.bin/elm-format⧘
+
+    `);
+
+    expect(bin4).toMatchInlineSnapshot(`
+      elmx
+        not elm
+        
+    `);
+
+    const { stdout: stdout5, bin: bin5 } = await installSuccessHelper(fixture);
+
+    // Nothing to do – say how to add tools.
+    expect(stdout5).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
+      The "tools" field is missing. To add tools: elm-tooling tools
+
+    `);
+
+    expect(bin5).toBe(bin4);
   });
 });
