@@ -263,12 +263,24 @@ describe("install", () => {
 
     `);
 
-    expect(bin).toMatchInlineSnapshot(`
-      elm -> somewhere-else
-      elmx
-        not elm
-        
-    `);
+    if (IS_WINDOWS) {
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(bin).toMatchInlineSnapshot(`
+        elm
+          something else
+        elmx
+          not elm
+          
+      `);
+    } else {
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(bin).toMatchInlineSnapshot(`
+        elm -> somewhere-else
+        elmx
+          not elm
+          
+      `);
+    }
 
     fs.writeFileSync(elmToolingJsonPath, JSON.stringify(elmToolingJson));
     const { stdout: stdout1, bin: bin1 } = await installSuccessHelper(fixture);

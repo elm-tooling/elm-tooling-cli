@@ -234,25 +234,27 @@ function removeSymlinkShimWindows(
   tool: Tool,
   items: Array<[string, string]>
 ): UnlinkResult {
+  let didNothing = true;
+
   for (const [itemPath, content] of items) {
     try {
       if (fs.readFileSync(itemPath, "utf8") === content) {
         fs.unlinkSync(itemPath);
-        return "Removed";
+        didNothing = false;
       }
     } catch (errorAny) {
       const error = errorAny as Error & { code?: string };
-      // TODO: Try this on Windows.
       // If the path exists but isn’t a file, let it be.
       // If the path does not exists there’s nothing to do.
-      if (error.code !== "EPERM" && error.code !== "ENOENT") {
+      if (error.code !== "EISDIR" && error.code !== "ENOENT") {
         return new Error(
           `Failed to remove old shim for ${tool.name} at ${itemPath}:\n${error.message}`
         );
       }
     }
   }
-  return "DidNothing";
+
+  return didNothing ? "DidNothing" : "Removed";
 }
 
 // Windows-style paths works fine, at least in Git bash.
