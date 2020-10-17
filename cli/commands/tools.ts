@@ -166,11 +166,10 @@ async function start(
               resolve(1);
               break;
             }
-            if (state.tools.length === 0) {
-              logger.log("Saved!");
-            } else {
-              logger.log("Saved! To install: elm-tooling install");
-            }
+            const verb = toolHasBeenAdded(tools, state.tools)
+              ? "install"
+              : "unlink";
+            logger.log(`Saved! To ${verb}: elm-tooling install`);
           }
           resolve(0);
           break;
@@ -339,5 +338,17 @@ function toolsEqual(a: Array<ToolChoice>, b: Array<ToolChoice>): boolean {
         (toolB) => toolA.name === toolB.name && toolA.version === toolB.version
       )
     )
+  );
+}
+
+function toolHasBeenAdded(
+  before: Array<ToolChoice>,
+  after: Array<ToolChoice>
+): boolean {
+  return after.some(
+    (toolA) =>
+      !before.some(
+        (toolB) => toolA.name === toolB.name && toolA.version === toolB.version
+      )
   );
 }

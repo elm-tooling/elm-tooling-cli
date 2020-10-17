@@ -18,7 +18,7 @@ function cleanInstall(string: string): string {
   return (
     string
       // Remove Windows differences.
-      .replace(/shims/g, "link")
+      .replace(/shims?/g, "link")
       .replace(/\{[.,\w]+\}/g, "")
       // Fails with EISDIR on Linux, but EPERM on Mac.
       .replace(/(EPERM|EISDIR):.*/g, "EISDIR: fake error")
@@ -218,7 +218,7 @@ describe("install", () => {
         ⟫
         ⧙1⧘ error
 
-        Failed to remove old link for elm at node_modules/.bin/elm:
+        Failed to remove old link for elm at /Users/you/project/fixtures/install/executable-is-folder/node_modules/.bin/elm:
         EISDIR: fake error
 
       `);
@@ -228,6 +228,18 @@ describe("install", () => {
   test("create/overwrite links", async () => {
     const fixture = "create-links";
     const binDir = path.join(FIXTURES_DIR, fixture, "node_modules", ".bin");
+    const elmToolingJsonPath = path.join(
+      FIXTURES_DIR,
+      fixture,
+      "elm-tooling.json"
+    );
+    const elmToolingJson = {
+      tools: {
+        elm: "0.19.1",
+        "elm-format": "0.8.3",
+      },
+    };
+
     for (const item of fs.readdirSync(binDir)) {
       if (item !== "elmx") {
         fs.unlinkSync(path.join(binDir, item));
@@ -239,9 +251,42 @@ describe("install", () => {
       fs.symlinkSync("somewhere-else", path.join(binDir, "elm"));
     }
 
+    // Missing "tools" field.
+    fs.writeFileSync(elmToolingJsonPath, JSON.stringify({}));
     const { stdout, bin } = await installSuccessHelper(fixture);
 
+    // Does not remove the `elm` link that was already there, but not made by
+    // elm-tooling.
     expect(stdout).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
+      The "tools" field is missing. To add tools: elm-tooling tools
+
+    `);
+
+    if (IS_WINDOWS) {
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(bin).toMatchInlineSnapshot(`
+        elm
+          something else
+        elmx
+          not elm
+          
+      `);
+    } else {
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(bin).toMatchInlineSnapshot(`
+        elm -> somewhere-else
+        elmx
+          not elm
+          
+      `);
+    }
+
+    fs.writeFileSync(elmToolingJsonPath, JSON.stringify(elmToolingJson));
+    const { stdout: stdout1, bin: bin1 } = await installSuccessHelper(fixture);
+
+    // Overwrites elm, creates elm-format.
+    expect(stdout1).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin/elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm⧘
           To run: npx elm
@@ -252,7 +297,7 @@ describe("install", () => {
 
     if (IS_WINDOWS) {
       // eslint-disable-next-line jest/no-conditional-expect
-      expect(bin).toMatchInlineSnapshot(`
+      expect(bin1).toMatchInlineSnapshot(`
         elm
           #!/bin/sh
           '/Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm' "$@"
@@ -287,7 +332,7 @@ describe("install", () => {
       `);
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
-      expect(bin).toMatchInlineSnapshot(`
+      expect(bin1).toMatchInlineSnapshot(`
         elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm
         elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format
         elmx
@@ -298,6 +343,7 @@ describe("install", () => {
 
     const { stdout: stdout2, bin: bin2 } = await installSuccessHelper(fixture);
 
+    // Detects that there’s nothing to do.
     expect(stdout2).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
@@ -305,7 +351,7 @@ describe("install", () => {
 
     `);
 
-    expect(bin2).toBe(bin);
+    expect(bin2).toBe(bin1);
 
     fs.unlinkSync(path.join(binDir, "elm-format"));
     const { stdout: stdout3, bin: bin3, cwd } = await installSuccessHelper(
@@ -314,6 +360,7 @@ describe("install", () => {
       "src"
     );
 
+    // Works from a subdirectory and handles a combination of already done and create.
     expect(stdout3).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
@@ -322,10 +369,39 @@ describe("install", () => {
 
     `);
 
-    expect(bin3).toBe(bin);
+    expect(bin3).toBe(bin1);
 
     expect(fs.readdirSync(path.join(cwd, "node_modules"))).toEqual([
       ".gitkeep",
     ]);
+
+    // Empty "tools" field.
+    fs.writeFileSync(elmToolingJsonPath, JSON.stringify({ tools: {} }));
+    const { stdout: stdout4, bin: bin4 } = await installSuccessHelper(fixture);
+
+    // Removes tools even if missing/empty "tools" field.
+    expect(stdout4).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
+      ⧙elm 0.19.1⧘ link removed: ⧙node_modules/.bin/elm⧘
+      ⧙elm-format 0.8.3⧘ link removed: ⧙node_modules/.bin/elm-format⧘
+
+    `);
+
+    expect(bin4).toMatchInlineSnapshot(`
+      elmx
+        not elm
+        
+    `);
+
+    const { stdout: stdout5, bin: bin5 } = await installSuccessHelper(fixture);
+
+    // Nothing to do – print how to add tools.
+    expect(stdout5).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
+      The "tools" field is empty. To add tools: elm-tooling tools
+
+    `);
+
+    expect(bin5).toBe(bin4);
   });
 });

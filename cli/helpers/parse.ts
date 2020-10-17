@@ -66,6 +66,7 @@ export type Entrypoint = {
 export type Tools = {
   existing: Array<Tool>;
   missing: Array<Tool>;
+  osName: OSName;
 };
 
 export type Tool = {
@@ -124,18 +125,11 @@ export function findReadAndParseElmToolingJson(
         break;
 
       case "tools": {
-        const osName = getOSName();
         result.tools = prefixFieldResult(
           "tools",
-          osName instanceof Error
-            ? // istanbul ignore next
-              {
-                tag: "Error" as const,
-                errors: [
-                  { path: [], message: osName.message },
-                ] as NonEmptyArray<FieldError>,
-              }
-            : parseTools(cwd, env, osName, value)
+          flatMapFieldResult(getOSNameAsFieldResult(), (osName) =>
+            parseTools(cwd, env, osName, value)
+          )
         );
         break;
       }
@@ -165,7 +159,37 @@ export function getOSName(): OSName | Error {
   }
 }
 
-function prefixFieldResult<T>(
+export function getOSNameAsFieldResult(): FieldResult<OSName> {
+  const osName = getOSName();
+  return osName instanceof Error
+    ? // istanbul ignore next
+      {
+        tag: "Error" as const,
+        errors: [{ path: [], message: osName.message }] as NonEmptyArray<
+          FieldError
+        >,
+      }
+    : {
+        tag: "Parsed",
+        parsed: osName,
+      };
+}
+
+function flatMapFieldResult<T, U>(
+  fieldResult: FieldResult<T>,
+  f: (parsed: T) => FieldResult<U>
+): FieldResult<U> {
+  switch (fieldResult.tag) {
+    // istanbul ignore next
+    case "Error":
+      return fieldResult;
+
+    case "Parsed":
+      return f(fieldResult.parsed);
+  }
+}
+
+export function prefixFieldResult<T>(
   prefix: string,
   fieldResult: FieldResult<T>
 ): FieldResult<T> {
@@ -413,17 +437,7 @@ function parseTools(
 
     const asset = osAssets[osName];
 
-    const tool: Tool = {
-      name,
-      version,
-      absolutePath: getToolAbsolutePath(
-        getElmToolingInstallPath(cwd, env),
-        name,
-        version,
-        asset.fileName
-      ),
-      asset,
-    };
+    const tool = makeTool(cwd, env, name, version, asset);
 
     const exists = validateFileExists(tool.absolutePath);
 
@@ -463,17 +477,28 @@ function parseTools(
 
   return {
     tag: "Parsed",
-    parsed: { existing, missing },
+    parsed: { existing, missing, osName },
   };
 }
 
-function getToolAbsolutePath(
-  elmToolingInstallPath: string,
+export function makeTool(
+  cwd: string,
+  env: Env,
   name: string,
   version: string,
-  fileName: string
-): string {
-  return path.join(elmToolingInstallPath, name, version, fileName);
+  asset: Asset
+): Tool {
+  return {
+    name,
+    version,
+    absolutePath: path.join(
+      getElmToolingInstallPath(cwd, env),
+      name,
+      version,
+      asset.fileName
+    ),
+    asset,
+  };
 }
 
 export function printFieldErrors(errors: Array<FieldError>): string {
@@ -564,17 +589,7 @@ export function getToolThrowing({
 
   const asset = versions[matchingVersion][osName];
 
-  return {
-    name,
-    version: matchingVersion,
-    absolutePath: getToolAbsolutePath(
-      getElmToolingInstallPath(cwd, env),
-      name,
-      matchingVersion,
-      asset.fileName
-    ),
-    asset,
-  };
+  return makeTool(cwd, env, name, matchingVersion, asset);
 }
 
 /* eslint-disable */

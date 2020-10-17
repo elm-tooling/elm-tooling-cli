@@ -5,8 +5,8 @@ import * as https from "https";
 import * as path from "path";
 import * as zlib from "zlib";
 
-import type { AssetType } from "../helpers/known-tools";
-import { linkTool } from "../helpers/link";
+import { AssetType, KNOWN_TOOLS, OSName } from "../helpers/known-tools";
+import { linkTool, unlinkTool } from "../helpers/link";
 import type { Logger } from "../helpers/logger";
 import {
   bold,
@@ -20,8 +20,11 @@ import {
 } from "../helpers/mixed";
 import {
   findReadAndParseElmToolingJson,
+  getOSNameAsFieldResult,
   getToolThrowing,
   isWindows,
+  makeTool,
+  prefixFieldResult,
   printFieldErrors,
   Tool,
   Tools,
@@ -53,12 +56,28 @@ export default async function install(
 
     case "Parsed": {
       switch (parseResult.tools?.tag) {
-        case undefined:
-          logger.log(bold(parseResult.elmToolingJsonPath));
-          logger.log(
-            `The "tools" field is missing. To add tools: elm-tooling tools`
-          );
-          return 0;
+        case undefined: {
+          const osResult = prefixFieldResult("tools", getOSNameAsFieldResult());
+
+          switch (osResult.tag) {
+            case "Error":
+              logger.error(bold(parseResult.elmToolingJsonPath));
+              logger.error("");
+              logger.error(printFieldErrors(osResult.errors));
+              // The spec documentation link does not help here.
+              return 1;
+
+            case "Parsed":
+              return removeAllTools(
+                cwd,
+                env,
+                logger,
+                osResult.parsed,
+                parseResult.elmToolingJsonPath,
+                "missing"
+              );
+          }
+        }
 
         case "Error":
           logger.error(bold(parseResult.elmToolingJsonPath));
@@ -68,13 +87,28 @@ export default async function install(
           logger.error(elmToolingJsonDocumentationLink);
           return 1;
 
-        case "Parsed":
+        case "Parsed": {
+          const tools = parseResult.tools.parsed;
+
+          if (tools.existing.length === 0 && tools.missing.length === 0) {
+            return removeAllTools(
+              cwd,
+              env,
+              logger,
+              tools.osName,
+              parseResult.elmToolingJsonPath,
+              "empty"
+            );
+          }
+
           return installTools(
             cwd,
+            env,
             logger,
             parseResult.elmToolingJsonPath,
-            parseResult.tools.parsed
+            tools
           );
+        }
       }
     }
   }
@@ -82,16 +116,11 @@ export default async function install(
 
 async function installTools(
   cwd: string,
+  env: Env,
   logger: Logger,
   elmToolingJsonPath: string,
   tools: Tools
 ): Promise<number> {
-  if (tools.existing.length === 0 && tools.missing.length === 0) {
-    logger.log(bold(elmToolingJsonPath));
-    logger.log(`The "tools" field is empty. To add tools: elm-tooling tools`);
-    return 0;
-  }
-
   const nodeModulesPath = findClosest(
     "node_modules",
     path.dirname(elmToolingJsonPath)
@@ -111,14 +140,22 @@ async function installTools(
   try {
     fs.mkdirSync(nodeModulesBinPath, { recursive: true });
   } catch (errorAny) {
-    const error = errorAny as Error & { code?: number };
+    const error = errorAny as Error;
     logger.error(bold(elmToolingJsonPath));
     logger.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
     return 1;
   }
 
   for (const tool of tools.missing) {
-    fs.mkdirSync(path.dirname(tool.absolutePath), { recursive: true });
+    const dir = path.dirname(tool.absolutePath);
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch (errorAny) {
+      const error = errorAny as Error;
+      logger.error(bold(elmToolingJsonPath));
+      logger.error(`Failed to create ${dir}:\n${error.message}`);
+      return 1;
+    }
   }
 
   const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
@@ -145,6 +182,13 @@ async function installTools(
   logger.log(bold(elmToolingJsonPath));
   redraw();
 
+  const presentNames = tools.missing
+    .concat(tools.existing)
+    .map(({ name }) => name);
+  const toolsToRemove = Object.keys(KNOWN_TOOLS).filter(
+    (name) => !presentNames.includes(name)
+  );
+
   const results: Array<string | Error | undefined> = [
     ...(await Promise.all(
       tools.missing.map((tool, index) =>
@@ -165,9 +209,20 @@ async function installTools(
         )
       )
     )),
+
     ...tools.existing.map((tool) => linkTool(cwd, nodeModulesBinPath, tool)),
+
+    ...removeTools(cwd, env, tools.osName, nodeModulesBinPath, toolsToRemove),
   ];
 
+  redraw();
+  return printResults(logger, results);
+}
+
+function printResults(
+  logger: Logger,
+  results: Array<string | Error | undefined>
+): number {
   const messages = results.flatMap((result) =>
     typeof result === "string" ? result : []
   );
@@ -175,8 +230,6 @@ async function installTools(
   const installErrors = results.flatMap((result) =>
     result instanceof Error ? result : []
   );
-
-  redraw();
 
   if (messages.length > 0) {
     logger.log(messages.join("\n"));
@@ -194,6 +247,61 @@ async function installTools(
   }
 
   return 0;
+}
+
+function removeAllTools(
+  cwd: string,
+  env: Env,
+  logger: Logger,
+  osName: OSName,
+  elmToolingJsonPath: string,
+  what: string
+): number {
+  logger.log(bold(elmToolingJsonPath));
+  const message = `The "tools" field is ${what}. To add tools: elm-tooling tools`;
+
+  const nodeModulesPath = findClosest(
+    "node_modules",
+    path.dirname(elmToolingJsonPath)
+  );
+  if (nodeModulesPath === undefined) {
+    logger.log(message);
+    return 0;
+  }
+
+  const nodeModulesBinPath = path.join(nodeModulesPath, ".bin");
+
+  const results = removeTools(
+    cwd,
+    env,
+    osName,
+    nodeModulesBinPath,
+    Object.keys(KNOWN_TOOLS)
+  );
+
+  if (results.every((result) => result === undefined)) {
+    logger.log(message);
+    return 0;
+  }
+
+  return printResults(logger, results);
+}
+
+function removeTools(
+  cwd: string,
+  env: Env,
+  osName: OSName,
+  nodeModulesBinPath: string,
+  names: Array<string>
+): Array<string | Error | undefined> {
+  return names.flatMap((name) => {
+    const versions = KNOWN_TOOLS[name];
+    return Object.keys(versions).map((version) => {
+      const asset = versions[version][osName];
+      const tool = makeTool(cwd, env, name, version, asset);
+      return unlinkTool(cwd, nodeModulesBinPath, tool);
+    });
+  });
 }
 
 async function downloadAndExtract(
