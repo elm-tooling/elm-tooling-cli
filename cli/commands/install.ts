@@ -5,8 +5,8 @@ import * as https from "https";
 import * as path from "path";
 import * as zlib from "zlib";
 
-import type { AssetType } from "../helpers/known-tools";
-import { linkTool } from "../helpers/link";
+import { AssetType, KNOWN_TOOLS } from "../helpers/known-tools";
+import { linkTool, unlinkTool } from "../helpers/link";
 import type { Logger } from "../helpers/logger";
 import {
   bold,
@@ -22,6 +22,7 @@ import {
   findReadAndParseElmToolingJson,
   getToolThrowing,
   isWindows,
+  makeTool,
   printFieldErrors,
   Tool,
   Tools,
@@ -71,6 +72,7 @@ export default async function install(
         case "Parsed":
           return installTools(
             cwd,
+            env,
             logger,
             parseResult.elmToolingJsonPath,
             parseResult.tools.parsed
@@ -82,6 +84,7 @@ export default async function install(
 
 async function installTools(
   cwd: string,
+  env: Env,
   logger: Logger,
   elmToolingJsonPath: string,
   tools: Tools
@@ -145,6 +148,19 @@ async function installTools(
   logger.log(bold(elmToolingJsonPath));
   redraw();
 
+  const presentNames = tools.missing
+    .concat(tools.existing)
+    .map(({ name }) => name);
+  const toolsToRemove = Object.keys(KNOWN_TOOLS).flatMap((name) => {
+    const versions = KNOWN_TOOLS[name];
+    return presentNames.includes(name)
+      ? []
+      : Object.keys(versions).map((version) => {
+          const asset = versions[version][tools.osName];
+          return makeTool(cwd, env, name, version, asset);
+        });
+  });
+
   const results: Array<string | Error | undefined> = [
     ...(await Promise.all(
       tools.missing.map((tool, index) =>
@@ -165,7 +181,10 @@ async function installTools(
         )
       )
     )),
+
     ...tools.existing.map((tool) => linkTool(cwd, nodeModulesBinPath, tool)),
+
+    ...toolsToRemove.map((tool) => unlinkTool(cwd, nodeModulesBinPath, tool)),
   ];
 
   const messages = results.flatMap((result) =>

@@ -66,6 +66,7 @@ export type Entrypoint = {
 export type Tools = {
   existing: Array<Tool>;
   missing: Array<Tool>;
+  osName: OSName;
 };
 
 export type Tool = {
@@ -413,17 +414,7 @@ function parseTools(
 
     const asset = osAssets[osName];
 
-    const tool: Tool = {
-      name,
-      version,
-      absolutePath: getToolAbsolutePath(
-        getElmToolingInstallPath(cwd, env),
-        name,
-        version,
-        asset.fileName
-      ),
-      asset,
-    };
+    const tool = makeTool(cwd, env, name, version, asset);
 
     const exists = validateFileExists(tool.absolutePath);
 
@@ -463,17 +454,28 @@ function parseTools(
 
   return {
     tag: "Parsed",
-    parsed: { existing, missing },
+    parsed: { existing, missing, osName },
   };
 }
 
-function getToolAbsolutePath(
-  elmToolingInstallPath: string,
+export function makeTool(
+  cwd: string,
+  env: Env,
   name: string,
   version: string,
-  fileName: string
-): string {
-  return path.join(elmToolingInstallPath, name, version, fileName);
+  asset: Asset
+): Tool {
+  return {
+    name,
+    version,
+    absolutePath: path.join(
+      getElmToolingInstallPath(cwd, env),
+      name,
+      version,
+      asset.fileName
+    ),
+    asset,
+  };
 }
 
 export function printFieldErrors(errors: Array<FieldError>): string {
@@ -564,17 +566,7 @@ export function getToolThrowing({
 
   const asset = versions[matchingVersion][osName];
 
-  return {
-    name,
-    version: matchingVersion,
-    absolutePath: getToolAbsolutePath(
-      getElmToolingInstallPath(cwd, env),
-      name,
-      matchingVersion,
-      asset.fileName
-    ),
-    asset,
-  };
+  return makeTool(cwd, env, name, matchingVersion, asset);
 }
 
 /* eslint-disable */
