@@ -255,7 +255,7 @@ describe("install", () => {
     fs.writeFileSync(elmToolingJsonPath, JSON.stringify({}));
     const { stdout, bin } = await installSuccessHelper(fixture);
 
-    // Does not remove the `elm` link that was already there, but node made by
+    // Does not remove the `elm` link that was already there, but not made by
     // elm-tooling.
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
@@ -343,7 +343,7 @@ describe("install", () => {
 
     const { stdout: stdout2, bin: bin2 } = await installSuccessHelper(fixture);
 
-    // Detects that’s there’s nothing to do.
+    // Detects that there’s nothing to do.
     expect(stdout2).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
@@ -395,7 +395,7 @@ describe("install", () => {
 
     const { stdout: stdout5, bin: bin5 } = await installSuccessHelper(fixture);
 
-    // Nothing to do – say how to add tools.
+    // Nothing to do – print how to add tools.
     expect(stdout5).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       The "tools" field is empty. To add tools: elm-tooling tools
