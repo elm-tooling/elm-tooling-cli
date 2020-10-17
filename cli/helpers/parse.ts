@@ -125,18 +125,11 @@ export function findReadAndParseElmToolingJson(
         break;
 
       case "tools": {
-        const osName = getOSName();
         result.tools = prefixFieldResult(
           "tools",
-          osName instanceof Error
-            ? // istanbul ignore next
-              {
-                tag: "Error" as const,
-                errors: [
-                  { path: [], message: osName.message },
-                ] as NonEmptyArray<FieldError>,
-              }
-            : parseTools(cwd, env, osName, value)
+          flatMapFieldResult(getOSNameAsFieldResult(), (osName) =>
+            parseTools(cwd, env, osName, value)
+          )
         );
         break;
       }
@@ -166,7 +159,36 @@ export function getOSName(): OSName | Error {
   }
 }
 
-function prefixFieldResult<T>(
+export function getOSNameAsFieldResult(): FieldResult<OSName> {
+  const osName = getOSName();
+  return osName instanceof Error
+    ? // istanbul ignore next
+      {
+        tag: "Error" as const,
+        errors: [{ path: [], message: osName.message }] as NonEmptyArray<
+          FieldError
+        >,
+      }
+    : {
+        tag: "Parsed",
+        parsed: osName,
+      };
+}
+
+function flatMapFieldResult<T, U>(
+  fieldResult: FieldResult<T>,
+  f: (parsed: T) => FieldResult<U>
+): FieldResult<U> {
+  switch (fieldResult.tag) {
+    case "Error":
+      return fieldResult;
+
+    case "Parsed":
+      return f(fieldResult.parsed);
+  }
+}
+
+export function prefixFieldResult<T>(
   prefix: string,
   fieldResult: FieldResult<T>
 ): FieldResult<T> {
