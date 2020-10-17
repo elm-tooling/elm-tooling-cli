@@ -9,31 +9,34 @@ export function linkTool(
   nodeModulesBinPath: string,
   tool: Tool
 ): string | Error {
-  const linkPath = path.join(nodeModulesBinPath, tool.name);
-  const relativeLinkPath = path.relative(cwd, linkPath);
-  const possiblyRelativeLinkPath = relativeLinkPath.startsWith("node_modules")
-    ? relativeLinkPath
-    : linkPath;
+  const { linkPathPresentationString, what, strategy } = linkHelper(
+    cwd,
+    nodeModulesBinPath,
+    tool
+  );
 
   // Just like npm, these overwrite whatever links are already in
   // `node_modules/.bin/`. Most likely it’s either old links from for example
   // the `elm` npm package, or links from previous runs of this script.
-  const [linkPathPresentationString, what] = isWindows
-    ? // istanbul ignore next
-      [symlinkShimWindows(tool, linkPath, possiblyRelativeLinkPath), "shims"]
-    : [symlink(tool, linkPath, possiblyRelativeLinkPath), "link"];
+  const result =
+    strategy.tag === "Shims"
+      ? // istanbul ignore next
+        symlinkShimWindows(tool, strategy.items)
+      : symlink(tool, strategy.linkPath);
 
-  if (linkPathPresentationString instanceof Error) {
-    return new Error(linkPathPresentationString.message);
+  if (result instanceof Error) {
+    return new Error(result.message);
   }
 
-  if (linkPathPresentationString === undefined) {
-    return `${bold(`${tool.name} ${tool.version}`)}: ${dim("all good")}`;
-  }
+  switch (result) {
+    case "AllGood":
+      return `${bold(`${tool.name} ${tool.version}`)}: ${dim("all good")}`;
 
-  return `${bold(`${tool.name} ${tool.version}`)} ${what} created: ${dim(
-    `${linkPathPresentationString} -> ${tool.absolutePath}`
-  )}\n${indent(`To run: npx ${tool.name}`)}`;
+    case "Created":
+      return `${bold(`${tool.name} ${tool.version}`)} ${what} created: ${dim(
+        `${linkPathPresentationString} -> ${tool.absolutePath}`
+      )}\n${indent(`To run: npx ${tool.name}`)}`;
+  }
 }
 
 export function unlinkTool(
@@ -41,41 +44,75 @@ export function unlinkTool(
   nodeModulesBinPath: string,
   tool: Tool
 ): string | Error | undefined {
+  const { linkPathPresentationString, what, strategy } = linkHelper(
+    cwd,
+    nodeModulesBinPath,
+    tool
+  );
+
+  const result =
+    strategy.tag === "Shims"
+      ? // istanbul ignore next
+        removeSymlinkShimWindows(tool, strategy.items)
+      : removeSymlink(tool, strategy.linkPath);
+
+  if (result instanceof Error) {
+    return new Error(result.message);
+  }
+
+  switch (result) {
+    case "DidNothing":
+      return undefined;
+
+    case "Removed":
+      return `${bold(`${tool.name} ${tool.version}`)} ${what} removed: ${dim(
+        `${linkPathPresentationString}`
+      )}`;
+  }
+}
+
+function linkHelper(
+  cwd: string,
+  nodeModulesBinPath: string,
+  tool: Tool
+): {
+  linkPathPresentationString: string;
+  what: string;
+  strategy:
+    | { tag: "Link"; linkPath: string }
+    | { tag: "Shims"; items: Array<[string, string]> };
+} {
   const linkPath = path.join(nodeModulesBinPath, tool.name);
   const relativeLinkPath = path.relative(cwd, linkPath);
   const possiblyRelativeLinkPath = relativeLinkPath.startsWith("node_modules")
     ? relativeLinkPath
     : linkPath;
 
-  const [linkPathPresentationString, what] = isWindows
+  return isWindows
     ? // istanbul ignore next
-      [
-        removeSymlinkShimWindows(tool, linkPath, possiblyRelativeLinkPath),
-        "shims",
-      ]
-    : [removeSymlink(tool, linkPath, possiblyRelativeLinkPath), "link"];
-
-  if (linkPathPresentationString instanceof Error) {
-    return new Error(linkPathPresentationString.message);
-  }
-
-  if (linkPathPresentationString === undefined) {
-    return undefined;
-  }
-
-  return `${bold(`${tool.name} ${tool.version}`)} ${what} removed: ${dim(
-    `${linkPathPresentationString}`
-  )}`;
+      {
+        linkPathPresentationString: `${possiblyRelativeLinkPath}{,.cmd,.ps1}`,
+        what: "shims",
+        strategy: {
+          tag: "Shims",
+          items: [
+            [linkPath, makeShScript(tool.absolutePath)],
+            [`${linkPath}.cmd`, makeCmdScript(tool.absolutePath)],
+            [`${linkPath}.ps1`, makePs1Script(tool.absolutePath)],
+          ],
+        },
+      }
+    : {
+        linkPathPresentationString: possiblyRelativeLinkPath,
+        what: "link",
+        strategy: { tag: "Link", linkPath },
+      };
 }
 
-function symlink(
-  tool: Tool,
-  linkPath: string,
-  possiblyRelativeLinkPath: string
-): string | Error | undefined {
+function symlink(tool: Tool, linkPath: string): "AllGood" | "Created" | Error {
   try {
     if (fs.readlinkSync(linkPath) === tool.absolutePath) {
-      return undefined;
+      return "AllGood";
     }
   } catch (_error) {
     // Continue below.
@@ -87,7 +124,7 @@ function symlink(
     const error = errorAny as Error & { code?: string };
     if (error.code !== "ENOENT") {
       return new Error(
-        `Failed to remove old link for ${tool.name} at ${possiblyRelativeLinkPath}:\n${error.message}`
+        `Failed to remove old link for ${tool.name} at ${linkPath}:\n${error.message}`
       );
     }
   }
@@ -97,22 +134,21 @@ function symlink(
   } catch (errorAny) /* istanbul ignore next */ {
     const error = errorAny as Error;
     return new Error(
-      `Failed to create link for ${tool.name} at ${possiblyRelativeLinkPath}:\n${error.message}`
+      `Failed to create link for ${tool.name} at ${linkPath}:\n${error.message}`
     );
   }
 
-  return possiblyRelativeLinkPath;
+  return "Created";
 }
 
 function removeSymlink(
   tool: Tool,
-  linkPath: string,
-  possiblyRelativeLinkPath: string
-): string | Error | undefined {
+  linkPath: string
+): "DidNothing" | "Removed" | Error {
   try {
     if (fs.readlinkSync(linkPath) === tool.absolutePath) {
       fs.unlinkSync(linkPath);
-      return possiblyRelativeLinkPath;
+      return "Removed";
     }
   } catch (errorAny) /* istanbul ignore next */ {
     const error = errorAny as Error & { code?: string };
@@ -120,98 +156,81 @@ function removeSymlink(
     // If the path does not exist there’s nothing to do.
     if (error.code !== "EINVAL" && error.code !== "ENOENT") {
       return new Error(
-        `Failed to remove old link for ${tool.name} at ${possiblyRelativeLinkPath}:\n${error.message}`
+        `Failed to remove old link for ${tool.name} at ${linkPath}:\n${error.message}`
       );
     }
   }
-  return undefined;
+  return "DidNothing";
 }
 
 // istanbul ignore next
 function symlinkShimWindows(
   tool: Tool,
-  linkPath: string,
-  possiblyRelativeLinkPath: string
-): string | Error | undefined {
-  const items = [
-    [linkPath, makeShScript(tool.absolutePath)],
-    [`${linkPath}.cmd`, makeCmdScript(tool.absolutePath)],
-    [`${linkPath}.ps1`, makePs1Script(tool.absolutePath)],
-  ];
-  const linkPathPresentationString = `${possiblyRelativeLinkPath}{,.cmd,.ps1}`;
-
+  items: Array<[string, string]>
+): "AllGood" | "Created" | Error {
   try {
     if (
       items.every(
         ([itemPath, content]) => fs.readFileSync(itemPath, "utf8") === content
       )
     ) {
-      return undefined;
+      return "AllGood";
     }
   } catch (_error) {
     // Continue below.
   }
 
-  try {
-    for (const [itemPath] of items) {
+  for (const [itemPath] of items) {
+    try {
       fs.unlinkSync(itemPath);
+    } catch (errorAny) {
+      const error = errorAny as Error & { code?: string };
+      if (error.code !== "ENOENT") {
+        return new Error(
+          `Failed to remove old shim for ${tool.name} at ${itemPath}:\n${error.message}`
+        );
+      }
     }
-  } catch (errorAny) {
-    const error = errorAny as Error & { code?: string };
-    if (error.code !== "ENOENT") {
+  }
+
+  for (const [itemPath, content] of items) {
+    try {
+      fs.writeFileSync(itemPath, content);
+    } catch (errorAny) {
+      const error = errorAny as Error;
       return new Error(
-        `Failed to remove old shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
+        `Failed to create shim for ${tool.name} at ${itemPath}:\n${error.message}`
       );
     }
   }
 
-  try {
-    for (const [itemPath, content] of items) {
-      fs.writeFileSync(itemPath, content);
-    }
-  } catch (errorAny) {
-    const error = errorAny as Error;
-    return new Error(
-      `Failed to create shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
-    );
-  }
-
-  return linkPathPresentationString;
+  return "Created";
 }
 
 // istanbul ignore next
 function removeSymlinkShimWindows(
   tool: Tool,
-  linkPath: string,
-  possiblyRelativeLinkPath: string
-): string | Error | undefined {
-  const items = [
-    [linkPath, makeShScript(tool.absolutePath)],
-    [`${linkPath}.cmd`, makeCmdScript(tool.absolutePath)],
-    [`${linkPath}.ps1`, makePs1Script(tool.absolutePath)],
-  ];
-  const linkPathPresentationString = `${possiblyRelativeLinkPath}{,.cmd,.ps1}`;
-
-  try {
-    for (const [itemPath, content] of items) {
+  items: Array<[string, string]>
+): "DidNothing" | "Removed" | Error {
+  for (const [itemPath, content] of items) {
+    try {
       if (fs.readFileSync(itemPath, "utf8") === content) {
         fs.unlinkSync(itemPath);
-        return linkPathPresentationString;
+        return "Removed";
+      }
+    } catch (errorAny) {
+      const error = errorAny as Error & { code?: string };
+      // TODO: Try this on Windows.
+      // If the path exists but isn’t a file, let it be.
+      // If the path does not exists there’s nothing to do.
+      if (error.code !== "EPERM" && error.code !== "ENOENT") {
+        return new Error(
+          `Failed to remove old shim for ${tool.name} at ${itemPath}:\n${error.message}`
+        );
       }
     }
-  } catch (errorAny) {
-    const error = errorAny as Error & { code?: string };
-    // TODO: Try this on Windows.
-    // If the path exists but isn’t a file, let it be.
-    // If the path does not exists there’s nothing to do.
-    if (error.code !== "EPERM" && error.code !== "ENOENT") {
-      return new Error(
-        `Failed to remove old shims for ${tool.name} at ${linkPathPresentationString}:\n${error.message}`
-      );
-    }
   }
-
-  return undefined;
+  return "DidNothing";
 }
 
 // Windows-style paths works fine, at least in Git bash.
