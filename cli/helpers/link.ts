@@ -4,6 +4,14 @@ import * as path from "path";
 import { bold, dim, indent } from "./mixed";
 import { isWindows, Tool } from "./parse";
 
+type LinkResult = "AllGood" | "Created" | Error;
+
+type UnlinkResult = "DidNothing" | "Removed" | Error;
+
+type Strategy =
+  | { tag: "Link"; linkPath: string }
+  | { tag: "Shims"; items: Array<[string, string]> };
+
 export function linkTool(
   cwd: string,
   nodeModulesBinPath: string,
@@ -15,14 +23,7 @@ export function linkTool(
     tool
   );
 
-  // Just like npm, these overwrite whatever links are already in
-  // `node_modules/.bin/`. Most likely it’s either old links from for example
-  // the `elm` npm package, or links from previous runs of this script.
-  const result =
-    strategy.tag === "Shims"
-      ? // istanbul ignore next
-        symlinkShimWindows(tool, strategy.items)
-      : symlink(tool, strategy.linkPath);
+  const result = linkToolWithStrategy(tool, strategy);
 
   if (result instanceof Error) {
     return new Error(result.message);
@@ -39,6 +40,20 @@ export function linkTool(
   }
 }
 
+// Just like npm, these overwrite whatever links are already in
+// `node_modules/.bin/`. Most likely it’s either old links from for example the
+// `elm` npm package, or links from previous runs of this script.
+function linkToolWithStrategy(tool: Tool, strategy: Strategy): LinkResult {
+  switch (strategy.tag) {
+    case "Link":
+      return symlink(tool, strategy.linkPath);
+
+    // istanbul ignore next
+    case "Shims":
+      return symlinkShimWindows(tool, strategy.items);
+  }
+}
+
 export function unlinkTool(
   cwd: string,
   nodeModulesBinPath: string,
@@ -50,11 +65,7 @@ export function unlinkTool(
     tool
   );
 
-  const result =
-    strategy.tag === "Shims"
-      ? // istanbul ignore next
-        removeSymlinkShimWindows(tool, strategy.items)
-      : removeSymlink(tool, strategy.linkPath);
+  const result = unlinkToolWithStrategy(tool, strategy);
 
   // istanbul ignore if
   if (result instanceof Error) {
@@ -72,6 +83,20 @@ export function unlinkTool(
   }
 }
 
+// These only remove things that are created by elm-tooling itself (or seem to
+// be). For example, if the user has installed elm-json with npm we shouldn’t
+// remove that link.
+function unlinkToolWithStrategy(tool: Tool, strategy: Strategy): UnlinkResult {
+  switch (strategy.tag) {
+    case "Link":
+      return removeSymlink(tool, strategy.linkPath);
+
+    // istanbul ignore next
+    case "Shims":
+      return removeSymlinkShimWindows(tool, strategy.items);
+  }
+}
+
 function linkHelper(
   cwd: string,
   nodeModulesBinPath: string,
@@ -79,9 +104,7 @@ function linkHelper(
 ): {
   linkPathPresentationString: string;
   what: string;
-  strategy:
-    | { tag: "Link"; linkPath: string }
-    | { tag: "Shims"; items: Array<[string, string]> };
+  strategy: Strategy;
 } {
   const linkPath = path.join(nodeModulesBinPath, tool.name);
   const relativeLinkPath = path.relative(cwd, linkPath);
@@ -110,7 +133,7 @@ function linkHelper(
       };
 }
 
-function symlink(tool: Tool, linkPath: string): "AllGood" | "Created" | Error {
+function symlink(tool: Tool, linkPath: string): LinkResult {
   try {
     if (fs.readlinkSync(linkPath) === tool.absolutePath) {
       return "AllGood";
@@ -142,10 +165,7 @@ function symlink(tool: Tool, linkPath: string): "AllGood" | "Created" | Error {
   return "Created";
 }
 
-function removeSymlink(
-  tool: Tool,
-  linkPath: string
-): "DidNothing" | "Removed" | Error {
+function removeSymlink(tool: Tool, linkPath: string): UnlinkResult {
   try {
     if (fs.readlinkSync(linkPath) === tool.absolutePath) {
       fs.unlinkSync(linkPath);
@@ -168,7 +188,7 @@ function removeSymlink(
 function symlinkShimWindows(
   tool: Tool,
   items: Array<[string, string]>
-): "AllGood" | "Created" | Error {
+): LinkResult {
   try {
     if (
       items.every(
@@ -212,7 +232,7 @@ function symlinkShimWindows(
 function removeSymlinkShimWindows(
   tool: Tool,
   items: Array<[string, string]>
-): "DidNothing" | "Removed" | Error {
+): UnlinkResult {
   for (const [itemPath, content] of items) {
     try {
       if (fs.readFileSync(itemPath, "utf8") === content) {

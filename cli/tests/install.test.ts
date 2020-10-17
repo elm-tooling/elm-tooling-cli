@@ -251,15 +251,15 @@ describe("install", () => {
       fs.symlinkSync("somewhere-else", path.join(binDir, "elm"));
     }
 
-    if (fs.existsSync(elmToolingJsonPath)) {
-      fs.unlinkSync(elmToolingJsonPath);
-    }
+    // Missing "tools" field.
+    fs.writeFileSync(elmToolingJsonPath, JSON.stringify({}));
     const { stdout, bin } = await installSuccessHelper(fixture);
 
-    // Does not remove the `elm` link that was already there, but node made by elm-tooling.
+    // Does not remove the `elm` link that was already there, but node made by
+    // elm-tooling.
     expect(stdout).toMatchInlineSnapshot(`
-      ⧙/Users/lydell/src/elm-tooling.json/cli/elm-tooling.json⧘
-      The "tools" field is empty. To add tools: elm-tooling tools
+      ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
+      The "tools" field is missing. To add tools: elm-tooling tools
 
     `);
 
@@ -363,10 +363,11 @@ describe("install", () => {
       ".gitkeep",
     ]);
 
-    fs.writeFileSync(elmToolingJsonPath, "{}");
+    // Empty "tools" field.
+    fs.writeFileSync(elmToolingJsonPath, JSON.stringify({ tools: {} }));
     const { stdout: stdout4, bin: bin4 } = await installSuccessHelper(fixture);
 
-    // Removes tools even if no "tools" field.
+    // Removes tools even if missing/empty "tools" field.
     expect(stdout4).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘ link removed: ⧙node_modules/.bin/elm⧘
@@ -385,7 +386,7 @@ describe("install", () => {
     // Nothing to do – say how to add tools.
     expect(stdout5).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
-      The "tools" field is missing. To add tools: elm-tooling tools
+      The "tools" field is empty. To add tools: elm-tooling tools
 
     `);
 
