@@ -522,6 +522,11 @@ function joinPath(errorPath: Array<string | number>): string {
 }
 
 const versionRangeRegex = /^([=~^])(\d+)\.(\d+)\.(\d+)([+-].+)?$/;
+const collator = new Intl.Collator("en", { numeric: true });
+
+function hasPrerelease(version: string): boolean {
+  return /[+-]/.exec(version)?.[0] === "-";
+}
 
 export function getToolThrowing({
   name,
@@ -534,23 +539,6 @@ export function getToolThrowing({
   cwd: string;
   env: Env;
 }): Tool {
-  const match = versionRangeRegex.exec(versionRange);
-
-  if (match === null) {
-    throw new Error(
-      `Version ranges must start with ^ or ~ (or = if you really need an exact version) and be followed by 3 dot-separated numbers, but got: ${versionRange}`
-    );
-  }
-
-  const sign = match[1];
-  const major = Number(match[2]);
-  const minor = Number(match[3]);
-  const lowerBound = versionRange.slice(1);
-  const upperBound =
-    major === 0 || sign === "~"
-      ? `${major}.${minor + 1}.0`
-      : `${major + 1}.0.0`;
-
   const osName = getOSName();
 
   // istanbul ignore if
@@ -570,14 +558,10 @@ export function getToolThrowing({
     );
   }
 
-  const matchingVersion = Object.keys(versions)
-    .reverse()
-    .find((version) =>
-      sign === "="
-        ? version === lowerBound
-        : semverCompare(version, lowerBound) >= 0 &&
-          semverCompare(version, upperBound) < 0
-    );
+  const matchingVersion = getLatestMatchingVersion(
+    versionRange,
+    Object.keys(versions).reverse()
+  );
 
   if (matchingVersion === undefined) {
     throw new Error(
@@ -592,27 +576,44 @@ export function getToolThrowing({
   return makeTool(cwd, env, name, matchingVersion, asset);
 }
 
-/* eslint-disable */
-const fn = new Intl.Collator("en", { numeric: true }).compare;
+export function getLatestMatchingVersion(
+  versionRange: string,
+  sortedValidVersions: Array<string>
+): string | undefined {
+  const match = versionRangeRegex.exec(versionRange);
 
-// Copied from:
-// https://github.com/lukeed/semiver/blob/ae7eebe6053c96be63032b14fb0b68e2553fcac4/src/index.js
-// Author: Luke Edwards. See LICENSE.
-function semverCompare(aInput: string, bInput: string): number {
-  let bool;
-  const a = aInput.split(".");
-  const b = bInput.split(".");
+  if (match === null) {
+    throw new Error(
+      `Version ranges must start with ^ or ~ (or = if you really need an exact version) and be followed by 3 dot-separated numbers, but got: ${versionRange}`
+    );
+  }
 
-  return (
-    fn(a[0], b[0]) ||
-    fn(a[1], b[1]) ||
-    ((b[2] = b.slice(2).join(".")),
-    (bool = /[.-]/.test((a[2] = a.slice(2).join(".")))),
-    bool == /[.-]/.test(b[2])
-      ? fn(a[2], b[2])
-      : bool
-      ? /* istanbul ignore next */ -1
-      : 1)
-  );
+  const sign = match[1];
+  const major = Number(match[2]);
+  const minor = Number(match[3]);
+  const patch = Number(match[4]);
+  const prereleasePrefix = `${major}.${minor}.${patch}-`;
+  const lowerBound = versionRange.slice(1);
+  const upperBound =
+    major === 0 || sign === "~"
+      ? `${major}.${minor + 1}.0`
+      : `${major + 1}.0.0`;
+
+  return sortedValidVersions.find((version) => {
+    if (sign === "=") {
+      return version === lowerBound;
+    }
+
+    if (
+      hasPrerelease(version) &&
+      !(hasPrerelease(lowerBound) && version.startsWith(prereleasePrefix))
+    ) {
+      return false;
+    }
+
+    return (
+      collator.compare(version, lowerBound) >= 0 &&
+      collator.compare(version, upperBound) < 0
+    );
+  });
 }
-/* eslint-enable */
