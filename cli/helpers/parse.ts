@@ -599,13 +599,6 @@ export function getLatestMatchingVersion(
       ? `${major}.${minor + 1}.0`
       : `${major + 1}.0.0`;
 
-  const osName = getOSName();
-
-  // istanbul ignore if
-  if (osName instanceof Error) {
-    throw osName;
-  }
-
   return sortedValidVersions.find((version) => {
     if (sign === "=") {
       return version === lowerBound;
