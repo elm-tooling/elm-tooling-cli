@@ -96,7 +96,7 @@ In the future this command might just need to download stuff from the Internet a
    "devDependencies": {
 -    "elm": "0.19.1",
 -    "elm-format": "0.8.3"
-+    "elm-tooling": "0.6.0"
++    "elm-tooling": "0.6.1"
    },
    "scripts": {
 +    "postinstall": "elm-tooling install"

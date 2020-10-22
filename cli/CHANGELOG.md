@@ -1,3 +1,7 @@
+### Version 0.6.1 (2020-10-22)
+
+- Fixed: `getExecutable` now properly deals with prereleases. Previously, `^1.0.0` would match `1.1.0-beta.1`. Prereleases should only be matched if the range contains a prerelease and they both have the same three-digit base.
+
 ### Version 0.6.0 (2020-10-17)
 
 - Improved: `elm-tooling install` now removes old links created by earlier runs of `elm-tooling install`.
