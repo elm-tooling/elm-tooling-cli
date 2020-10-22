@@ -539,6 +539,47 @@ export function getToolThrowing({
   cwd: string;
   env: Env;
 }): Tool {
+  const osName = getOSName();
+
+  // istanbul ignore if
+  if (osName instanceof Error) {
+    throw osName;
+  }
+
+  const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
+    ? KNOWN_TOOLS[name]
+    : undefined;
+
+  if (versions === undefined) {
+    throw new Error(
+      `Unknown tool: ${name}\nKnown tools: ${Object.keys(KNOWN_TOOLS).join(
+        ", "
+      )}`
+    );
+  }
+
+  const matchingVersion = getLatestMatchingVersion(
+    versionRange,
+    Object.keys(versions).reverse()
+  );
+
+  if (matchingVersion === undefined) {
+    throw new Error(
+      `No ${name} versions matching: ${versionRange}\nKnown versions: ${Object.keys(
+        versions
+      ).join(", ")}`
+    );
+  }
+
+  const asset = versions[matchingVersion][osName];
+
+  return makeTool(cwd, env, name, matchingVersion, asset);
+}
+
+export function getLatestMatchingVersion(
+  versionRange: string,
+  sortedValidVersions: Array<string>
+): string | undefined {
   const match = versionRangeRegex.exec(versionRange);
 
   if (match === null) {
@@ -565,49 +606,21 @@ export function getToolThrowing({
     throw osName;
   }
 
-  const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
-    ? KNOWN_TOOLS[name]
-    : undefined;
+  return sortedValidVersions.find((version) => {
+    if (sign === "=") {
+      return version === lowerBound;
+    }
 
-  if (versions === undefined) {
-    throw new Error(
-      `Unknown tool: ${name}\nKnown tools: ${Object.keys(KNOWN_TOOLS).join(
-        ", "
-      )}`
+    if (
+      hasPrerelease(version) &&
+      !(hasPrerelease(lowerBound) && version.startsWith(prereleasePrefix))
+    ) {
+      return false;
+    }
+
+    return (
+      collator.compare(version, lowerBound) >= 0 &&
+      collator.compare(version, upperBound) < 0
     );
-  }
-
-  const matchingVersion = Object.keys(versions)
-    .reverse()
-    .find((version) => {
-      if (sign === "=") {
-        return version === lowerBound;
-      }
-
-      // Currently there are no prereleases in `KNOWN_TOOLS` to test with.
-      // istanbul ignore next
-      if (
-        hasPrerelease(version) &&
-        !(hasPrerelease(lowerBound) && version.startsWith(prereleasePrefix))
-      ) {
-        return false;
-      }
-
-      return (
-        collator.compare(version, lowerBound) >= 0 &&
-        collator.compare(version, upperBound) < 0
-      );
-    });
-
-  if (matchingVersion === undefined) {
-    throw new Error(
-      `No ${name} versions matching: ${versionRange}\nKnown versions: ${Object.keys(
-        versions
-      ).join(", ")}`
-    );
-  }
-
-  const asset = versions[matchingVersion][osName];
-
-  return makeTool(cwd, env, name, matchingVersion, asset);
+  });
 }
