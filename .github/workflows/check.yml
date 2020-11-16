@@ -15,6 +15,10 @@ jobs:
         os: [ubuntu-latest]
         node-version: [15.x]
 
+    defaults:
+      run:
+        working-directory: cli
+
     steps:
       - uses: actions/checkout@v2
 
