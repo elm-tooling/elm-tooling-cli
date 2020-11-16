@@ -1,3 +1,4 @@
+import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
@@ -27,7 +28,9 @@ function tree(dir: string): Array<string> {
     ...fs
       .readdirSync(dir, { withFileTypes: true })
       .flatMap((entry) =>
-        entry.isFile()
+        entry.name === "node_modules"
+          ? []
+          : entry.isFile()
           ? entry.name.endsWith(".json")
             ? [
                 entry.name,
@@ -106,6 +109,24 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
   }
 }
 
+async function spawnPromise(
+  name: string,
+  cwd: string,
+  stdout: WriteStream
+): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const child = childProcess.spawn("npx", [name, "--help"], {
+      cwd,
+      shell: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    child.stdout.pipe(stdout);
+    child.stderr.pipe(stdout);
+    child.on("error", reject);
+    child.on("close", resolve);
+  });
+}
+
 export async function run(): Promise<void> {
   const variants: Array<Array<readonly [string, string]>> = join(
     Object.keys(KNOWN_TOOLS).map((name) =>
@@ -120,7 +141,7 @@ export async function run(): Promise<void> {
 
   process.stdout.write(CLEAR);
 
-  const exitCodes = await Promise.all(
+  const exitCodes: Array<Array<number>> = await Promise.all(
     variants.map((tools, index) => {
       const dir = path.join(WORK_DIR, index.toString());
 
@@ -129,6 +150,7 @@ export async function run(): Promise<void> {
       };
 
       fs.mkdirSync(dir);
+      fs.mkdirSync(path.join(dir, "node_modules"));
       fs.writeFileSync(
         path.join(dir, "elm-tooling.json"),
         JSON.stringify(elmToolingJson, null, 2)
@@ -143,22 +165,46 @@ export async function run(): Promise<void> {
           calculateHeight(variants.slice(0, index))
         ),
         stderr,
-      }).then(
-        (exitCode) => {
+      })
+        .then((exitCode) => {
           if (exitCode !== 0) {
             stderr.write(
               `\nPromise at index ${index}: Non-zero exit code: ${exitCode}\n`
             );
+            return [exitCode];
           }
-          return exitCode;
-        },
-        (error: Error) => {
+          return Promise.all(
+            tools.map(([name, version], index2) => {
+              const stdout = new MemoryWriteStream();
+              return spawnPromise(name, dir, stdout).then((exitCode2) => {
+                const prefix = `\nPromise at index ${index}/${index2}: Spawn ${name}`;
+                if (exitCode !== 0) {
+                  stderr.write(`${prefix}: ${exitCode2}\n`);
+                  return exitCode;
+                }
+                if (!stdout.content.includes(name)) {
+                  stderr.write(
+                    `${prefix}: Expected stdout to contain: ${name}\n\n${stdout.content}\n\n`
+                  );
+                  return 10;
+                }
+                if (!stdout.content.includes(version)) {
+                  stderr.write(
+                    `${prefix}: Expected stdout to contain: ${version}\n\n${stdout.content}\n\n`
+                  );
+                  return 11;
+                }
+                return 0;
+              });
+            })
+          );
+        })
+        .catch((error: Error) => {
           stderr.write(
             `\nPromise at index ${index}: Error: ${error.message}\n`
           );
-          return 1;
-        }
-      );
+          return [12];
+        });
     })
   );
 
@@ -168,7 +214,7 @@ export async function run(): Promise<void> {
     process.stderr.write(`All stderr outputs:\n${stderr.content}`);
   }
 
-  const failed = exitCodes.filter((exitCode) => exitCode !== 0);
+  const failed = exitCodes.flat().filter((exitCode) => exitCode !== 0);
   if (failed.length > 0) {
     throw new Error(`${failed.length} exited with non-zero exit code.`);
   }
