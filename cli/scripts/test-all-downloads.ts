@@ -8,7 +8,7 @@ import elmToolingCli from "..";
 import { KNOWN_TOOLS } from "../helpers/known-tools";
 import type { ElmTooling, WriteStream } from "../helpers/mixed";
 
-const WORK_DIR = path.join(__dirname, "all-downloads");
+const WORK_DIR = path.join(__dirname, "workdirs", "all-downloads");
 const EXPECTED_FILE = path.join(__dirname, "all-downloads.expected.txt");
 const ACTUAL_FILE = path.join(__dirname, "all-downloads.actual.txt");
 
@@ -136,8 +136,10 @@ export async function run(): Promise<void> {
 
   const stderr = new MemoryWriteStream();
 
-  fs.rmdirSync(WORK_DIR, { recursive: true });
-  fs.mkdirSync(WORK_DIR);
+  if (fs.existsSync(WORK_DIR)) {
+    fs.rmdirSync(WORK_DIR, { recursive: true });
+  }
+  fs.mkdirSync(WORK_DIR, { recursive: true });
 
   process.stdout.write(CLEAR);
 
@@ -149,8 +151,7 @@ export async function run(): Promise<void> {
         tools: Object.fromEntries(tools),
       };
 
-      fs.mkdirSync(dir);
-      fs.mkdirSync(path.join(dir, "node_modules"));
+      fs.mkdirSync(path.join(dir, "node_modules"), { recursive: true });
       fs.writeFileSync(
         path.join(dir, "elm-tooling.json"),
         JSON.stringify(elmToolingJson, null, 2)

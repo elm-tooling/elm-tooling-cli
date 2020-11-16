@@ -3,13 +3,13 @@ import * as path from "path";
 
 import getExecutable from "../getExecutable";
 
-const WORK_DIR = path.join(__dirname, "all-downloads");
+const WORK_DIR = path.join(__dirname, "workdirs", "getExecutable");
 
 export async function run(): Promise<void> {
   if (fs.existsSync(WORK_DIR)) {
     rmdirSyncRecursive(WORK_DIR);
   }
-  fs.mkdirSync(WORK_DIR);
+  fs.mkdirSync(WORK_DIR, { recursive: true });
 
   const progress: Array<number> = [];
 
