@@ -1,0 +1,55 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+
+jobs:
+  main:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        node-version: [12.x, 14.x, 15.x]
+
+    env:
+      ELM_HOME: "${{ github.workspace }}/elm-stuff/elm-home"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "${{ matrix.node-version }}"
+
+      - name: Cache node_modules
+        id: cache-node_modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Cache ELM_HOME
+        uses: actions/cache@v2
+        with:
+          path: "${{ env.ELM_HOME }}"
+          key: elm-${{ matrix.os }}-${{ hashFiles('elm/**/elm.json', 'example-*/**/elm.json', 'tests/**/elm.json') }}
+
+      - name: npm ci
+        if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Jest
+        run: npx --no-install jest --coverage
+
+      - name: test-all-downloads.ts
+        run: npx --no-install ts-node scripts/test-all-downloads.ts
+
+      - name: test-integration.ts
+        run: npx --no-install ts-node scripts/test-integration.ts
+
+      - name: test-getExecutable.ts
+        run: npx --no-install ts-node scripts/test-getExecutable.ts
