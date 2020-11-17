@@ -265,7 +265,7 @@ describe("install", () => {
 
     if (IS_WINDOWS) {
       // eslint-disable-next-line jest/no-conditional-expect
-      expect(bin).toMatchInlineSnapshot(`
+      expect(JSON.stringify(bin)).toMatchInlineSnapshot(`
         elm
           something else
         elmx
@@ -297,7 +297,7 @@ describe("install", () => {
 
     if (IS_WINDOWS) {
       // eslint-disable-next-line jest/no-conditional-expect
-      expect(bin1).toMatchInlineSnapshot(`
+      expect(JSON.stringify(bin1)).toMatchInlineSnapshot(`
         elm
           #!/bin/sh
           '/Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm' "$@"
@@ -387,7 +387,7 @@ describe("install", () => {
 
     `);
 
-    expect(bin4).toMatchInlineSnapshot(`
+    expect(IS_WINDOWS ? JSON.stringify(bin4) : bin4).toMatchInlineSnapshot(`
       elmx
         not elm
         
