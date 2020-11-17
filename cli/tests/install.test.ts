@@ -9,6 +9,7 @@ import {
   FailReadStream,
   IS_WINDOWS,
   MemoryWriteStream,
+  readFile,
   stringSnapshotSerializer,
 } from "./helpers";
 
@@ -62,9 +63,10 @@ async function installSuccessHelper(
                 path.join(binDir, entry.name)
               )}`
             : entry.isFile()
-            ? `${entry.name}\n${fs
-                .readFileSync(path.join(binDir, entry.name), "utf8")
-                .replace(/^/gm, "  ")}`
+            ? `${entry.name}\n${readFile(path.join(binDir, entry.name)).replace(
+                /^/gm,
+                "  "
+              )}`
             : entry.name
         )
         .join("\n")

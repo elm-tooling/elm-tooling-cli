@@ -7,6 +7,7 @@ import {
   clean,
   FailReadStream,
   MemoryWriteStream,
+  readFile,
   stringSnapshotSerializer,
 } from "./helpers";
 
@@ -42,7 +43,7 @@ async function initSuccessHelper(
 
   return {
     stdout: clean(stdout.content),
-    json: fs.readFileSync(elmToolingJsonPath, "utf8"),
+    json: readFile(elmToolingJsonPath),
   };
 }
 

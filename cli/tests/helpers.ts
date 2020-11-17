@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import * as stream from "stream";
@@ -10,6 +11,12 @@ import {
 } from "../helpers/mixed";
 
 export const IS_WINDOWS = os.platform() === "win32";
+
+// Read file with normalized line endings to make snapshotting easier
+// cross-platform.
+export function readFile(filePath: string): string {
+  return fs.readFileSync(filePath, "utf8").replace(/\r\n/g, "\n");
+}
 
 export class FailReadStream extends stream.Readable implements ReadStream {
   isTTY = true;
