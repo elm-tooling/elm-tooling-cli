@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: node_modules
-          key: node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
+          key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('cli/package-lock.json') }}
 
       - name: npm ci
         if: steps.cache-node_modules.outputs.cache-hit != 'true'
