@@ -15,6 +15,12 @@ const ACTUAL_FILE = path.join(__dirname, "all-downloads.actual.txt");
 const CLEAR =
   process.platform === "win32" ? "\x1B[2J\x1B[0f" : "\x1B[2J\x1B[3J\x1B[H";
 
+// Read file with normalized line endings to make snapshotting easier
+// cross-platform.
+export function readFile(filePath: string): string {
+  return fs.readFileSync(filePath, "utf8").replace(/\r\n/g, "\n");
+}
+
 function join<T>(listOfLists: Array<Array<T>>): Array<Array<T | undefined>> {
   const longestLength = Math.max(0, ...listOfLists.map((list) => list.length));
   return Array.from({ length: longestLength }, (_, i) =>
@@ -34,8 +40,7 @@ function tree(dir: string): Array<string> {
           ? entry.name.endsWith(".json")
             ? [
                 entry.name,
-                ...fs
-                  .readFileSync(path.join(dir, entry.name), "utf8")
+                ...readFile(path.join(dir, entry.name))
                   .split("\n")
                   .map((line) => `  ${line}`),
               ]
@@ -220,7 +225,7 @@ export async function run(): Promise<void> {
     throw new Error(`${failed.length} exited with non-zero exit code.`);
   }
 
-  const expected = fs.readFileSync(EXPECTED_FILE, "utf8");
+  const expected = readFile(EXPECTED_FILE);
   const actual = `${tree(WORK_DIR).join("\n")}\n`;
 
   process.stdout.write(actual);
