@@ -120,7 +120,7 @@ async function spawnPromise(
   stdout: WriteStream
 ): Promise<number> {
   return new Promise((resolve, reject) => {
-    const child = childProcess.spawn("npx", [name, "--help"], {
+    const child = childProcess.spawn("npx", ["--no-install", name, "--help"], {
       cwd,
       shell: true,
       stdio: ["ignore", "pipe", "pipe"],
@@ -130,6 +130,46 @@ async function spawnPromise(
     child.on("error", reject);
     child.on("close", resolve);
   });
+}
+
+async function runTool({
+  name,
+  version,
+  cwd,
+  stderr,
+}: {
+  name: string;
+  version: string;
+  cwd: string;
+  stderr: MemoryWriteStream;
+}): Promise<number> {
+  const stdout = new MemoryWriteStream();
+  const prefix = `\nSpawn ${name} ${version}`;
+  return spawnPromise(name, cwd, stdout).then(
+    (exitCode) => {
+      if (exitCode !== 0) {
+        stderr.write(`${prefix}: Non-zero exit code: ${exitCode}\n`);
+        return exitCode;
+      }
+      if (!stdout.content.includes(name)) {
+        stderr.write(
+          `${prefix}: Expected output to contain: ${name}\n\n${stdout.content}\n\n`
+        );
+        return 20;
+      }
+      if (!stdout.content.includes(version)) {
+        stderr.write(
+          `${prefix}: Expected output to contain: ${version}\n\n${stdout.content}\n\n`
+        );
+        return 21;
+      }
+      return 0;
+    },
+    (error: Error) => {
+      stderr.write(`${prefix}: Error: ${error.message}\n`);
+      return 22;
+    }
+  );
 }
 
 export async function run(): Promise<void> {
@@ -180,36 +220,16 @@ export async function run(): Promise<void> {
             return [exitCode];
           }
           return Promise.all(
-            tools.map(([name, version], index2) => {
-              const stdout = new MemoryWriteStream();
-              return spawnPromise(name, dir, stdout).then((exitCode2) => {
-                const prefix = `\nPromise at index ${index}/${index2}: Spawn ${name}`;
-                if (exitCode !== 0) {
-                  stderr.write(`${prefix}: ${exitCode2}\n`);
-                  return exitCode;
-                }
-                if (!stdout.content.includes(name)) {
-                  stderr.write(
-                    `${prefix}: Expected stdout to contain: ${name}\n\n${stdout.content}\n\n`
-                  );
-                  return 10;
-                }
-                if (!stdout.content.includes(version)) {
-                  stderr.write(
-                    `${prefix}: Expected stdout to contain: ${version}\n\n${stdout.content}\n\n`
-                  );
-                  return 11;
-                }
-                return 0;
-              });
-            })
+            tools.map(([name, version]) =>
+              runTool({ name, version, cwd: dir, stderr })
+            )
           );
         })
         .catch((error: Error) => {
           stderr.write(
             `\nPromise at index ${index}: Error: ${error.message}\n`
           );
-          return [12];
+          return [10];
         });
     })
   );
