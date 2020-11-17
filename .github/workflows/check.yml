@@ -30,7 +30,7 @@ jobs:
         id: cache-node_modules
         uses: actions/cache@v2
         with:
-          path: node_modules
+          path: cli/node_modules
           key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('cli/package-lock.json') }}
 
       - name: npm ci
