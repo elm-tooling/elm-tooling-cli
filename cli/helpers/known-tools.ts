@@ -40,9 +40,9 @@ export const KNOWN_TOOLS: KnownTools = {
       },
       windows: {
         hash:
-          "d1bf666298cbe3c5447b9ca0ea608552d750e5d232f9845c2af11907b654903b",
+          "0e27d80537418896cf98326224159a45b6d36bf08e608e3a174ab6d2c572c5ae",
         url:
-          "https://github.com/elm/compiler/releases/download/0.19.1/binary-for-windows-64-bit.gz",
+          "https://github.com/elm/compiler/releases/download/0.19.0/binary-for-windows-64-bit.gz",
         fileName: "elm.exe",
         type: "gz",
       },
