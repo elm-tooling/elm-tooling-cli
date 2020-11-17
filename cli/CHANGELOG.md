@@ -1,3 +1,7 @@
+### Version 0.6.2 (2020-11-17)
+
+- Fixed: `"elm": "0.19.0"` accidentally resulted in Elm 0.19.<strong>1</strong> being downloaded on Windows.
+
 ### Version 0.6.1 (2020-10-22)
 
 - Fixed: `getExecutable` now properly deals with prereleases. Previously, `^1.0.0` would match `1.1.0-beta.1`. Prereleases should only be matched if the range contains a prerelease and they both have the same three-digit base.
