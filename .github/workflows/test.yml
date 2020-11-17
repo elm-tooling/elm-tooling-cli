@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - "master"
+  pull_request:
+
+jobs:
+  main:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        node-version: [12.x, 14.x, 15.x]
+
+    defaults:
+      run:
+        working-directory: cli
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "${{ matrix.node-version }}"
+
+      - name: Cache node_modules
+        id: cache-node_modules
+        uses: actions/cache@v2
+        with:
+          path: cli/node_modules
+          key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('cli/package-lock.json') }}
+
+      - name: npm ci
+        if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Jest
+        run: npx --no-install jest --coverage
+
+      - name: test-all-downloads.ts
+        run: npx --no-install ts-node scripts/test-all-downloads.ts
+
+      - name: test-integration.ts
+        run: npx --no-install ts-node scripts/test-integration.ts
+
+      - name: test-getExecutable.ts
+        run: npx --no-install ts-node scripts/test-getExecutable.ts

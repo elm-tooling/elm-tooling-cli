@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  main:
     runs-on: ubuntu-latest
 
     defaults:
@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: "10.x"
+          node-version: 10.x
 
       - name: cache node_modules
         id: cache-node_modules
@@ -32,5 +32,5 @@ jobs:
         if: steps.cache-node_modules.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: test
+      - name: test-getExecutable.ts
         run: npx --no-install ts-node scripts/test-getExecutable.ts

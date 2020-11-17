@@ -1,3 +1,4 @@
+import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
@@ -7,12 +8,18 @@ import elmToolingCli from "..";
 import { KNOWN_TOOLS } from "../helpers/known-tools";
 import type { ElmTooling, WriteStream } from "../helpers/mixed";
 
-const WORK_DIR = path.join(__dirname, "all-downloads");
+const WORK_DIR = path.join(__dirname, "workdirs", "all-downloads");
 const EXPECTED_FILE = path.join(__dirname, "all-downloads.expected.txt");
 const ACTUAL_FILE = path.join(__dirname, "all-downloads.actual.txt");
 
 const CLEAR =
   process.platform === "win32" ? "\x1B[2J\x1B[0f" : "\x1B[2J\x1B[3J\x1B[H";
+
+// Read file with normalized line endings to make snapshotting easier
+// cross-platform.
+export function readFile(filePath: string): string {
+  return fs.readFileSync(filePath, "utf8").replace(/\r\n/g, "\n");
+}
 
 function join<T>(listOfLists: Array<Array<T>>): Array<Array<T | undefined>> {
   const longestLength = Math.max(0, ...listOfLists.map((list) => list.length));
@@ -27,12 +34,13 @@ function tree(dir: string): Array<string> {
     ...fs
       .readdirSync(dir, { withFileTypes: true })
       .flatMap((entry) =>
-        entry.isFile()
+        entry.name === "node_modules"
+          ? []
+          : entry.isFile()
           ? entry.name.endsWith(".json")
             ? [
                 entry.name,
-                ...fs
-                  .readFileSync(path.join(dir, entry.name), "utf8")
+                ...readFile(path.join(dir, entry.name))
                   .split("\n")
                   .map((line) => `  ${line}`),
               ]
@@ -106,6 +114,64 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
   }
 }
 
+async function spawnPromise(
+  name: string,
+  cwd: string,
+  stdout: WriteStream
+): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const child = childProcess.spawn("npx", ["--no-install", name, "--help"], {
+      cwd,
+      shell: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    child.stdout.pipe(stdout);
+    child.stderr.pipe(stdout);
+    child.on("error", reject);
+    child.on("close", resolve);
+  });
+}
+
+async function runTool({
+  name,
+  version,
+  cwd,
+  stderr,
+}: {
+  name: string;
+  version: string;
+  cwd: string;
+  stderr: MemoryWriteStream;
+}): Promise<number> {
+  const stdout = new MemoryWriteStream();
+  const prefix = `\nSpawn ${name} ${version}`;
+  return spawnPromise(name, cwd, stdout).then(
+    (exitCode) => {
+      if (exitCode !== 0) {
+        stderr.write(`${prefix}: Non-zero exit code: ${exitCode}\n`);
+        return exitCode;
+      }
+      if (!stdout.content.includes(name)) {
+        stderr.write(
+          `${prefix}: Expected output to contain: ${name}\n\n${stdout.content}\n\n`
+        );
+        return 20;
+      }
+      if (!stdout.content.includes(version)) {
+        stderr.write(
+          `${prefix}: Expected output to contain: ${version}\n\n${stdout.content}\n\n`
+        );
+        return 21;
+      }
+      return 0;
+    },
+    (error: Error) => {
+      stderr.write(`${prefix}: Error: ${error.message}\n`);
+      return 22;
+    }
+  );
+}
+
 export async function run(): Promise<void> {
   const variants: Array<Array<readonly [string, string]>> = join(
     Object.keys(KNOWN_TOOLS).map((name) =>
@@ -115,12 +181,14 @@ export async function run(): Promise<void> {
 
   const stderr = new MemoryWriteStream();
 
-  fs.rmdirSync(WORK_DIR, { recursive: true });
-  fs.mkdirSync(WORK_DIR);
+  if (fs.existsSync(WORK_DIR)) {
+    fs.rmdirSync(WORK_DIR, { recursive: true });
+  }
+  fs.mkdirSync(WORK_DIR, { recursive: true });
 
   process.stdout.write(CLEAR);
 
-  const exitCodes = await Promise.all(
+  const exitCodes: Array<Array<number>> = await Promise.all(
     variants.map((tools, index) => {
       const dir = path.join(WORK_DIR, index.toString());
 
@@ -128,7 +196,7 @@ export async function run(): Promise<void> {
         tools: Object.fromEntries(tools),
       };
 
-      fs.mkdirSync(dir);
+      fs.mkdirSync(path.join(dir, "node_modules"), { recursive: true });
       fs.writeFileSync(
         path.join(dir, "elm-tooling.json"),
         JSON.stringify(elmToolingJson, null, 2)
@@ -143,22 +211,26 @@ export async function run(): Promise<void> {
           calculateHeight(variants.slice(0, index))
         ),
         stderr,
-      }).then(
-        (exitCode) => {
+      })
+        .then((exitCode) => {
           if (exitCode !== 0) {
             stderr.write(
               `\nPromise at index ${index}: Non-zero exit code: ${exitCode}\n`
             );
+            return [exitCode];
           }
-          return exitCode;
-        },
-        (error: Error) => {
+          return Promise.all(
+            tools.map(([name, version]) =>
+              runTool({ name, version, cwd: dir, stderr })
+            )
+          );
+        })
+        .catch((error: Error) => {
           stderr.write(
             `\nPromise at index ${index}: Error: ${error.message}\n`
           );
-          return 1;
-        }
-      );
+          return [10];
+        });
     })
   );
 
@@ -168,12 +240,12 @@ export async function run(): Promise<void> {
     process.stderr.write(`All stderr outputs:\n${stderr.content}`);
   }
 
-  const failed = exitCodes.filter((exitCode) => exitCode !== 0);
+  const failed = exitCodes.flat().filter((exitCode) => exitCode !== 0);
   if (failed.length > 0) {
     throw new Error(`${failed.length} exited with non-zero exit code.`);
   }
 
-  const expected = fs.readFileSync(EXPECTED_FILE, "utf8");
+  const expected = readFile(EXPECTED_FILE);
   const actual = `${tree(WORK_DIR).join("\n")}\n`;
 
   process.stdout.write(actual);

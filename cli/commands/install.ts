@@ -468,7 +468,11 @@ function downloadFile(
     }
   });
 
-  return { kill: () => toKill.kill() };
+  return {
+    kill: () => {
+      toKill.kill();
+    },
+  };
 }
 
 function downloadFileNative(
@@ -486,7 +490,11 @@ function downloadFileNative(
   },
   maxRedirects = 50 // This is curl’s default.
 ): { kill: () => void } {
-  let toKill = { kill: () => request.destroy() };
+  let toKill = {
+    kill: () => {
+      request.destroy();
+    },
+  };
 
   const request = https.get(url, (response) => {
     switch (response.statusCode) {
@@ -543,7 +551,11 @@ function downloadFileNative(
 
   request.on("error", onError);
 
-  return { kill: () => toKill.kill() };
+  return {
+    kill: () => {
+      toKill.kill();
+    },
+  };
 }
 
 type MiniWritable = {
@@ -646,7 +658,9 @@ function extractFile({
           }
         },
         write: (chunk) => write.write(chunk),
-        end: () => write.end(),
+        end: () => {
+          write.end();
+        },
       };
     }
   }
@@ -708,7 +722,9 @@ function extractTar({
   return {
     destroy: () => tar.kill(),
     write: (chunk) => tar.stdin.write(chunk),
-    end: () => tar.stdin.end(),
+    end: () => {
+      tar.stdin.end();
+    },
   };
 }
 

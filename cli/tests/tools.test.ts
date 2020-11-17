@@ -8,6 +8,7 @@ import {
   FailReadStream,
   MemoryWriteStream,
   RawReadStream,
+  readFile,
   stringSnapshotSerializer,
 } from "./helpers";
 
@@ -19,7 +20,7 @@ async function toolsSuccessHelper(
 ): Promise<{ stdout: string; json: string }> {
   const dir = path.join(FIXTURES_DIR, fixture);
   const elmToolingJsonPath = path.join(dir, "elm-tooling.json");
-  const original = fs.readFileSync(elmToolingJsonPath, "utf8");
+  const original = readFile(elmToolingJsonPath);
 
   const stdout = new CursorWriteStream();
   const stderr = new MemoryWriteStream();
@@ -32,7 +33,7 @@ async function toolsSuccessHelper(
     stderr,
   });
 
-  const json = fs.readFileSync(elmToolingJsonPath, "utf8");
+  const json = readFile(elmToolingJsonPath);
 
   if (json !== original) {
     fs.writeFileSync(elmToolingJsonPath, original);

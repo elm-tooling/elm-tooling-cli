@@ -59,7 +59,10 @@ for (const { src, dest = src, transformSrc, transformDest } of FILES_TO_COPY) {
   }
 }
 
-childProcess.spawnSync("npx", ["tsc"], { shell: true, stdio: "inherit" });
+childProcess.spawnSync("npx", ["--no-install", "tsc"], {
+  shell: true,
+  stdio: "inherit",
+});
 
 function modifyFile(
   file: string,

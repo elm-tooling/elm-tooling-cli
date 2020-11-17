@@ -70,7 +70,7 @@ describe("getExecutable", () => {
     `));
 
   // Change this to use `getExecutableHelper` when we have a prerelease in `KNOWN_TOOLS`.
-  test("future prereleases should not match", () =>
+  test("future prereleases should not match", () => {
     expect(
       getLatestMatchingVersion("^1.0.0-beta.1", [
         "1.1.0-beta.1",
@@ -78,16 +78,18 @@ describe("getExecutable", () => {
         "1.0.0",
         "1.0.0-beta.1",
       ])
-    ).toBe("1.0.1"));
+    ).toBe("1.0.1");
+  });
 
   // Change this to use `getExecutableHelper` when we have a prerelease in `KNOWN_TOOLS`.
-  test("too old prerelease should not match", () =>
+  test("too old prerelease should not match", () => {
     expect(
       getLatestMatchingVersion("^1.0.0-beta.2", [
         "1.1.0-beta.1",
         "1.0.0-beta.1",
       ])
-    ).toBeUndefined());
+    ).toBeUndefined();
+  });
 
   test("missing range character", () =>
     expect(

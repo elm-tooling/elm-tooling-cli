@@ -5,6 +5,6 @@ coverage
 dist
 elm-stuff
 node_modules
-scripts/all-downloads
+scripts/workdirs
 scripts/all-downloads.actual.txt
 tmp.*

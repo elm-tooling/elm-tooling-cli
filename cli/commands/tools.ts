@@ -45,12 +45,13 @@ export default async function toolsCommand(
       return 1;
 
     case "Parsed": {
-      const save = (tools: Array<ToolChoice>): void =>
+      const save = (tools: Array<ToolChoice>): void => {
         updateElmToolingJson(
           parseResult.elmToolingJsonPath,
           parseResult.originalObject,
           tools
         );
+      };
 
       switch (parseResult.tools?.tag) {
         case "Error":

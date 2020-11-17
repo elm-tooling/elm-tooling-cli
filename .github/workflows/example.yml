@@ -7,16 +7,8 @@ on:
   pull_request:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-
-    # elm-tooling works cross-platform and with multiple Node.js versions. Feel
-    # free to change/remove `${{ matrix.os }}` and `${{ matrix.node-version }}`
-    # if you don’t need to run CI on multiple platforms and Node.js versions.
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-        node-version: [12.x, 14.x]
+  main:
+    runs-on: ubuntu-latest
 
     defaults:
       run:
@@ -25,19 +17,12 @@ jobs:
         working-directory: cli/example
 
     steps:
-      # This repo uses Prettier with LF – make that work on Windows.
-      - name: Set git to use LF
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-        working-directory: .
-
       - uses: actions/checkout@v2
 
       - uses: actions/setup-node@v1
         with:
           # Choose your Node.js version here:
-          node-version: "${{ matrix.node-version }}"
+          node-version: 15.x
 
       # IGNORE START: This is just internal stuff specific for this repo.
       - name: Internal cache node_modules
@@ -45,13 +30,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: cli/node_modules
-          key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('cli/package-lock.json') }}
+          key: internal-node_modules-ubuntu-latest-15.x-${{ hashFiles('cli/package-lock.json') }}
       - name: Internal npm ci
         if: steps.internal-cache-node_modules.outputs.cache-hit != 'true'
         run: npm ci
         working-directory: cli
-      - name: Internal npm test
-        run: npm test
+      - name: Internal build
+        run: npm run test
         working-directory: cli
       # IGNORE END
 
@@ -61,7 +46,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: cli/example/node_modules
-          key: node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('cli/example/package-lock.json') }}
+          key: node_modules-${{ hashFiles('cli/example/package-lock.json') }}
 
       # Re-use ~/.elm between runs until elm.json, elm-tooling.json or
       # review/elm.json changes. The Elm compiler saves downloaded Elm packages
@@ -70,7 +55,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.elm
-          key: elm-${{ matrix.os }}-${{ hashFiles('cli/example/elm.json', 'cli/example/elm-tooling.json', 'cli/example/review/elm.json') }}
+          key: elm-${{ hashFiles('cli/example/elm.json', 'cli/example/elm-tooling.json', 'cli/example/review/elm.json') }}
 
       # Install npm packages, unless we restored them from cache.
       # Since `npm ci` removes the node_modules folder before running it’s

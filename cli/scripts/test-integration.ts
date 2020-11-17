@@ -18,9 +18,13 @@ export async function run(): Promise<void> {
 
   try {
     fs.unlinkSync(elmToolingJsonPath);
-    fs.rmdirSync(elmToolingInstallPath, { recursive: true });
-    fs.rmdirSync(nodeModulesInstallPath, { recursive: true });
-    fs.mkdirSync(nodeModulesInstallPath);
+    if (fs.existsSync(elmToolingInstallPath)) {
+      fs.rmdirSync(elmToolingInstallPath, { recursive: true });
+    }
+    if (fs.existsSync(nodeModulesInstallPath)) {
+      fs.rmdirSync(nodeModulesInstallPath, { recursive: true });
+    }
+    fs.mkdirSync(nodeModulesInstallPath, { recursive: true });
   } catch (errorAny) {
     const error = errorAny as Error & { code?: string };
     if (error.code !== "ENOENT") {
