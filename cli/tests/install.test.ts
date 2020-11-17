@@ -310,9 +310,7 @@ describe("install", () => {
           
         elm-format.cmd
           @ECHO off
-          
           "/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format" %*
-          
           
         elm-format.ps1
           #!/usr/bin/env pwsh
@@ -320,9 +318,7 @@ describe("install", () => {
           
         elm.cmd
           @ECHO off
-          
           "/Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm" %*
-          
           
         elm.ps1
           #!/usr/bin/env pwsh
