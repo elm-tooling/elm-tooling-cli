@@ -165,9 +165,9 @@ export function getOSNameAsFieldResult(): FieldResult<OSName> {
     ? // istanbul ignore next
       {
         tag: "Error" as const,
-        errors: [{ path: [], message: osName.message }] as NonEmptyArray<
-          FieldError
-        >,
+        errors: [
+          { path: [], message: osName.message },
+        ] as NonEmptyArray<FieldError>,
       }
     : {
         tag: "Parsed",

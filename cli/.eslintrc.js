@@ -118,6 +118,7 @@ module.exports = {
     "no-invalid-regexp": error,
     "no-labels": error,
     "no-misleading-character-class": error,
+    "no-nonoctal-decimal-escape": error,
     "no-octal-escape": error,
     "no-param-reassign": error,
     "no-promise-executor-return": error,
