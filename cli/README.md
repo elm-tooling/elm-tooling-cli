@@ -64,9 +64,9 @@ Validate the closest `elm-tooling.json`. If you’re having trouble with some pr
 
 Interactively add, remove and update tools in your `elm-tooling.json`. This is an alternative to editing the `"tools"` field by hand.
 
-Not seeing the latest version of a tool? Update to the latest version of `elm-tooling`!
+> _Note:_ You need to update `elm-tooling` itself to get new tool versions!
 
-Still not seeing it? Open an issue!
+Since Elm tools are so few and update so infrequently, `elm-tooling` can go with a very simple and reliable approach: All [known tools and versions][known-tools] ship with `elm-tooling` itself. Open an issue or pull request if you’d like to see support for another tool or version!
 
 ### elm-tooling install
 
@@ -78,7 +78,7 @@ You can use `npx` to run the installed tools. For example, `npx elm --help`.
 
 As mentioned in [tools], you can set `ELM_HOME` environment variable to customize where tools will be downloaded. The Elm compiler uses this variable too for where to store packages.
 
-`elm-tooling` uses `curl` to download stuff if it exists, otherwise `wget`, and finally the `https` Node.js core module. So if you need to do any proxy stuff or anything, configure whatever environment variables or whatever `curl` or `wget` understands. Most systems – even Windows! – come with either `curl` or `wget`.
+`elm-tooling` uses `curl` to download stuff if it exists, otherwise `wget`, and finally the `https` Node.js core module. So if you need to do any proxy stuff or something like that, you do that via the environment variables and config files that `curl` and `wget` understand. Most systems – even Windows! – come with either `curl` or `wget`.
 
 Similarly, `tar` is used to extract archives. Even Windows comes with `tar` these days so you shouldn’t need to install anything.
 
@@ -115,7 +115,7 @@ elm-tooling.json:
 +}
 ```
 
-Thanks to the [postinstall] script shown in `package.json` above, `elm` and `elm-format` will be automatically installed whenever you run `npm install` (just like you’re used to if you already install `elm` and `elm-format` using `npm`).
+Thanks to the [postinstall][scripts] script shown in `package.json` above, `elm` and `elm-format` will be automatically installed whenever you run `npm install` (just like you’re used to if you already install `elm` and `elm-format` using `npm`).
 
 `elm-tooling install` does two things:
 
@@ -148,6 +148,10 @@ The difference compared to installing the regular `elm`, `elm-format` and `elm-j
 
 - You can set the `NO_ELM_TOOLING_INSTALL` environment variable to turn `elm-tooling install` into a no-op. This lets you run `npm install` without also running `elm-tooling install`, which can be useful in CI.
 
+- If you’re creating an npm package that uses `elm-tooling` to install Elm and other tools during development, beware that `"postinstall": "elm-tooling install"` will run not only when developers run `npm install` in your repo, but also when users install your package with `npm install your-package`! You can solve this by using `"prepare": "elm-tooling install"` instead. [prepare][scripts] also runs after `npm install` in development, but not after `npm install your-package`. However, it also runs before `npm publish`, which unneeded but doesn’t hurt that much since it’s so fast after everything has been downloaded once.
+
+  Another way is to generate the package.json that actually ends up in the npm package during a build step – a package.json without `"scripts"`, `"devDependencies"` and other config that is only wasted bytes for all users of your package.
+
 ## CI
 
 See the [Example GitHub Actions workflow] for inspiration. Even if you don’t use GitHub Actions it’s still a good resource – there’s a lot of comments and the concepts and steps should be fairly similar regardless of what CI you use.
@@ -159,6 +163,8 @@ Basically, you need to:
    Setting the `NO_ELM_TOOLING_INSTALL` environment variable turns `elm-tooling install` into a no-op, in case you have a `"postinstall": "elm-tooling install"` script in your `package.json`. In CI it’s better to install npm packages and `elm-tooling.json` tools separately so you can cache `node_modules` and `~/.elm` separately.
 
 2. Install tools from `elm-tooling.json`: `npx --no-install elm-tooling install`. Make sure that `~/.elm` is cached (or `ELM_HOME` if you’ve set it), based on `elm.json` (because it lists your Elm dependencies and the Elm compiler installs packages into `~/.elm`) and `elm-tooling.json` (because it lists your tools and `elm-tooling` downloads them into `~/.elm`) as well as `review/elm.json` if you use [elm-review] or whatever other `elm.json` files you might have.
+
+   Note that Windows uses `%APPDATA%\elm` rather than `~/.elm`. If you need to run the same CI workflow both Windows and some other OS, [set `ELM_HOME` to a directory that works everywhere][elm-home-ci].
 
 3. Run whatever commands you want.
 
@@ -322,10 +328,12 @@ getExecutable({
 
 [child\_process.spawn]: https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
 [cli-api]: #elmtoolingcli
+[elm-home-ci]: https://github.com/rtfeldman/node-test-runner/blob/dafa12e58043915bdd8fcd7d2231ccff511a7827/.github/workflows/test.yml#L18-L19
 [elm-review]: https://package.elm-lang.org/packages/jfmengels/elm-review/latest/
 [example github actions workflow]: https://github.com/lydell/elm-tooling.json/blob/main/.github/workflows/example.yml
 [ignore-scripts]: https://docs.npmjs.com/using-npm/config#ignore-scripts
+[known-tools]: https://github.com/lydell/elm-tooling.json/blob/main/cli/helpers/known-tools.ts
 [npm/npm-lifecycle#49]: https://github.com/npm/npm-lifecycle/issues/49
-[postinstall]: https://docs.npmjs.com/misc/scripts
+[scripts]: https://docs.npmjs.com/misc/scripts
 [semver-ranges]: https://docs.npmjs.com/misc/semver#tilde-ranges-123-12-1
 [tools]: https://github.com/lydell/elm-tooling.json#tools
