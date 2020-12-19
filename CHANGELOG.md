@@ -1,3 +1,8 @@
+### Version 0.6.3 (2020-12-19)
+
+- Added: Node.js 10 support. This is useful for npm packages that need to run tests on Node.js 10 and use `elm-tooling` to install `elm` and `elm-format`.
+- Updated: Links to documentation and to the specification, since the repo was reorganized a bit.
+
 ### Version 0.6.2 (2020-11-17)
 
 - Fixed: `"elm": "0.19.0"` accidentally resulted in Elm 0.19.<strong>1</strong> being downloaded on Windows.
