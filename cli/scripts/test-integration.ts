@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as rimraf from "rimraf";
 
 import elmToolingCli from "..";
 
@@ -19,10 +20,10 @@ export async function run(): Promise<void> {
   try {
     fs.unlinkSync(elmToolingJsonPath);
     if (fs.existsSync(elmToolingInstallPath)) {
-      fs.rmdirSync(elmToolingInstallPath, { recursive: true });
+      rimraf.sync(elmToolingInstallPath);
     }
     if (fs.existsSync(nodeModulesInstallPath)) {
-      fs.rmdirSync(nodeModulesInstallPath, { recursive: true });
+      rimraf.sync(nodeModulesInstallPath);
     }
     fs.mkdirSync(nodeModulesInstallPath, { recursive: true });
   } catch (errorAny) {

@@ -65,9 +65,8 @@ the top
         reject(new Error("Expected stream never to close."));
       });
 
-      readline.moveCursor(stream, -1, 0, () => {
-        stream.end();
-      });
+      readline.moveCursor(stream, -1, 0);
+      stream.end();
     }));
 
   test("error when out of bounds vertically", () =>
@@ -85,10 +84,8 @@ the top
         reject(new Error("Expected stream never to close."));
       });
 
-      readline.moveCursor(stream, 9999, 5, () => {
-        readline.moveCursor(stream, -9998, -8, () => {
-          stream.end();
-        });
-      });
+      readline.moveCursor(stream, 9999, 5);
+      readline.moveCursor(stream, -9998, -8);
+      stream.end();
     }));
 });

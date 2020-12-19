@@ -99,3 +99,33 @@ export const elmToolingJsonDocumentationLink = `${dim(
 export function printNumErrors(numErrors: number): string {
   return `${bold(numErrors.toString())} error${numErrors === 1 ? "" : "s"}`;
 }
+
+// This can be replaced with `Array.prototype.flatMap` once Node.js is EOL
+// 2021-04-30 and support for Node.js 10 is dropped.
+export function flatMap<T, U>(
+  array: Array<T>,
+  callback: (value: T, index: number, array: Array<T>) => U | Array<U>
+): Array<U> {
+  const results: Array<U> = [];
+  for (const [index, item] of array.entries()) {
+    const result = callback(item, index, array);
+    if (Array.isArray(result)) {
+      results.push(...result);
+    } else {
+      results.push(result);
+    }
+  }
+  return results;
+}
+
+// This can be replaced with `Object.fromEntries` once Node.js is EOL
+// 2021-04-30 and support for Node.js 10 is dropped.
+export function fromEntries<T>(
+  entries: Iterable<readonly [string | number, T]>
+): { [k: string]: T } {
+  const result: { [k: string]: T } = {};
+  for (const [key, value] of entries) {
+    result[key] = value;
+  }
+  return result;
+}

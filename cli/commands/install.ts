@@ -14,6 +14,7 @@ import {
   elmToolingJsonDocumentationLink,
   Env,
   findClosest,
+  flatMap,
   indent,
   printNumErrors,
   removeColor,
@@ -223,11 +224,11 @@ function printResults(
   logger: Logger,
   results: Array<string | Error | undefined>
 ): number {
-  const messages = results.flatMap((result) =>
+  const messages = flatMap(results, (result) =>
     typeof result === "string" ? result : []
   );
 
-  const installErrors = results.flatMap((result) =>
+  const installErrors = flatMap(results, (result) =>
     result instanceof Error ? result : []
   );
 
@@ -294,7 +295,7 @@ function removeTools(
   nodeModulesBinPath: string,
   names: Array<string>
 ): Array<string | Error | undefined> {
-  return names.flatMap((name) => {
+  return flatMap(names, (name) => {
     const versions = KNOWN_TOOLS[name];
     return Object.keys(versions).map((version) => {
       const asset = versions[version][osName];

@@ -9,6 +9,8 @@ import {
   ElmTooling,
   Env,
   findClosest,
+  flatMap,
+  fromEntries,
   isRecord,
   NonEmptyArray,
   toJSON,
@@ -47,7 +49,7 @@ export default async function init(
     getOSName() instanceof Error
       ? /* istanbul ignore next */ undefined
       : tryGuessToolsFromNodeModules(cwd, env) ??
-        Object.fromEntries(
+        fromEntries(
           Object.keys(KNOWN_TOOLS)
             .sort((a, b) => a.localeCompare(b))
             .map((name) => {
@@ -77,7 +79,7 @@ async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
     return [];
   }
 
-  const files = sourceDirectories.flatMap((directory) =>
+  const files = flatMap(sourceDirectories, (directory) =>
     fs
       .readdirSync(directory, { encoding: "utf-8", withFileTypes: true })
       .filter((entry) => entry.isFile() && entry.name.endsWith(".elm"))
@@ -94,9 +96,9 @@ async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
     )
   );
 
-  const entrypoints = results
-    .flatMap((result) => (result instanceof Error ? [] : result))
-    .sort((a, b) => a.localeCompare(b));
+  const entrypoints = flatMap(results, (result) =>
+    result instanceof Error ? [] : result
+  ).sort((a, b) => a.localeCompare(b));
 
   if (entrypoints.length === 0) {
     throw new Error("Expected at least 1 entrypoint but got 0.");
@@ -126,7 +128,7 @@ function tryGetSourceDirectories(cwd: string): Array<string> {
           )}`
         );
       }
-      const directories = elmJson["source-directories"].flatMap((item) =>
+      const directories = flatMap(elmJson["source-directories"], (item) =>
         typeof item === "string"
           ? path.resolve(path.dirname(elmJsonPath), item)
           : []
@@ -184,7 +186,8 @@ function tryGuessToolsFromNodeModules(
     return undefined;
   }
 
-  const pairs: Array<[string, string]> = Object.keys(KNOWN_TOOLS).flatMap(
+  const pairs: Array<[string, string]> = flatMap(
+    Object.keys(KNOWN_TOOLS),
     (name) => {
       try {
         const pkg: unknown = JSON.parse(
@@ -228,5 +231,5 @@ function tryGuessToolsFromNodeModules(
     }
   );
 
-  return pairs.length > 0 ? Object.fromEntries(pairs) : undefined;
+  return pairs.length > 0 ? fromEntries(pairs) : undefined;
 }
