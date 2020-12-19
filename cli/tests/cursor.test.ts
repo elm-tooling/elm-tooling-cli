@@ -51,7 +51,7 @@ the top
   });
 
   test("error when out of bounds horizontally", () =>
-    new Promise((resolve, reject) => {
+    new Promise<void>((resolve, reject) => {
       const stream = new CursorWriteStream();
 
       stream.on("error", (error) => {
@@ -71,7 +71,7 @@ the top
     }));
 
   test("error when out of bounds vertically", () =>
-    new Promise((resolve, reject) => {
+    new Promise<void>((resolve, reject) => {
       const stream = new CursorWriteStream();
 
       stream.on("error", (error) => {
