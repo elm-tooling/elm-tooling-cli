@@ -15,10 +15,6 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         node-version: [10.x, 12.x, 14.x, 15.x]
 
-    defaults:
-      run:
-        working-directory: cli
-
     steps:
       - uses: actions/checkout@v2
 
@@ -30,8 +26,8 @@ jobs:
         id: cache-node_modules
         uses: actions/cache@v2
         with:
-          path: cli/node_modules
-          key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('cli/package-lock.json') }}
+          path: node_modules
+          key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('package-lock.json') }}
 
       - name: npm ci
         if: steps.cache-node_modules.outputs.cache-hit != 'true'

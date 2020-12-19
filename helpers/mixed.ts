@@ -93,8 +93,8 @@ export function indent(string: string): string {
 }
 
 export const elmToolingJsonDocumentationLink = `${dim(
-  "Documentation:"
-)}\n${indent("https://github.com/lydell/elm-tooling.json")}`;
+  "Specification:"
+)}\n${indent("https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md")}`;
 
 export function printNumErrors(numErrors: number): string {
   return `${bold(numErrors.toString())} error${numErrors === 1 ? "" : "s"}`;
