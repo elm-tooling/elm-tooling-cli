@@ -34,7 +34,7 @@ const FILES_TO_COPY: Array<FileToCopy> = [
     transformSrc: (content) =>
       content.replace(/("elm-tooling":\s*)"[^"]+"/g, `$1"${PKG.version}"`),
     transformDest: (content) =>
-      content.replace(/^.+\n## /, "").replace(/<!--[^]*$/, READ_MORE),
+      content.replace(/^#[^]+?\n# /, "# ").replace(/<!--[^]*$/, READ_MORE),
   },
 ];
 
