@@ -2,11 +2,17 @@ import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
+import * as rimraf from "rimraf";
 import * as stream from "stream";
 
 import elmToolingCli from "..";
 import { KNOWN_TOOLS } from "../helpers/known-tools";
-import type { ElmTooling, WriteStream } from "../helpers/mixed";
+import {
+  ElmTooling,
+  flatMap,
+  fromEntries,
+  WriteStream,
+} from "../helpers/mixed";
 
 const WORK_DIR = path.join(__dirname, "workdirs", "all-downloads");
 const EXPECTED_FILE = path.join(__dirname, "all-downloads.expected.txt");
@@ -31,25 +37,22 @@ function join<T>(listOfLists: Array<Array<T>>): Array<Array<T | undefined>> {
 function tree(dir: string): Array<string> {
   return [
     `${path.basename(dir)}/`,
-    ...fs
-      .readdirSync(dir, { withFileTypes: true })
-      .flatMap((entry) =>
-        entry.name === "node_modules"
-          ? []
-          : entry.isFile()
-          ? entry.name.endsWith(".json")
-            ? [
-                entry.name,
-                ...readFile(path.join(dir, entry.name))
-                  .split("\n")
-                  .map((line) => `  ${line}`),
-              ]
-            : entry.name.replace(/\.exe$/, "")
-          : entry.isDirectory()
-          ? tree(path.join(dir, entry.name))
-          : []
-      )
-      .map((line) => `  ${line}`),
+    ...flatMap(fs.readdirSync(dir, { withFileTypes: true }), (entry) =>
+      entry.name === "node_modules"
+        ? []
+        : entry.isFile()
+        ? entry.name.endsWith(".json")
+          ? [
+              entry.name,
+              ...readFile(path.join(dir, entry.name))
+                .split("\n")
+                .map((line) => `  ${line}`),
+            ]
+          : entry.name.replace(/\.exe$/, "")
+        : entry.isDirectory()
+        ? tree(path.join(dir, entry.name))
+        : []
+    ).map((line) => `  ${line}`),
   ];
 }
 
@@ -182,7 +185,7 @@ export async function run(): Promise<void> {
   const stderr = new MemoryWriteStream();
 
   if (fs.existsSync(WORK_DIR)) {
-    fs.rmdirSync(WORK_DIR, { recursive: true });
+    rimraf.sync(WORK_DIR);
   }
   fs.mkdirSync(WORK_DIR, { recursive: true });
 
@@ -193,7 +196,7 @@ export async function run(): Promise<void> {
       const dir = path.join(WORK_DIR, index.toString());
 
       const elmToolingJson: ElmTooling = {
-        tools: Object.fromEntries(tools),
+        tools: fromEntries(tools),
       };
 
       fs.mkdirSync(path.join(dir, "node_modules"), { recursive: true });
@@ -240,7 +243,9 @@ export async function run(): Promise<void> {
     process.stderr.write(`All stderr outputs:\n${stderr.content}`);
   }
 
-  const failed = exitCodes.flat().filter((exitCode) => exitCode !== 0);
+  const failed = ([] as Array<number>)
+    .concat(...exitCodes)
+    .filter((exitCode) => exitCode !== 0);
   if (failed.length > 0) {
     throw new Error(`${failed.length} exited with non-zero exit code.`);
   }

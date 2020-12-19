@@ -1,6 +1,7 @@
 import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
+import * as rimraf from "rimraf";
 
 const DIR = path.dirname(__dirname);
 const BUILD = path.join(DIR, "build");
@@ -37,7 +38,7 @@ const FILES_TO_COPY: Array<FileToCopy> = [
 ];
 
 if (fs.existsSync(BUILD)) {
-  fs.rmdirSync(BUILD, { recursive: true });
+  rimraf.sync(BUILD);
 }
 
 fs.mkdirSync(BUILD);

@@ -8,6 +8,8 @@ import {
   dim,
   elmToolingJsonDocumentationLink,
   Env,
+  flatMap,
+  fromEntries,
   HIDE_CURSOR,
   ReadStream,
   SHOW_CURSOR,
@@ -285,7 +287,7 @@ function update(keypress: string, state: State): [State, Cmd] {
 }
 
 function updateCursorTool(delta: number, cursorTool: ToolChoice): ToolChoice {
-  const all = Object.keys(KNOWN_TOOLS).flatMap((name) =>
+  const all = flatMap(Object.keys(KNOWN_TOOLS), (name) =>
     Object.keys(KNOWN_TOOLS[name]).map((version) => ({ name, version }))
   );
   const index = all.findIndex(
@@ -320,7 +322,7 @@ function updateElmToolingJson(
   const tools =
     toolsList.length === 0
       ? undefined
-      : Object.fromEntries(
+      : fromEntries(
           sortTools(toolsList).map(({ name, version }) => [name, version])
         );
 
