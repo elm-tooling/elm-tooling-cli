@@ -141,8 +141,8 @@ describe("install", () => {
         ⧙tools⧘
             Expected an object but got: ["elm","elm-format"]
 
-        ⧙Documentation:⧘
-            https://github.com/lydell/elm-tooling.json
+        ⧙Specification:⧘
+            https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md
 
       `);
     });
@@ -161,8 +161,8 @@ describe("install", () => {
             Unknown version: 0.8
             Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4
 
-        ⧙Documentation:⧘
-            https://github.com/lydell/elm-tooling.json
+        ⧙Specification:⧘
+            https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md
 
       `);
     });

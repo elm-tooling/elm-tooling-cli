@@ -1,178 +1,346 @@
-# elm-tooling.json spec
+# elm-tooling
 
-This is a proposal for an `elm-tooling.json` file, where unofficial Elm tools can collaborate on per-project configuration they need.
+This repo contains two things:
 
-Known support:
+- The [specification for elm-tooling.json][spec]
+- The `elm-tooling` CLI tool (see below)
 
-| Name                  | `"entrypoints"` | `"tools"` | `node_modules/.bin/` |
-| --------------------- | :-------------: | :-------: | :------------------: |
-| [elm-language-server] |       ✅        |           |          ✅          |
-| [elm-tooling]         |       ✅        |    ✅     |          ✅          |
+# elm-tooling CLI
 
-Note: Anything that supports finding `elm` and `elm-format` in your local `node_modules/.bin/` folder can indirectly use the `"tools"` field via [elm-tooling install].
+The CLI for [elm-tooling.json][spec]. Create and validate `elm-tooling.json`. Install Elm tools.
 
-## File location
+[spec]: https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md
 
-`elm-tooling.json` must be located next to an `elm.json` (in the same directory as an `elm.json`).
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-`elm-tooling.json` contains stuff for the particular Elm project defined by the `elm.json` next to it. There is no “global” `elm-tooling.json` – only project-local ones.
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Commands](#commands)
+  - [elm-tooling init](#elm-tooling-init)
+  - [elm-tooling validate](#elm-tooling-validate)
+  - [elm-tooling tools](#elm-tooling-tools)
+  - [elm-tooling install](#elm-tooling-install)
+    - [Example](#example)
+    - [Comparison with the regular npm packages](#comparison-with-the-regular-npm-packages)
+    - [Notes](#notes)
+- [CI](#ci)
+- [API](#api)
+  - [elmToolingCli](#elmtoolingcli)
+  - [getExecutable](#getexecutable)
+- [Adding elm-tooling to an existing project](#adding-elm-tooling-to-an-existing-project)
+- [Creating a new project with elm-tooling](#creating-a-new-project-with-elm-tooling)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Installation
+
+```
+npm install --save-dev elm-tooling
+```
+
+```
+npx elm-tooling help
+```
+
+## Quick start
+
+_Assuming you already have a package.json_
+
+1. `npx elm-tooling init`
+2. `npx elm-tooling install`
+3. `npx elm --help`
+
+More details:
+
+- [Adding elm-tooling to an existing project](#adding-elm-tooling-to-an-existing-project)
+- [Creating a new project with elm-tooling](#creating-a-new-project-with-elm-tooling)
+
+## Commands
+
+### elm-tooling init
+
+Create a sample `elm-tooling.json` in the current directory. It tries to guess some values based on your project to help you get started.
+
+### elm-tooling validate
+
+Validate the closest `elm-tooling.json`. If you’re having trouble with some program not reading your `elm-tooling.json` correctly, try `elm-tooling validate` to check if you’ve made any mistakes.
+
+### elm-tooling tools
+
+Interactively add, remove and update tools in your `elm-tooling.json`. This is an alternative to editing the `"tools"` field by hand.
+
+> _Note:_ You need to update `elm-tooling` itself to get new tool versions!
+
+Since Elm tools are so few and update so infrequently, `elm-tooling` can go with a very simple and reliable approach: All [known tools and versions][known-tools] ship with `elm-tooling` itself. Open an issue or pull request if you’d like to see support for another tool or version!
+
+### elm-tooling install
+
+Download the [tools] in the closest `elm-tooling.json` and create links to them in `node_modules/.bin/`.
+
+This is basically a drop-in replacement for installing for example `elm` and `elm-format` with `npm`.
+
+You can use `npx` to run the installed tools. For example, `npx elm --help`.
+
+As mentioned in [tools], you can set `ELM_HOME` environment variable to customize where tools will be downloaded. The Elm compiler uses this variable too for where to store packages.
+
+`elm-tooling` uses `curl` to download stuff if it exists, otherwise `wget`, and finally the `https` Node.js core module. So if you need to do any proxy stuff or something like that, you do that via the environment variables and config files that `curl` and `wget` understand. Most systems – even Windows! – come with either `curl` or `wget`.
+
+Similarly, `tar` is used to extract archives. Even Windows comes with `tar` these days so you shouldn’t need to install anything.
+
+Installing stuff into the local `node_modules/.bin/` folder might sound strange at first, but piggy-backing on the well-supported `npm` ecosystem is currently the best way of doing things. This lets you use the [tools] field of `elm-tooling.json` without your editor and build tools having to support it.
+
+In the future this command might just need to download stuff from the Internet and shove it into a folder (basically, `~/.elm/elm-tooling/`). It would then be up to other programs to support the shared location of executables. Time will tell.
+
+#### Example
+
+`package.json`:
+
+```diff
+ {
+   "name": "my-app",
+   "devDependencies": {
+-    "elm": "0.19.1",
+-    "elm-format": "0.8.3"
++    "elm-tooling": "0.6.2"
+   },
+   "scripts": {
++    "postinstall": "elm-tooling install"
+   }
+ }
+```
+
+elm-tooling.json:
+
+```diff
++{
++    "tools": {
++        "elm": "0.19.1",
++        "elm-format": "0.8.3"
++    }
++}
+```
+
+Thanks to the [postinstall][scripts] script shown in `package.json` above, `elm` and `elm-format` will be automatically installed whenever you run `npm install` (just like you’re used to if you already install `elm` and `elm-format` using `npm`).
+
+`elm-tooling install` does two things:
+
+1. Makes sure your [tools] are available on disk. Downloads them if missing.
+2. Creates links in your local `node_modules/.bin/` folder to the downloaded tools, just like the `elm`, `elm-format` and `elm-json` npm packages do. This allows you to run things like `npx elm make src/Main.elm`, and your editor and build tools will automatically find them.
+
+#### Comparison with the regular npm packages
+
+The difference compared to installing the regular `elm`, `elm-format` and `elm-json` packages are:
+
+- Faster initial installs. `elm-tooling` downloads all tools in parallel, while the executable downloads for the regular `elm` and `elm-format` packages are serial.
+- Faster subsequent installs. Once you’ve downloaded one version of a tool once you never need to download it again. This works by saving the executables in a shared location rather than locally in each project.
+- Less disk usage. Again, storing the executables in a shared location saves tens of megabytes per project.
+- Less npm dependencies. The `elm` and `elm-format` npm packages depend on 70 dependencies. `elm-tooling` has no npm dependencies at all.
+- Security. `elm-tooling` ships with sha256 hashes for all tools it knows about and verifies that download files match. `elm-tooling` itself is hashed in your `package-lock.json` (which you commit).
+
+#### Notes
+
+- The `package.json` example above has `elm-tooling` in `"devDependencies"`. That makes sense since you only need `elm-tooling` for development and building your application, not at runtime in production. **But,** this has the consequence that `npm install --production`/`npm ci --production` will fail. Why? Because the `"postinstall"` script will still execute, and try to run `elm-tooling install` – but `elm-tooling` isn’t even installed (`"devDependencies"` is ignored when using the `--production` flag). So what are your options?
+
+  - Maybe you don’t even need `--production`. Some applications use `npm` only for a build step and does not have any production Node.js server or anything like that.
+  - Try `--ignore-scripts`. This will skip the `"postinstall"` script – but also any scripts that your dependencies might run during installation! Sometimes, only `"devDependencies"` (such as node-sass) need to run scripts during installation – so try it! If `--ignore-scripts` works you have nothing to lose.
+  - Make a little wrapper script that runs `elm-tooling install` only if `elm-tooling` is installed. For example, you could write the script in JavaScript and use the [API version of the CLI][cli-api].
+  - If you only need `--production` installs in for example a Dockerfile, try adding `RUN sed -i '/postinstall/d' package.json` to remove the `"postinstall"` script from `package.json` before running `npm install --production`. This specific example only works with GNU sed and if your `"postinstall"` script isn’t last (due to trailing commas being invalid JSON).
+  - Move `elm-tooling` to `"dependencies"`. `elm-tooling` is small and has no dependencies so it won’t bloat your build very much. Set the `NO_ELM_TOOLING_INSTALL` environment variable to turn `elm-tooling install` into a no-op (see below).
+
+- Due to a bug in `npm`, the `"name"` field _must_ exist in `package.json` if you have a `"postinstall"` script – otherwise `npm` crashes with a confusing message. Worse, in a Dockerfile `"name"` must match your current `WORKDIR` – otherwise `npm` refuses to run your `"postinstall"` script. See [npm/npm-lifecycle#49] for more information.
+
+- If you’re using `npm`’s [ignore-scripts] setting, that also means your _own_ `postinstall` script won’t run. Which means that you’ll have to remember to run `npm run postinstall` or `npx elm-tooling install` yourself. `npm` tends to keep stuff in `node_modules/.bin/` even when running `npm ci` (which claims to remove `node_modules/` before installation), so it should hopefully not be too much of a hassle.
+
+- You can set the `NO_ELM_TOOLING_INSTALL` environment variable to turn `elm-tooling install` into a no-op. This lets you run `npm install` without also running `elm-tooling install`, which can be useful in CI.
+
+- If you’re creating an npm package that uses `elm-tooling` to install Elm and other tools during development, beware that `"postinstall": "elm-tooling install"` will run not only when developers run `npm install` in your repo, but also when users install your package with `npm install your-package`! You can solve this by using `"prepare": "elm-tooling install"` instead. [prepare][scripts] also runs after `npm install` in development, but not after `npm install your-package`. However, it also runs before `npm publish`, which unneeded but doesn’t hurt that much since it’s so fast after everything has been downloaded once.
+
+  Another way is to generate the package.json that actually ends up in the npm package during a build step – a package.json without `"scripts"`, `"devDependencies"` and other config that is only wasted bytes for all users of your package.
+
+## CI
+
+See the [Example GitHub Actions workflow] for inspiration. Even if you don’t use GitHub Actions it’s still a good resource – there’s a lot of comments and the concepts and steps should be fairly similar regardless of what CI you use.
+
+Basically, you need to:
+
+1. Install npm packages, with `NO_ELM_TOOLING_INSTALL` set. It’s nice to cache `node_modules` (based on your `package-lock.json`) for speed and reliability.
+
+   Setting the `NO_ELM_TOOLING_INSTALL` environment variable turns `elm-tooling install` into a no-op, in case you have a `"postinstall": "elm-tooling install"` script in your `package.json`. In CI it’s better to install npm packages and `elm-tooling.json` tools separately so you can cache `node_modules` and `~/.elm` separately.
+
+2. Install tools from `elm-tooling.json`: `npx --no-install elm-tooling install`. Make sure that `~/.elm` is cached (or `ELM_HOME` if you’ve set it), based on `elm.json` (because it lists your Elm dependencies and the Elm compiler installs packages into `~/.elm`) and `elm-tooling.json` (because it lists your tools and `elm-tooling` downloads them into `~/.elm`) as well as `review/elm.json` if you use [elm-review] or whatever other `elm.json` files you might have.
+
+   Note that Windows uses `%APPDATA%\elm` rather than `~/.elm`. If you need to run the same CI workflow both Windows and some other OS, [set `ELM_HOME` to a directory that works everywhere][elm-home-ci].
+
+3. Run whatever commands you want.
+
+## API
+
+### elmToolingCli
+
+Instead of using [child\_process.spawn], you can import the CLI and run it directly. That’s an easy way to make a cross-platform script.
 
 Example:
 
+```js
+import elmToolingCli from "elm-tooling";
+
+elmToolingCli(["install"]).then(
+  (exitCode) => {
+    console.log("Exit", exitCode);
+    process.exit(exitCode);
+  },
+  (error) => {
+    console.error("Unexpected error", error);
+    process.exit(1);
+  }
+);
 ```
-example-project
-├── elm-tooling.json
-├── elm.json
-└── src
-   └── Main.elm
-```
 
-## Known fields
-
-`elm-tooling.json` must contain a JSON object. All fields are optional for maximum forwards and backwards compatibility as tools need more fields.
-
-Given all known fields, the object must match this TypeScript type:
+Here’s the full interface:
 
 ```ts
-type NonEmptyArray<T> = [T, ...T[]];
+import type { Readable, Writable } from "stream";
 
-type ElmTooling = {
-  entrypoints?: NonEmptyArray<string>;
-  tools?: {
-    [name: string]: string;
-  };
+type ReadStream = Readable & {
+  isTTY: boolean;
+  setRawMode: (mode: boolean) => void;
 };
+
+type WriteStream = Writable & {
+  isTTY: boolean;
+};
+
+export default function elmToolingCli(
+  args: Array<string>,
+  options?: {
+    cwd: string;
+    env: Record<string, string | undefined>;
+    stdin: ReadStream;
+    stdout: WriteStream;
+    stderr: WriteStream;
+  }
+): Promise<number>;
 ```
+
+The default options use values from the `process` global.
+
+### getExecutable
+
+This function lets npm packages depend on tools distributed as platform specific executables.
+
+It makes sure that a tool choice exists on disk and then returns the absolute path to it so you can execute it.
+
+- Each user will only need to download each executable tool once per computer (rather than once per project).
+- If the user has the same tool in their `elm-tooling.json`, they will get maximum parallel downloading on clean installs.
+
+```ts
+export default function getExecutable(options: {
+  name: string;
+  version: string;
+  cwd?: string;
+  env?: Record<string, string | undefined>;
+  onProgress: (percentage: number) => void;
+}): Promise<string>;
+```
+
+- `name`: The name of the tool you want. For example, `"elm"`.
+- `version`: A [`^` or `~` semver version range][semver-ranges]. The latest known version matching the range will be chosen. Note that the range _has_ to start with `^` or `~` (or `=` if you _really_ need an exact version) and _must_ be followed by 3 dot-separated digits (unlike `npm` you can’t leave out any numbers). Example: `"~0.2.8"`.
+- `cwd`: The current working directory. Needed in case `ELM_HOME` is set to a relative path. Defaults to `process.cwd()`.
+- `env`: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. Defaults to `process.env`.
+- `onProgress`: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
+- Returns: A promise that resolves to the absolute path to the tool.
+
+If you need several tools you can use `Promise.all` to download them all in parallel.
 
 Example:
 
-```json
-{
-  "entrypoints": ["./src/Main.elm"],
-  "tools": {
-    "elm": "0.19.1",
-    "elm-format": "0.8.3"
-  }
-}
+```js
+import getExecutable from "elm-tooling/getExecutable";
+import * as child_process from "child_process";
+
+getExecutable({
+  name: "elm-json",
+  version: "~0.2.8",
+  onProgress: (percentage) => {
+    // `percentage` is a number from 0 to 1.
+    // This is only called if the tool does not already exist on disk and needs
+    // to be downloaded.
+    console.log(percentage);
+  },
+}).then((toolAbsolutePath) => {
+  // `toolAbsolutePath` is the absolute path to the latest known elm-json 0.2.8 executable.
+  // Standard Node.js `child_process.spawn` and `child_process.spawnSync` work
+  // great for running the executable, even on Windows.
+  console.log(
+    child_process.spawnSync(toolAbsolutePath, ["--help"], { encoding: "utf8" })
+  );
+}, console.error);
 ```
 
-The [elm-tooling] CLI tool lets you validate an `elm-tooling.json` file according to all known fields in this spec.
+## Adding elm-tooling to an existing project
 
-### entrypoints
+1. Install it: `npm install --save-dev elm-tooling`
 
-A list of file paths, to the Elm entrypoint files of the project (the ones with `main =` in them, basically). Compiling all the entrypoints (and the files they import) should produce all compilation errors (if any) of the project.\*
+2. Create an `elm-tooling.json`: `npx elm-tooling init`
 
-File paths are always relative to the directory containing the `elm-tooling.json` and `elm.json` files.
+3. Edit `elm-tooling.json`:
 
-File paths must start with `./` to make it clear that they are relative.
+   - `elm-tooling init` tries to guess which tools you already depend on via `npm` by looking inside the closest `node_modules/` folder (if any). Check if `elm-tooling init` got it right, and then remove tools (such as `elm` and `elm-format`) from your `package.json`.
 
-File paths must use `/` as the directory separator. `\` is not a valid directory separator†. Programs consuming file paths must convert `/` to `\` on Windows if needed.
+   - `elm-tooling init` also tries to detect your entrypoints, but might fail. Have a look at `"entrypoints"` and make sure that they match your project.
 
-The array must **not** be empty.
+4. Install the tools in `elm-tooling.json`: `npx elm-tooling install`
 
-(\*) Excluding tests. For most projects, you should be able to find compilation errors in tests by running `elm-test make`. If tests are located outside `tests/`, though, you would miss out on those. Maybe there should be a `"tests": ["./tests", "./somewhere-else"]` field? Then tools would know to run `elm-test make ./tests ./somewhere-else` to find all test compilation errors. It would also allow elm-test itself to default to `./tests` and `./somewhere-else` when running `elm-test` without arguments.
+5. Add `"postinstall": "elm-tooling install"` to your `package.json` scripts.
 
-(†) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
+6. Check if there are any issues with your `elm-tooling.json`: `npx elm-tooling validate`
 
-### tools
+7. Run through your CI and build system and see if everything works or something needs to be tweaked. See the [Example GitHub Actions workflow] for inspiration.
 
-A mapping between Elm tool names and the version of the tool.
+## Creating a new project with elm-tooling
 
-By specifying versions _once\*_ in _one_ place…
+1. Create a folder and enter it: `mkdir my-app && cd my-app`
 
-- …you can automatically get the correct elm and elm-format versions, in the terminal and in your editor (whichever editor it is)
-- …collaborators on your project can get the correct versions
-- …your CI and build pipelines can get the correct versions
+2. Create a `package.json`:
 
-(…with the help of tools that read `elm.tooling.json`.)
+   ```json
+   {
+     "private": true,
+     "name": "my-app",
+     "scripts": {
+       "postinstall": "elm-tooling install"
+     }
+   }
+   ```
 
-(\*) For Elm applications, you also need to specify the Elm version in `elm.json`. For Elm packages, you specify a _range_ of compatible Elm versions in `elm.json`. `elm-tooling.json` keeps things simple by always specifying the elm version itself.
+3. Install `elm-tooling`: `npm install --save-dev elm-tooling`
 
-For example, the following means that the project uses elm 0.19.1 and elm-format 0.8.3:
+4. Create an `elm-tooling.json`: `npx elm-tooling init`
 
-```json
-{
-  "tools": {
-    "elm": "0.19.1",
-    "elm-format": "0.8.3"
-  }
-}
-```
+5. Install the tools in `elm-tooling.json`: `npx elm-tooling install`
 
-The tools must be located in a standard location: Inside `elm-tooling/` inside “Elm Home.” The Elm compiler stores downloaded packages and REPL history in a directory that I call “Elm Home.” The default location on Linux and macOS is `~/.elm/`, and on Windows it is `%APPDATA%\elm`. You can customize the location by setting the `ELM_HOME` environment variable.
+6. Create an `elm.json`: `npx elm init`
 
-The location of a tool can be resolved like this on Linux and macOS in `sh`, `bash` and `zsh`:
+7. Optional: Install whatever other `npm` packages and stuff you want.
 
-```bash
-"${ELM_HOME:-$HOME/.elm}/elm-tooling/$name/$version/$name"
-```
+8. Create the `src` folder: `mkdir src`
 
-With the above example (and assuming that the `ELM_HOME` environment variable is not set) the following two tools should exist on Linux and macOS:
-
-- `~/.elm/elm-tooling/elm/0.19.1/elm`
-- `~/.elm/elm-tooling/elm-format/0.8.3/elm-format`
-
-On a typical Windows setup (with a user called “John”), they would be:
-
-- `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm\0.19.1\elm.exe`
-- `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm-format\0.8.3\elm-format.exe`
-
-Note that on Windows the `.exe` file extension is used, while on Linux and macOS no file extension is used.
-
-An earlier version of this document stored all tools in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several executables per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
-
-Consumers of `elm-tooling.json` must use the specified tools and must not use fallbacks if they are missing. Missing tools must be an error, or (if appropriate, and with the user’s permission) cause a download of the tool. Downloads should have security in mind.
-
-If a tool _could_ be specified in the `"tools"` field but isn’t, it is up to the consumer to choose what to do.
-
-Note: Tools, such as elm-test, that require Node.js must be installed with `npm` via package.json and must **not** be specified in the `"tools"` field.
-
-If the `"tools"` field is missing or empty, it means that the project wants to take advantage of other parts of `elm-tooling.json`, but isn’t ready to buy into `elm-tooling.json`’s way of handling tool locations. For example, an existing project might want to use `"entrypoints"` but is fine with continuing to use `npm` to install Elm for the time being.
-
-## How to consume elm-tooling.json
-
-1. Find and read `elm-tooling.json`.\*
-2. If not found, abort.
-3. Parse the file as JSON.
-4. If there’s a JSON parse error, abort.
-5. If the result isn’t a JSON object, abort.
-6. If the JSON object does not contain the field(s) you need, abort.
-7. If the field(s) you need are invalid, abort.
-8. Success! Use the data from the field(s) you need.
-
-Any time you abort:
-
-- Treat it as an error if appropriate.
-- Log information and use a fallback otherwise. Don’t _silently_ ignore errors in `elm-tooling.json` – users want to know what mistakes they might have made:
-  - Not found: The user might have created their `elm-tooling.json` in the wrong place. But it might also mean that the user does not want to use `elm-tooling.json` (if your tool does not mandate it).
-  - JSON parse error/Not an object/Invalid fields: Always a mistake by the user.
-  - Missing fields: Means that the user has misspelled the field or forgotten to add it, or use `elm-tooling.json` only for some _other_ tool’s sake, not for _your_ tool (if your tool does not mandate it).
-
-It’s recommended to link to the [elm-tooling] CLI tool in error messages/logs or documentation as a tip on how to successfully create a valid `elm-tooling.json` file. The idea is that you could do as much parsing as makes sense for your tool, while the [elm-tooling] CLI could provide as user friendly validation as possible.
-
-(\*) It is up to you to find an `elm-tooling.json` file on disk and read it. The process should be similar to finding an `elm.json` file.
-
-### Example
-
-If you’re looking for entrypoints to a project, you could log one of these lines depending on what you find:
-
-1. “Find entrypoints: No elm-tooling.json found in […]. Defaulting to […]. See https://example.com/docs/entrypoints.html for more information.”
-2. “Find entrypoints: /Users/you/code/elm-tooling.json contains invalid JSON: […]. Defaulting to […]. See https://example.com/docs/entrypoints.html for more information.”
-3. “Find entrypoints: /Users/you/code/elm-tooling.json does not contain the `entrypoints` field. Defaulting to […]. See https://example.com/docs/entrypoints.html for more information.”
-4. “Find entrypoints: /Users/you/code/elm-tooling.json contains an invalid `entrypoints` field: […]. Defaulting to […]. See https://example.com/docs/entrypoints.html for more information.”
-5. “Find entrypoints: Using `entrypoints` from /Users/you/code/elm-tooling.json: […]. See https://example.com/docs/entrypoints.html for more information.”
-
-The above logs provide:
-
-- What the task/goal is: “Find entrypoints”.
-- What happened.
-- What actual value was eventually used (default value, or values from `elm-tooling.json`).
-- A link to documentation, explaining the feature in more depth and containing troubleshooting tips.
+9. Create `src/Main.elm` and start coding!
 
 ## License
 
-Public domain
+[MIT](LICENSE).
 
-[elm-language-server]: https://github.com/elm-tooling/elm-language-server
-[elm-tooling install]: https://github.com/lydell/elm-tooling.json/blob/main/cli#elm-tooling-install
-[elm-tooling]: https://github.com/lydell/elm-tooling.json/blob/main/cli
+[child\_process.spawn]: https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options
+[cli-api]: #elmtoolingcli
+[elm-home-ci]: https://github.com/rtfeldman/node-test-runner/blob/dafa12e58043915bdd8fcd7d2231ccff511a7827/.github/workflows/test.yml#L18-L19
+[elm-review]: https://package.elm-lang.org/packages/jfmengels/elm-review/latest/
+[example github actions workflow]: https://github.com/lydell/elm-tooling.json/blob/main/.github/workflows/example.yml
+[ignore-scripts]: https://docs.npmjs.com/using-npm/config#ignore-scripts
+[known-tools]: https://github.com/lydell/elm-tooling.json/blob/main/helpers/known-tools.ts
+[npm/npm-lifecycle#49]: https://github.com/npm/npm-lifecycle/issues/49
+[scripts]: https://docs.npmjs.com/misc/scripts
+[semver-ranges]: https://docs.npmjs.com/misc/semver#tilde-ranges-123-12-1
+[tools]: https://github.com/lydell/elm-tooling.json#tools
