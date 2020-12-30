@@ -15,7 +15,12 @@ import {
   NonEmptyArray,
   toJSON,
 } from "../helpers/mixed";
-import { getOSName, getToolThrowing, isWindows } from "../helpers/parse";
+import {
+  getLatestVersionInRange,
+  getOSName,
+  getToolThrowing,
+  isWindows,
+} from "../helpers/parse";
 
 export default async function init(
   cwd: string,
@@ -58,7 +63,7 @@ export default async function init(
             })
         );
 
-  const elmVersionFromElmJson = getElmVersionFromElmJson(cwd, env);
+  const elmVersionFromElmJson = getElmVersionFromElmJson(cwd);
 
   const json: ElmTooling = {
     entrypoints:
@@ -245,15 +250,17 @@ function tryGuessToolsFromNodeModules(
   return pairs.length > 0 ? fromEntries(pairs) : undefined;
 }
 
-function getElmVersionFromElmJson(cwd: string, env: Env): string | undefined {
+function getElmVersionFromElmJson(cwd: string): string | undefined {
   try {
-    return getElmVersionFromElmJsonHelper(cwd, env);
+    return getElmVersionFromElmJsonHelper(cwd);
   } catch (_error) {
     return undefined;
   }
 }
 
-function getElmVersionFromElmJsonHelper(cwd: string, env: Env): string {
+const elmVersionRangeRegex = /^\s*(\S+)\s*<=\s*v\s*<\s*(\S+)\s*$/;
+
+function getElmVersionFromElmJsonHelper(cwd: string): string {
   const [elmJson] = tryGetElmJson(cwd);
 
   const elmVersion = elmJson["elm-version"];
@@ -273,7 +280,7 @@ function getElmVersionFromElmJsonHelper(cwd: string, env: Env): string {
       return elmVersion;
 
     case "package": {
-      const match = /^\s*(\S+)\s*<=\s*v\s*<\s*\S+\s*$/.exec(elmVersion);
+      const match = elmVersionRangeRegex.exec(elmVersion);
 
       if (match === null) {
         throw new Error(
@@ -281,16 +288,19 @@ function getElmVersionFromElmJsonHelper(cwd: string, env: Env): string {
         );
       }
 
-      const lowerVersion = match[1];
+      const [, lowerBoundInclusive, upperBoundExclusive] = match;
 
-      const tool = getToolThrowing({
-        name: "elm",
-        version: `^${lowerVersion}`,
-        cwd,
-        env,
-      });
+      const version = getLatestVersionInRange(
+        lowerBoundInclusive,
+        upperBoundExclusive,
+        Object.keys(KNOWN_TOOLS.elm).reverse()
+      );
 
-      return tool.version;
+      if (version === undefined) {
+        throw new Error(`No version found for: ${elmVersion}`);
+      }
+
+      return version;
     }
 
     default:

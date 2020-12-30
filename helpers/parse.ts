@@ -522,10 +522,15 @@ function joinPath(errorPath: Array<string | number>): string {
 }
 
 const versionRangeRegex = /^([=~^])(\d+)\.(\d+)\.(\d+)([+-].+)?$/;
+const prereleaseRegex = /-.+$/;
 const collator = new Intl.Collator("en", { numeric: true });
 
 function hasPrerelease(version: string): boolean {
   return /[+-]/.exec(version)?.[0] === "-";
+}
+
+function hasSameBase(a: string, b: string): boolean {
+  return a.replace(prereleaseRegex, "-") === b.replace(prereleaseRegex, "-");
 }
 
 export function getToolThrowing({
@@ -591,29 +596,44 @@ export function getLatestMatchingVersion(
   const sign = match[1];
   const major = Number(match[2]);
   const minor = Number(match[3]);
-  const patch = Number(match[4]);
-  const prereleasePrefix = `${major}.${minor}.${patch}-`;
-  const lowerBound = versionRange.slice(1);
-  const upperBound =
+  const lowerBoundInclusive = versionRange.slice(1);
+  const upperBoundExclusive =
     major === 0 || sign === "~"
       ? `${major}.${minor + 1}.0`
       : `${major + 1}.0.0`;
 
-  return sortedValidVersions.find((version) => {
-    if (sign === "=") {
-      return version === lowerBound;
-    }
+  return sign === "="
+    ? sortedValidVersions.find((version) => version === lowerBoundInclusive)
+    : getLatestVersionInRange(
+        lowerBoundInclusive,
+        upperBoundExclusive,
+        sortedValidVersions
+      );
+}
 
+export function getLatestVersionInRange(
+  lowerBoundInclusive: string,
+  upperBoundExclusive: string,
+  sortedValidVersions: Array<string>
+): string | undefined {
+  return sortedValidVersions.find((version) => {
     if (
+      // Known prereleases can only be matched…
       hasPrerelease(version) &&
-      !(hasPrerelease(lowerBound) && version.startsWith(prereleasePrefix))
+      // …if the lower bound mentions a prerelease…
+      !(
+        hasPrerelease(lowerBoundInclusive) &&
+        // …and both are for the same base version.
+        hasSameBase(version, lowerBoundInclusive)
+      )
     ) {
+      // If not (via the `!` above), don’t try to match this version.
       return false;
     }
 
     return (
-      collator.compare(version, lowerBound) >= 0 &&
-      collator.compare(version, upperBound) < 0
+      collator.compare(version, lowerBoundInclusive) >= 0 &&
+      collator.compare(version, upperBoundExclusive) < 0
     );
   });
 }
