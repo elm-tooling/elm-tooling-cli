@@ -167,17 +167,17 @@ describe("init", () => {
       `);
 
       expect(json).toMatchInlineSnapshot(`
-              {
-                  "entrypoints": [
-                      "./src/Main.elm"
-                  ],
-                  "tools": {
-                      "elm": "0.19.1",
-                      "elm-format": "0.8.3"
-                  }
+          {
+              "entrypoints": [
+                  "./src/Main.elm"
+              ],
+              "tools": {
+                  "elm": "0.19.1",
+                  "elm-format": "0.8.3"
               }
+          }
 
-          `);
+      `);
     });
 
     test("semver resolution", async () => {
@@ -193,16 +193,16 @@ describe("init", () => {
       `);
 
       expect(json).toMatchInlineSnapshot(`
-              {
-                  "entrypoints": [
-                      "./src/Main.elm"
-                  ],
-                  "tools": {
-                      "elm-json": "0.2.8"
-                  }
+          {
+              "entrypoints": [
+                  "./src/Main.elm"
+              ],
+              "tools": {
+                  "elm-json": "0.2.8"
               }
+          }
 
-          `);
+      `);
     });
 
     test("bad package.json in node_modules are ignored", async () => {
@@ -226,6 +226,182 @@ describe("init", () => {
                 "elm": "0.19.1",
                 "elm-format": "0.8.4",
                 "elm-json": "0.2.8"
+            }
+        }
+
+      `);
+    });
+  });
+
+  describe("elm-version in elm.json is detected", () => {
+    test("bad elm-version for application is ignored", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "bad-elm-json-elm-version-application"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/init/bad-elm-json-elm-version-application/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+        {
+            "entrypoints": [
+                "./src/Main.elm"
+            ],
+            "tools": {
+                "elm": "0.19.1",
+                "elm-format": "0.8.4",
+                "elm-json": "0.2.8"
+            }
+        }
+
+      `);
+    });
+
+    test("bad elm-version for package is ignored", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "bad-elm-json-elm-version-package"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/init/bad-elm-json-elm-version-package/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+        {
+            "tools": {
+                "elm": "0.19.1",
+                "elm-format": "0.8.4",
+                "elm-json": "0.2.8"
+            }
+        }
+
+      `);
+    });
+
+    test("unknown elm-version for application is ignored", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "unknown-elm-version-application"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/init/unknown-elm-version-application/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+        {
+            "entrypoints": [
+                "./src/Main.elm"
+            ],
+            "tools": {
+                "elm": "0.19.1",
+                "elm-format": "0.8.4",
+                "elm-json": "0.2.8"
+            }
+        }
+
+      `);
+    });
+
+    test("unknown elm-version for package is ignored", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "unknown-elm-version-package"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/init/unknown-elm-version-package/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+        {
+            "tools": {
+                "elm": "0.19.1",
+                "elm-format": "0.8.4",
+                "elm-json": "0.2.8"
+            }
+        }
+
+      `);
+    });
+
+    test("unknown elm.json type is ignored", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "bad-elm-json-type-with-elm-version"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/init/bad-elm-json-type-with-elm-version/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+        {
+            "entrypoints": [
+                "./src/Main.elm"
+            ],
+            "tools": {
+                "elm": "0.19.1",
+                "elm-format": "0.8.4",
+                "elm-json": "0.2.8"
+            }
+        }
+
+      `);
+    });
+
+    test("elm-version from elm.json wins over node_modules for application", async () => {
+      const { stdout, json } = await initSuccessHelper(
+        "elm-version-application"
+      );
+
+      expect(stdout).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/init/elm-version-application/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+        {
+            "entrypoints": [
+                "./src/Main.elm"
+            ],
+            "tools": {
+                "elm": "0.19.1"
+            }
+        }
+
+      `);
+    });
+
+    test("elm-version from elm.json wins over node_modules for package", async () => {
+      const { stdout, json } = await initSuccessHelper("elm-version-package");
+
+      expect(stdout).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/init/elm-version-package/elm-tooling.json⧘
+        Created! Open it in a text editor and have a look!
+        To install tools: elm-tooling install
+
+      `);
+
+      expect(json).toMatchInlineSnapshot(`
+        {
+            "tools": {
+                "elm": "0.19.1"
             }
         }
 

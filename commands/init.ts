@@ -58,12 +58,17 @@ export default async function init(
             })
         );
 
+  const elmVersionFromElmJson = getElmVersionFromElmJson(cwd, env);
+
   const json: ElmTooling = {
     entrypoints:
       entrypoints.length === 0
         ? undefined
         : (entrypoints as NonEmptyArray<string>),
-    tools,
+    tools:
+      elmVersionFromElmJson === undefined
+        ? tools
+        : { ...tools, elm: elmVersionFromElmJson },
   };
 
   fs.writeFileSync(absolutePath, toJSON(json));
@@ -107,7 +112,7 @@ async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
   return entrypoints;
 }
 
-function tryGetSourceDirectories(cwd: string): Array<string> {
+function tryGetElmJson(cwd: string): [Record<string, unknown>, string] {
   const elmJsonPath = path.join(cwd, "elm.json");
   const elmJson: unknown = JSON.parse(fs.readFileSync(elmJsonPath, "utf8"));
 
@@ -118,6 +123,12 @@ function tryGetSourceDirectories(cwd: string): Array<string> {
       )}`
     );
   }
+
+  return [elmJson, elmJsonPath];
+}
+
+function tryGetSourceDirectories(cwd: string): Array<string> {
+  const [elmJson, elmJsonPath] = tryGetElmJson(cwd);
 
   switch (elmJson.type) {
     case "application": {
@@ -135,7 +146,7 @@ function tryGetSourceDirectories(cwd: string): Array<string> {
       );
       if (directories.length === 0) {
         throw new Error(
-          `Expected "source-directories" to contain at least of string but got: ${JSON.stringify(
+          `Expected "source-directories" to contain at least one string but got: ${JSON.stringify(
             elmJson["source-directories"]
           )}`
         );
@@ -232,4 +243,61 @@ function tryGuessToolsFromNodeModules(
   );
 
   return pairs.length > 0 ? fromEntries(pairs) : undefined;
+}
+
+function getElmVersionFromElmJson(cwd: string, env: Env): string | undefined {
+  try {
+    return getElmVersionFromElmJsonHelper(cwd, env);
+  } catch (_error) {
+    return undefined;
+  }
+}
+
+function getElmVersionFromElmJsonHelper(cwd: string, env: Env): string {
+  const [elmJson] = tryGetElmJson(cwd);
+
+  const elmVersion = elmJson["elm-version"];
+  if (typeof elmVersion !== "string") {
+    throw new Error(
+      `Expected "elm-version" to be a string but got: ${JSON.stringify(
+        elmVersion
+      )}`
+    );
+  }
+
+  switch (elmJson.type) {
+    case "application":
+      if (!Object.hasOwnProperty.call(KNOWN_TOOLS.elm, elmVersion)) {
+        throw new Error(`Unknown/unsupported Elm version: ${elmVersion}`);
+      }
+      return elmVersion;
+
+    case "package": {
+      const match = /^\s*(\S+)\s*<=\s*v\s*<\s*\S+\s*$/.exec(elmVersion);
+
+      if (match === null) {
+        throw new Error(
+          `Elm version range did not match the regex: ${elmVersion}`
+        );
+      }
+
+      const lowerVersion = match[1];
+
+      const tool = getToolThrowing({
+        name: "elm",
+        version: `^${lowerVersion}`,
+        cwd,
+        env,
+      });
+
+      return tool.version;
+    }
+
+    default:
+      throw new Error(
+        `Expected "type" to be "application" or "package" but got: ${JSON.stringify(
+          elmJson.type
+        )}`
+      );
+  }
 }
