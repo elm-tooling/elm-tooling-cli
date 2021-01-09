@@ -4,7 +4,7 @@
   "author": "Simon Lydell",
   "license": "MIT",
   "description": "The CLI for elm-tooling.json",
-  "repository": "lydell/elm-tooling.json",
+  "repository": "elm-tooling/elm-tooling-cli",
   "type": "commonjs",
   "exports": {
     ".": "./index.js",

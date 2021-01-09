@@ -34,7 +34,7 @@ ${bold("Environment variables:")}
         Disable colored output
 
 ${bold("Documentation:")}
-    https://github.com/lydell/elm-tooling.json/#readme
+    https://elm-tooling.github.io/elm-tooling-cli/cli
 
 ${bold("Version:")}
     %VERSION%

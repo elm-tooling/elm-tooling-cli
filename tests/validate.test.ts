@@ -89,7 +89,7 @@ describe("validate", () => {
             Expected an object but got: ["elm","elm-format"]
 
         ⧙Specification:⧘
-            https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md
+            https://elm-tooling.github.io/elm-tooling-cli/spec
 
       `);
     });
@@ -105,7 +105,7 @@ describe("validate", () => {
             Expected at least one entrypoint but got 0.
 
         ⧙Specification:⧘
-            https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md
+            https://elm-tooling.github.io/elm-tooling-cli/spec
 
       `);
     });
@@ -163,7 +163,7 @@ describe("validate", () => {
             Exists but is not a file: /Users/you/project/fixtures/validate/kitchen-sink/elm-tooling/elm-format/0.8.3/elm-format
 
         ⧙Specification:⧘
-            https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md
+            https://elm-tooling.github.io/elm-tooling-cli/spec
 
       `);
     });
@@ -184,7 +184,7 @@ describe("validate", () => {
             Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4
 
         ⧙Specification:⧘
-            https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md
+            https://elm-tooling.github.io/elm-tooling-cli/spec
 
       `);
     });
@@ -205,7 +205,7 @@ describe("validate", () => {
             elm-tooling install
 
         ⧙Specification:⧘
-            https://github.com/lydell/elm-tooling.json/tree/main/SPEC.md
+            https://elm-tooling.github.io/elm-tooling-cli/spec
 
       `);
     });

@@ -6,9 +6,6 @@ import * as rimraf from "rimraf";
 const DIR = path.dirname(__dirname);
 const BUILD = path.join(DIR, "build");
 
-const READ_MORE =
-  "**[➡️ Full readme](https://github.com/lydell/elm-tooling.json/#readme)**";
-
 type Package = {
   version: string;
 };
@@ -29,13 +26,7 @@ const FILES_TO_COPY: Array<FileToCopy> = [
   { src: "index.d.ts" },
   { src: "getExecutable.d.ts" },
   { src: "package-real.json", dest: "package.json" },
-  {
-    src: "README.md",
-    transformSrc: (content) =>
-      content.replace(/("elm-tooling":\s*)"[^"]+"/g, `$1"${PKG.version}"`),
-    transformDest: (content) =>
-      content.replace(/^#[^]+?\n# /, "# ").replace(/<!--[^]*$/, READ_MORE),
-  },
+  { src: "README-npm.md", dest: "README.md" },
 ];
 
 if (fs.existsSync(BUILD)) {
@@ -44,21 +35,8 @@ if (fs.existsSync(BUILD)) {
 
 fs.mkdirSync(BUILD);
 
-for (const { src, dest = src, transformSrc, transformDest } of FILES_TO_COPY) {
-  if (transformSrc !== undefined) {
-    fs.writeFileSync(
-      path.join(DIR, src),
-      transformSrc(fs.readFileSync(path.join(DIR, src), "utf8"))
-    );
-  }
-  if (transformDest !== undefined) {
-    fs.writeFileSync(
-      path.join(BUILD, dest),
-      transformDest(fs.readFileSync(path.join(DIR, src), "utf8"))
-    );
-  } else {
-    fs.copyFileSync(path.join(DIR, src), path.join(BUILD, dest));
-  }
+for (const { src, dest = src } of FILES_TO_COPY) {
+  fs.copyFileSync(path.join(DIR, src), path.join(BUILD, dest));
 }
 
 childProcess.spawnSync("npx", ["--no-install", "tsc"], {
@@ -84,3 +62,7 @@ modifyFile(path.join(BUILD, "commands", "help.js"), (content) =>
 );
 
 fs.chmodSync(path.join(BUILD, "index.js"), "755");
+
+modifyFile(path.join(DIR, "docs", "getting-started.md"), (content) =>
+  content.replace(/("elm-tooling":\s*)"[^"]+"/g, `$1"${PKG.version}"`)
+);

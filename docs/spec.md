@@ -9,7 +9,7 @@ Known support:
 | [elm-language-server] |       ✅        |           |          ✅          |
 | [elm-tooling]         |       ✅        |    ✅     |          ✅          |
 
-Note: Anything that supports finding `elm` and `elm-format` in your local `node_modules/.bin/` folder can indirectly use the `"tools"` field via [elm-tooling install].
+Note: Anything that supports finding `elm` and `elm-format` in your local `node_modules/.bin/` folder can indirectly use the `"tools"` field via [elm-tooling install](./cli#elm-tooling-install).
 
 ## File location
 
@@ -174,5 +174,4 @@ The above logs provide:
 Public domain
 
 [elm-language-server]: https://github.com/elm-tooling/elm-language-server
-[elm-tooling install]: https://github.com/lydell/elm-tooling.json/#elm-tooling-install
-[elm-tooling]: https://github.com/lydell/elm-tooling.json/#readme
+[elm-tooling]: https://elm-tooling.github.io/elm-tooling-cli
