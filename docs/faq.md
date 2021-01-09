@@ -40,7 +40,7 @@ Comments:
 - Installation time, re-installation time and processing: This of course depends on your Internet speed. `elm-tooling` is faster because:
 
   - There’s just 1 npm package to install instead of 70.
-  - The executables are fetched in parallel (all at the same time) instead of sequential (one after the other). (`yarn` to run package postinstall scripts in parallel, but on the flip it also seems to unnecessarily trigger them more often.)
+  - The executables are fetched in parallel (all at the same time) instead of sequential (one after the other). (`yarn` runs package postinstall scripts in parallel, but on the flip it also seems to unnecessarily trigger them more often.)
   - For a re-installation (removed `node_modules/` folder, for example), `elm-tooling install` becomes basically a no-op. All executables already exist in `~/.elm/elm-tooling` so there’s not much to do.
 
   9 seconds vs 2 seconds might not sound like much. 2 seconds feels near-instant, while 9 seconds is more of a “meh” experience. 0.5 seconds really feels instant, and is a god send if you ever switch between git branches with big changes to `package.json` between them.
