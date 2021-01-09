@@ -1,9 +1,16 @@
-# CLI reference
+---
+nav_order: 4
+---
 
-- [elm-tooling init](#elm-tooling-init)
-- [elm-tooling validate](#elm-tooling-validate)
-- [elm-tooling tools](#elm-tooling-tools)
-- [elm-tooling install](#elm-tooling-install)
+<!-- prettier-ignore-start -->
+
+# CLI reference
+{: .no_toc }
+
+1. TOC
+{:toc}
+
+<!-- prettier-ignore-end -->
 
 ## elm-tooling init
 

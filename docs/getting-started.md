@@ -1,9 +1,16 @@
-# Getting started
+---
+nav_order: 2
+---
 
-- [Installation](#installation)
-- [Quick start](#quick-start)
-- [Adding elm-tooling to an existing project](#adding-elm-tooling-to-an-existing-project)
-- [Creating a new project with elm-tooling](#creating-a-new-project-with-elm-tooling)
+<!-- prettier-ignore-start -->
+
+# Getting started
+{: .no_toc }
+
+1. TOC
+{:toc}
+
+<!-- prettier-ignore-end -->
 
 ## Installation
 

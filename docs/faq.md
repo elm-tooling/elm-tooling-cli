@@ -1,4 +1,16 @@
+---
+nav_order: 3
+---
+
+<!-- prettier-ignore-start -->
+
 # FAQ
+{: .no_toc }
+
+1. TOC
+{:toc}
+
+<!-- prettier-ignore-end -->
 
 ## Why install Elm tools using `elm-tooling` instead of `npm`?
 

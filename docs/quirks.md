@@ -1,3 +1,7 @@
+---
+nav_order: 7
+---
+
 # Quirks
 
 Having trouble? Here are some known (mostly npm related) quirks and suggestions on how to work around them that might help.

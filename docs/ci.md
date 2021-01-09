@@ -1,3 +1,7 @@
+---
+nav_order: 6
+---
+
 # CI setup
 
 This page explains how to install Elm tools from `elm-tooling.json` in a Continuous Integration (CI) scenario, such as GitHub Actions.

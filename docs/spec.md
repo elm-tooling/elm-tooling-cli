@@ -1,3 +1,7 @@
+---
+nav_order: 7
+---
+
 # elm-tooling.json spec
 
 This is the specification for the `elm-tooling.json` file, where unofficial Elm tools can collaborate on per-project configuration they need.

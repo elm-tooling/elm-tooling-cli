@@ -1,14 +1,9 @@
+---
+title: Home
+nav_order: 1
+---
+
 # elm-tooling
-
-- [Getting started](./getting-started)
-- [FAQ](./faq)
-- [elm-tooling.json spec](./spec)
-- [CLI reference](./cli)
-- [API reference](./api)
-- [CI setup](./ci)
-- [Quirks](./quirks)
-
-## What is this and why should I care?
 
 [elm-tooling.json](./spec) is a file where Elm tools can put their configuration. This allows having configuration in one single place and reusing stuff between tools.
 

@@ -1,3 +1,7 @@
+---
+nav_order: 5
+---
+
 # API reference
 
 The `elm-tooling` npm package includes not only a CLI, but also an API that lets you:
