@@ -104,7 +104,7 @@ export function printNumErrors(numErrors: number): string {
 // 2021-04-30 and support for Node.js 10 is dropped.
 export function flatMap<T, U>(
   array: Array<T>,
-  callback: (value: T, index: number, array: Array<T>) => U | Array<U>
+  callback: (value: T, index: number, array: Array<T>) => Array<U> | U
 ): Array<U> {
   const results: Array<U> = [];
   for (const [index, item] of array.entries()) {
@@ -121,7 +121,7 @@ export function flatMap<T, U>(
 // This can be replaced with `Object.fromEntries` once Node.js is EOL
 // 2021-04-30 and support for Node.js 10 is dropped.
 export function fromEntries<T>(
-  entries: Iterable<readonly [string | number, T]>
+  entries: Iterable<readonly [number | string, T]>
 ): { [k: string]: T } {
   const result: { [k: string]: T } = {};
   for (const [key, value] of entries) {

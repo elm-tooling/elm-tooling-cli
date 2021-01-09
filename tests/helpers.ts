@@ -64,7 +64,7 @@ export class MemoryWriteStream extends stream.Writable implements WriteStream {
   content = "";
 
   _write(
-    chunk: string | Buffer,
+    chunk: Buffer | string,
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {
@@ -83,7 +83,7 @@ export function duoStream(): {
     isTTY = unmarkedStream.isTTY;
 
     _write(
-      chunk: string | Buffer,
+      chunk: Buffer | string,
       _encoding: BufferEncoding,
       callback: (error?: Error | null) => void
     ): void {
@@ -158,7 +158,7 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
   private cursorVisible = true;
 
   _write(
-    chunk: string | Buffer,
+    chunk: Buffer | string,
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {

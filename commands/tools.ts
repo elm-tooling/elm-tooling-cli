@@ -93,7 +93,7 @@ type State = {
   cursorTool: ToolChoice;
 };
 
-type Cmd = "None" | "Exit" | "Save" | "TestExit";
+type Cmd = "Exit" | "None" | "Save" | "TestExit";
 
 async function start(
   logger: Logger,

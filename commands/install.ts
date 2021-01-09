@@ -190,7 +190,7 @@ async function installTools(
     (name) => !presentNames.includes(name)
   );
 
-  const results: Array<string | Error | undefined> = [
+  const results: Array<Error | string | undefined> = [
     ...(await Promise.all(
       tools.missing.map((tool, index) =>
         downloadAndExtract(tool, (percentage) => {
@@ -222,7 +222,7 @@ async function installTools(
 
 function printResults(
   logger: Logger,
-  results: Array<string | Error | undefined>
+  results: Array<Error | string | undefined>
 ): number {
   const messages = flatMap(results, (result) =>
     typeof result === "string" ? result : []
@@ -294,7 +294,7 @@ function removeTools(
   osName: OSName,
   nodeModulesBinPath: string,
   names: Array<string>
-): Array<string | Error | undefined> {
+): Array<Error | string | undefined> {
   return flatMap(names, (name) => {
     const versions = KNOWN_TOOLS[name];
     return Object.keys(versions).map((version) => {
@@ -417,7 +417,7 @@ function downloadFile(
   };
 
   const onClose = (commandName: string) => (
-    code: number | null,
+    code: null | number,
     signal: NodeJS.Signals | null
   ): void => {
     if (errored.includes(commandName)) {
@@ -747,7 +747,7 @@ function callOnProgressIfReasonable(
 }
 
 function exitReason(
-  code: number | null,
+  code: null | number,
   signal: NodeJS.Signals | null
 ): string {
   return code !== null

@@ -76,7 +76,7 @@ class MemoryWriteStream extends stream.Writable implements WriteStream {
   content = "";
 
   _write(
-    chunk: string | Buffer,
+    chunk: Buffer | string,
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {
@@ -98,7 +98,7 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
   private hasWritten = false;
 
   _write(
-    chunk: string | Buffer,
+    chunk: Buffer | string,
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {

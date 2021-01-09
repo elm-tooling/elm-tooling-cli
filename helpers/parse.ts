@@ -36,17 +36,17 @@ export type ParseResult =
       message: string;
     }
   | {
-      tag: "ReadAsJsonObjectError";
-      elmToolingJsonPath: string;
-      message: string;
-    }
-  | {
       tag: "Parsed";
       elmToolingJsonPath: string;
       originalObject: Record<string, unknown>;
       unknownFields: Array<string>;
       entrypoints?: FieldResult<NonEmptyArray<Entrypoint>>;
       tools?: FieldResult<Tools>;
+    }
+  | {
+      tag: "ReadAsJsonObjectError";
+      elmToolingJsonPath: string;
+      message: string;
     };
 
 export type FieldResult<T> =
@@ -54,7 +54,7 @@ export type FieldResult<T> =
   | { tag: "Parsed"; parsed: T };
 
 export type FieldError = {
-  path: Array<string | number>;
+  path: Array<number | string>;
   message: string;
 };
 
@@ -143,7 +143,7 @@ export function findReadAndParseElmToolingJson(
   return result;
 }
 
-export function getOSName(): OSName | Error {
+export function getOSName(): Error | OSName {
   // istanbul ignore next
   switch (os.platform()) {
     case "linux":
@@ -209,9 +209,9 @@ export function prefixFieldResult<T>(
 }
 
 export type FileExists =
-  | { tag: "Exists" }
   | { tag: "DoesNotExist"; message: string }
-  | { tag: "Error"; message: string };
+  | { tag: "Error"; message: string }
+  | { tag: "Exists" };
 
 export function validateFileExists(fullPath: string): FileExists {
   try {
@@ -510,7 +510,7 @@ export function printFieldErrors(errors: Array<FieldError>): string {
   ].join("\n\n");
 }
 
-function joinPath(errorPath: Array<string | number>): string {
+function joinPath(errorPath: Array<number | string>): string {
   // istanbul ignore if
   if (errorPath.length === 0) {
     return "General";

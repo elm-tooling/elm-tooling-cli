@@ -4,9 +4,9 @@ import * as path from "path";
 import { bold, dim, indent } from "./mixed";
 import { isWindows, Tool } from "./parse";
 
-type LinkResult = "AllGood" | "Created" | Error;
+type LinkResult = Error | "AllGood" | "Created";
 
-type UnlinkResult = "DidNothing" | "Removed" | Error;
+type UnlinkResult = Error | "DidNothing" | "Removed";
 
 type Strategy =
   | { tag: "Link"; linkPath: string }
@@ -16,7 +16,7 @@ export function linkTool(
   cwd: string,
   nodeModulesBinPath: string,
   tool: Tool
-): string | Error {
+): Error | string {
   const { linkPathPresentationString, what, strategy } = linkHelper(
     cwd,
     nodeModulesBinPath,
@@ -58,7 +58,7 @@ export function unlinkTool(
   cwd: string,
   nodeModulesBinPath: string,
   tool: Tool
-): string | Error | undefined {
+): Error | string | undefined {
   const { linkPathPresentationString, what, strategy } = linkHelper(
     cwd,
     nodeModulesBinPath,
