@@ -49,7 +49,7 @@ Comments:
 
 Finally, the `elm`, `elm-format` and `elm-json` npm packages are essentially hacks. The `elm` npm package for instance does not contain Elm at all. It just contains some code that _downloads_ Elm using a postinstall script (or at the first run).
 
-<details>
+<details markdown="block">
 
 <summary>Terminal output</summary>
 
