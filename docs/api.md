@@ -1,4 +1,5 @@
 ---
+title: API reference
 nav_order: 5
 ---
 

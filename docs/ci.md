@@ -1,4 +1,5 @@
 ---
+title: CI setup
 nav_order: 6
 ---
 

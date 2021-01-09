@@ -1,4 +1,5 @@
 ---
+title: Quirks
 nav_order: 7
 ---
 

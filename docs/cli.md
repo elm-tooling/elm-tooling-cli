@@ -1,4 +1,5 @@
 ---
+title: CLI reference
 nav_order: 4
 ---
 
