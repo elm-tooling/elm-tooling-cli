@@ -3,7 +3,7 @@
   "version": "0.6.3",
   "author": "Simon Lydell",
   "license": "MIT",
-  "description": "The CLI for elm-tooling.json",
+  "description": "Manage elm-tooling.json. Install Elm tools.",
   "repository": "elm-tooling/elm-tooling-cli",
   "type": "commonjs",
   "exports": {
@@ -11,5 +11,5 @@
     "./getExecutable": "./getExecutable.js"
   },
   "bin": "./index.js",
-  "keywords": ["elm", "elm-format", "elm-tooling", "elm-tooling.json"]
+  "keywords": ["elm", "elm-format", "elm-json", "elm-tooling", "elm-tooling.json"]
 }
