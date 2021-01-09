@@ -416,7 +416,10 @@ function downloadFile(
     }
   };
 
-  const onClose = (commandName: string) => (code: number): void => {
+  const onClose = (commandName: string) => (
+    code: number | null,
+    signal: NodeJS.Signals | null
+  ): void => {
     if (errored.includes(commandName)) {
       return;
     } else if (code === 0) {
@@ -428,7 +431,7 @@ function downloadFile(
         .replace(/^[\s#O=-]+/g, "");
       onError(
         new Error(
-          `${commandName} exited with non-zero exit code ${code}:\n${
+          `${commandName} exited with ${exitReason(code, signal)}:\n${
             trimmed === "" ? EMPTY_STDERR : trimmed
           }`
         )
@@ -705,14 +708,14 @@ function extractTar({
     stderr += chunk.toString();
   });
 
-  tar.on("close", (code) => {
+  tar.on("close", (code, signal) => {
     if (code === 0) {
       onSuccess();
     } else {
       const trimmed = stderr.trim();
       onError(
         new Error(
-          `tar exited with non-zero exit code ${code}:\n${
+          `tar exited with ${exitReason(code, signal)}:\n${
             trimmed === "" ? EMPTY_STDERR : trimmed
           }`
         )
@@ -741,6 +744,17 @@ function callOnProgressIfReasonable(
   if (percentage > 0 && percentage < 1) {
     onProgress(percentage);
   }
+}
+
+function exitReason(
+  code: number | null,
+  signal: NodeJS.Signals | null
+): string {
+  return code !== null
+    ? `exit code ${code}`
+    : signal !== null
+    ? `signal ${signal}`
+    : "unknown reason";
 }
 
 export async function getExecutable({
