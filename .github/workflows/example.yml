@@ -36,7 +36,7 @@ jobs:
         run: npm ci
         working-directory: .
       - name: Internal build
-        run: npm run test
+        run: npm run build
         working-directory: .
       # IGNORE END
 
