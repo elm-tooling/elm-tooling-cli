@@ -2,7 +2,7 @@
 
 This page explains how to install Elm tools from `elm-tooling.json` in a Continuous Integration (CI) scenario, such as GitHub Actions.
 
-See the [Example GitHub Actions workflow] for inspiration. Even if you don’t use GitHub Actions it’s still a good resource – there’s a lot of comments and the concepts and steps should be fairly similar regardless of what CI you use.
+See the [Example GitHub Actions workflow](https://github.com/elm-tooling/elm-tooling-cli/blob/main/.github/workflows/example.yml) for inspiration. Even if you don’t use GitHub Actions it’s still a good resource – there’s a lot of comments and the concepts and steps should be fairly similar regardless of what CI you use.
 
 Basically, you need to:
 
@@ -12,8 +12,6 @@ Basically, you need to:
 
 2. Install tools from `elm-tooling.json`: `npx --no-install elm-tooling install`. Make sure that `~/.elm` is cached (or `ELM_HOME` if you’ve set it), based on `elm.json` (because it lists your Elm dependencies and the Elm compiler installs packages into `~/.elm`) and `elm-tooling.json` (because it lists your tools and `elm-tooling` downloads them into `~/.elm`) as well as `review/elm.json` if you use [elm-review] or whatever other `elm.json` files you might have.
 
-   Note that Windows uses `%APPDATA%\elm` rather than `~/.elm`. If you need to run the same CI workflow both Windows and some other OS, [set `ELM_HOME` to a directory that works everywhere][elm-home-ci].
+   Note that Windows uses `%APPDATA%\elm` rather than `~/.elm`. If you need to run the same CI workflow both Windows and some other OS, [set `ELM_HOME` to a directory that works everywhere](https://github.com/rtfeldman/node-test-runner/blob/dafa12e58043915bdd8fcd7d2231ccff511a7827/.github/workflows/test.yml#L18-L19).
 
 3. Run whatever commands you want.
-
-[example github actions workflow]: https://github.com/elm-tooling/elm-tooling-cli/blob/main/.github/workflows/example.yml
