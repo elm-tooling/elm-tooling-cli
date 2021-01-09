@@ -1,3 +1,7 @@
+### Version 1.0.0 (2021-01-09)
+
+- Improved: `elm-tooling init` now looks at `elm.json` to figure out which Elm version to use.
+
 ### Version 0.6.3 (2020-12-19)
 
 - Added: Node.js 10 support. This is useful for npm packages that need to run tests on Node.js 10 and use `elm-tooling` to install `elm` and `elm-format`.
