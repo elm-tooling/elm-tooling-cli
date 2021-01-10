@@ -29,6 +29,14 @@ export default async function elmToolingCli(
 ): Promise<number> {
   const logger = makeLogger({ env, stdout, stderr });
 
+  const isHelp = args.some(
+    (arg) => arg === "-h" || arg === "-help" || arg === "--help"
+  );
+  if (isHelp) {
+    logger.log(help(cwd, env));
+    return 0;
+  }
+
   // So far no command takes any further arguments.
   // Let each command handle this when needed.
   if (args.length > 1) {
@@ -40,9 +48,6 @@ export default async function elmToolingCli(
 
   switch (args[0]) {
     case undefined:
-    case "-h":
-    case "-help":
-    case "--help":
     case "help":
       logger.log(help(cwd, env));
       return 0;

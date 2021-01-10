@@ -75,6 +75,12 @@ describe("help", () => {
     expect(await helpHelper(["-h"], env)).toBe(output);
     expect(await helpHelper(["-help"], env)).toBe(output);
     expect(await helpHelper(["--help"], env)).toBe(output);
+    expect(await helpHelper(["whatever", "-h"], env)).toBe(output);
+    expect(await helpHelper(["whatever", "-help"], env)).toBe(output);
+    expect(await helpHelper(["whatever", "--help"], env)).toBe(output);
+    expect(await helpHelper(["-h", "whatever"], env)).toBe(output);
+    expect(await helpHelper(["-help", "whatever"], env)).toBe(output);
+    expect(await helpHelper(["--help", "whatever"], env)).toBe(output);
   });
 
   test("NO_COLOR", async () => {
