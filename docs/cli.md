@@ -13,6 +13,8 @@ nav_order: 4
 
 <!-- prettier-ignore-end -->
 
+Note: None of the commands take any arguments.
+
 ## elm-tooling init
 
 Create a sample `elm-tooling.json` in the current directory. It tries to guess some values based on your project to help you get started.
