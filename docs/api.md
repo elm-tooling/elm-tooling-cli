@@ -79,10 +79,25 @@ export default function getExecutable(options: {
 ```
 
 - `name`: The name of the tool you want. For example, `"elm"`.
+
 - `version`: A [`^` or `~` semver version range](https://docs.npmjs.com/misc/semver#tilde-ranges-123-12-1). The latest known version matching the range will be chosen. Note that the range _has_ to start with `^` or `~` (or `=` if you _really_ need an exact version) and _must_ be followed by 3 dot-separated digits (unlike `npm` you can’t leave out any numbers). Example: `"~0.2.8"`.
+
 - `cwd`: The current working directory. Needed in case `ELM_HOME` is set to a relative path. Defaults to `process.cwd()`.
+
 - `env`: Available environment variables. `ELM_HOME` can be used to customize where tools will be downloaded. `APPDATA` is used on Windows to find the default download location. Defaults to `process.env`.
-- `onProgress`: This function is called repeatedly with a number from 0 to 1 if the tool needs to be downloaded. You can use this to display a progress bar.
+
+- `onProgress`: This function is called repeatedly with a number (float) from 0.0 to 1.0 if the tool needs to be downloaded. You can use this to display a progress bar. Example numbers you might get:
+
+  ```
+  0
+  0.02
+  0.062
+  0.20600000000000002
+  0.49700000000000005
+  0.9740000000000001
+  1
+  ```
+
 - Returns: A promise that resolves to the absolute path to the tool.
 
 If you need several tools you can use `Promise.all` to download them all in parallel.
