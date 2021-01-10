@@ -1,3 +1,8 @@
+### Version 1.0.1 (2021-01-10)
+
+- Improved: `--help` now shows the help text even if there are other arguments passed.
+- Improved: Each option of `elmToolingCli` is now optional and has its own default. Previously, you had to pass either no options or _all_ options.
+
 ### Version 1.0.0 (2021-01-09)
 
 - Improved: `elm-tooling init` now looks at `elm.json` to figure out which Elm version to use.
