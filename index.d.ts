@@ -12,10 +12,10 @@ type WriteStream = Writable & {
 export default function elmToolingCli(
   args: Array<string>,
   options?: {
-    cwd: string;
-    env: Record<string, string | undefined>;
-    stdin: ReadStream;
-    stdout: WriteStream;
-    stderr: WriteStream;
+    cwd?: string;
+    env?: Record<string, string | undefined>;
+    stdin?: ReadStream;
+    stdout?: WriteStream;
+    stderr?: WriteStream;
   }
 ): Promise<number>;

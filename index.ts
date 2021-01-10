@@ -9,23 +9,23 @@ import { makeLogger } from "./helpers/logger";
 import type { Env, ReadStream, WriteStream } from "./helpers/mixed";
 
 type Options = {
-  cwd: string;
-  env: Env;
-  stdin: ReadStream;
-  stdout: WriteStream;
-  stderr: WriteStream;
+  cwd?: string;
+  env?: Env;
+  stdin?: ReadStream;
+  stdout?: WriteStream;
+  stderr?: WriteStream;
 };
 
 export default async function elmToolingCli(
   args: Array<string>,
   // istanbul ignore next
-  { cwd, env, stdin, stdout, stderr }: Options = {
-    cwd: process.cwd(),
-    env: process.env,
-    stdin: process.stdin,
-    stdout: process.stdout,
-    stderr: process.stderr,
-  }
+  {
+    cwd = process.cwd(),
+    env = process.env,
+    stdin = process.stdin,
+    stdout = process.stdout,
+    stderr = process.stderr,
+  }: Options = {}
 ): Promise<number> {
   const logger = makeLogger({ env, stdout, stderr });
 
