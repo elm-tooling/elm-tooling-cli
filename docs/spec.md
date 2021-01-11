@@ -61,7 +61,7 @@ Example:
 }
 ```
 
-The [elm-tooling] CLI tool lets you validate an `elm-tooling.json` file according to all known fields in this spec.
+The [elm-tooling] command line program lets you validate an `elm-tooling.json` file according to all known fields in this spec.
 
 ### entrypoints
 
@@ -153,7 +153,7 @@ Any time you abort:
   - JSON parse error/Not an object/Invalid fields: Always a mistake by the user.
   - Missing fields: Means that the user has misspelled the field or forgotten to add it, or use `elm-tooling.json` only for some _other_ tool’s sake, not for _your_ tool (if your tool does not mandate it).
 
-It’s recommended to link to the [elm-tooling] CLI tool in error messages/logs or documentation as a tip on how to successfully create a valid `elm-tooling.json` file. The idea is that you could do as much parsing as makes sense for your tool, while the [elm-tooling] CLI could provide as user friendly validation as possible.
+It’s recommended to link to the [elm-tooling] command line program in error messages/logs or documentation as a tip on how to successfully create a valid `elm-tooling.json` file. The idea is that you could do as much parsing as makes sense for your tool, while the [elm-tooling] CLI could provide as user friendly validation as possible.
 
 (\*) It is up to you to find an `elm-tooling.json` file on disk and read it. The process should be similar to finding an `elm.json` file.
 
