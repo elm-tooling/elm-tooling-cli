@@ -158,7 +158,7 @@ The [elm-pages-starter](https://github.com/dillonkearns/elm-pages-starter) templ
 
 ## Is `elm-tooling` stable?
 
-Yes! It’s tested on macOS, Linux and Windows, and has great test coverage. It’s written in strict TypeScript, and focuses and handling errors at all points. There are no planned features, other than adding support for new tools and versions as they come, and adding validation for new fields in `elm-tooling.json` as they are invented.
+Yes! It’s tested on macOS, Linux and Windows, and has great test coverage. It’s written in strict TypeScript, and focuses on handling errors at all points. There are no planned features, other than adding support for new tools and versions as they come, and adding validation for new fields in `elm-tooling.json` as they are invented.
 
 ## Can I install the tools globally?
 
