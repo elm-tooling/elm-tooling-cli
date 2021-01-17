@@ -3,4 +3,4 @@ remote_theme: pmarsceill/just-the-docs
 # Aux links for the upper right navigation
 aux_links:
   "elm-tooling-cli on GitHub":
-    - "//github.com/elm-tooling/elm-tooling-cli"
+    - "https://github.com/elm-tooling/elm-tooling-cli"

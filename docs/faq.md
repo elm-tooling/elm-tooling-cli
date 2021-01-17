@@ -32,7 +32,7 @@ Comments:
 
 - `node_modules/` size: How can `elm-tooling` be so much smaller?
 
-  - Some of the 70 `npm` packages are pretty heavy.
+  - Some of the 70 `npm` packages are pretty heavy. `elm-tooling` has no dependencies, and instead uses the `curl` (or `wget`) and `tar` that come with basically all operating systems (even Windows!) out of the box.
   - `elm-tooling` puts the executables in a central location (`~/.elm/elm-tooling`) instead of in the local `node_modules/` folder.
 
   (Measured on macOS; executables vary slightly in size between macOS, Linux and Windows (also disk block size).)
@@ -51,7 +51,7 @@ Finally, the `elm`, `elm-format` and `elm-json` npm packages are essentially hac
 
 <details markdown="block">
 
-<summary>Terminal output</summary>
+<summary>Terminal output comparison</summary>
 
 This is what a typical `npm install` looks like for an Elm project:
 
@@ -129,13 +129,13 @@ If you’re just starting out, don’t forget to check out the official document
 - [Guide: Install](https://guide.elm-lang.org/install/elm.html)
 - [npm installer](https://github.com/elm/compiler/tree/master/installers/npm)
 
-But if you’re already familiar with installing stuff with `npm` you might think it’s just as easy to start with `elm-tooling`. It doesn’t really matter.
+If you’re just getting started, install Elm whatever way you think is the easiest so you can get started coding. Installing Elm globally using the installer can be a great way. But if you’re already familiar with installing stuff with `npm` it might be just as easy to start with `elm-tooling`. It doesn’t really matter. You can always change the installation method later.
 
 ### For Elm applications
 
-When a new Elm version comes out, your old projects will continue to work since they have a fixed local Elm version.
+When a new Elm version comes out, your old projects will continue to work since they have a fixed local Elm version. Now, new Elm versions aren’t released very often so it’s not a super big deal, but when a new version does come out it’s nice not having to upgrade each and every project at the same time.
 
-You’ll also avoid formatting changes going back and forth due to different contributors having different versions of `elm-format`.
+`elm-format` releases a little bit often than Elm, and even with a patch release there can be tiny formatting changes. You wouldn’t want two contributors using different elm-format versions and format files back and forth all the time.
 
 ### For Elm packages
 
@@ -149,6 +149,64 @@ Note:
 
 - Don’t make `elm-tooling.json` part of your `npm` package. `elm-tooling.json` is only for development and CI, not for production code. Use the [getExecutable API](./api#getexecutable) if you need to depend on some other tool.
 - Use `"prepare": "elm-tooling install"` instead of `"postinstall": "elm-tooling install"`. See [Quirks](./quirks).
+
+## How does `elm-tooling install` work?
+
+In `elm-tooling.json` you can specify your tools:
+
+<!-- prettier-ignore -->
+```json
+{
+    "tools": {
+        "elm": "0.19.1",
+        "elm-format": "0.8.4"
+    }
+}
+```
+
+`elm-tooling install` downloads the tools you’ve specified to “Elm home” (if they don’t exist already). After using `elm-tooling` in a couple of projects you might end up with something like this:
+
+```
+~/.elm/elm-tooling
+├── elm
+│  └── 0.19.1
+│     └── elm
+├── elm-format
+│  ├── 0.8.3
+│  │  └── elm-format
+│  └── 0.8.4
+│     └── elm-format
+└── elm-json
+   └── 0.2.8
+      └── elm-json
+```
+
+`elm-tooling install` then creates links in your local `./node_modules/.bin/` folder:
+
+```
+./node_modules/.bin/elm -> ~/.elm/elm-tooling/elm/0.19.1/elm
+./node_modules/.bin/elm-format -> ~/.elm/elm-tooling/elm-format/0.8.4/elm-format
+```
+
+The algorithm is roughly:
+
+1. Find an `elm-tooling.json` up the directory tree.
+
+2. For every tool/version pair in `"tools"`:
+
+   1. Look it up in the built-in list of known tools, to get the URL to download from and the expected SHA256 hash.
+
+   2. Unless the executable already exists on disk in `~/.elm/`:
+
+      1. Download the URL using `curl`, `wget` or Node.js’ `https` module.
+
+      2. Verify that the downloaded contents match the SHA256 hash.
+
+      3. Extract the executable using `tar` or Node.js’ `zlib` module (`gunzip`).
+
+      4. Make sure the extracted file is executable (`chmod +x`).
+
+   3. Create a link in `./node_modules/.bin/`.
 
 ## Who uses `elm-tooling`?
 
