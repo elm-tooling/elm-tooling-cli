@@ -7,6 +7,8 @@ nav_order: 7
 
 This is the specification for the `elm-tooling.json` file, where unofficial Elm tools can collaborate on per-project configuration they need.
 
+The keywords “MUST”, “SHOULD” and “MAY” are used as defined in [RFC 2119].
+
 Known support:
 
 | Name                  | `"entrypoints"` | `"tools"` |
@@ -20,7 +22,7 @@ Known support:
 
 ## File location
 
-`elm-tooling.json` must be located next to an `elm.json` (in the same directory as an `elm.json`).
+`elm-tooling.json` SHOULD generally be located next to an `elm.json` (in the same directory as an `elm.json`).
 
 `elm-tooling.json` contains stuff for the particular Elm project defined by the `elm.json` next to it. There is no “global” `elm-tooling.json` – only project-local ones.
 
@@ -36,9 +38,9 @@ example-project
 
 ## Known fields
 
-`elm-tooling.json` must contain a JSON object. All fields are optional for maximum forwards and backwards compatibility as tools need more fields.
+`elm-tooling.json` MUST contain a JSON object. All fields are optional for maximum forwards and backwards compatibility as tools need more fields.
 
-Given all known fields, the object must match this TypeScript type:
+Given all known fields, the object MUST match this TypeScript type:
 
 ```ts
 type NonEmptyArray<T> = [T, ...T[]];
@@ -71,13 +73,13 @@ A list of file paths, to the Elm entrypoint files of the project (the ones with 
 
 File paths are always relative to the directory containing the `elm-tooling.json` and `elm.json` files.
 
-File paths must start with `./` to make it clear that they are relative.
+File paths MUST start with `./` to make it clear that they are relative.
 
-File paths must use `/` as the directory separator. `\` is not a valid directory separator†. Programs consuming file paths must convert `/` to `\` on Windows if needed.
+File paths MUST use `/` as the directory separator. `\` is not a valid directory separator†. Programs consuming file paths MUST convert `/` to `\` on Windows if needed.
 
-The array must **not** be empty.
+The array MUST NOT be empty.
 
-(\*) Excluding tests. For most projects, you should be able to find compilation errors in tests by running `elm-test make`. If tests are located outside `tests/`, though, you would miss out on those. Maybe there should be a `"tests": ["./tests", "./somewhere-else"]` field? Then tools would know to run `elm-test make ./tests ./somewhere-else` to find all test compilation errors. It would also allow elm-test itself to default to `./tests` and `./somewhere-else` when running `elm-test` without arguments.
+(\*) Excluding tests. See [#17].
 
 (†) I think it’s good to avoid the backslash, since it’s used for escaping in JSON.
 
@@ -91,9 +93,9 @@ By specifying versions _once\*_ in _one_ place…
 - …collaborators on your project can get the correct versions
 - …your CI and build pipelines can get the correct versions
 
-(…with the help of tools that read `elm.tooling.json`.)
+(…with the help of tools that read `elm-tooling.json`.)
 
-(\*) For Elm applications, you also need to specify the Elm version in `elm.json`. For Elm packages, you specify a _range_ of compatible Elm versions in `elm.json`. `elm-tooling.json` keeps things simple by always specifying the elm version itself.
+(\*) For Elm applications, you also need to specify the Elm version in `elm.json`. For Elm packages, you specify a _range_ of compatible Elm versions in `elm.json`. `elm-tooling.json` keeps things simple by always specifying the elm version itself. (This also supports the more uncommon case where you have an `elm-tooling.json` but no `elm.json`.)
 
 For example, the following means that the project uses elm 0.19.1 and elm-format 0.8.3:
 
@@ -106,7 +108,7 @@ For example, the following means that the project uses elm 0.19.1 and elm-format
 }
 ```
 
-The tools must be located in a standard location: Inside `elm-tooling/` inside “Elm Home.” The Elm compiler stores downloaded packages and REPL history in a directory that I call “Elm Home.” The default location on Linux and macOS is `~/.elm/`, and on Windows it is `%APPDATA%\elm`. You can customize the location by setting the `ELM_HOME` environment variable.
+The tools MUST be located in a standard location: Inside `elm-tooling/` inside “Elm Home.” The Elm compiler stores downloaded packages and REPL history in a directory that I call “Elm Home.” The default location on Linux and macOS is `~/.elm/`, and on Windows it is `%APPDATA%\elm`. You can customize the location by setting the `ELM_HOME` environment variable.
 
 The location of a tool can be resolved like this on Linux and macOS in `sh`, `bash` and `zsh`:
 
@@ -128,11 +130,11 @@ Note that on Windows the `.exe` file extension is used, while on Linux and macOS
 
 An earlier version of this document stored all tools in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several executables per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
 
-Consumers of `elm-tooling.json` must use the specified tools and must not use fallbacks if they are missing. Missing tools must be an error, or (if appropriate, and with the user’s permission) cause a download of the tool. Downloads should have security in mind.
+Consumers of `elm-tooling.json` MUST use the specified tools and MUST NOT use fallbacks if they are missing. Missing tools MUST be an error, or (if appropriate, and with the user’s permission) cause a download of the tool. Downloads SHOULD have security in mind.
 
 If a tool _could_ be specified in the `"tools"` field but isn’t, it is up to the consumer to choose what to do.
 
-Note: Tools, such as elm-test, that require Node.js must be installed with `npm` via package.json and must **not** be specified in the `"tools"` field.
+Note: Tools which are written in Node.js (such as [node-test-runner]) need to be installed with `npm` via `package.json` and MUST NOT be specified in the `"tools"` field.
 
 If the `"tools"` field is missing or empty, it means that the project wants to take advantage of other parts of `elm-tooling.json`, but isn’t ready to buy into `elm-tooling.json`’s way of handling tool locations. For example, an existing project might want to use `"entrypoints"` but is fine with continuing to use `npm` to install Elm for the time being.
 
@@ -180,5 +182,8 @@ The above logs provide:
 
 Public domain
 
+[#17]: https://github.com/elm-tooling/elm-tooling-cli/issues/17
 [elm-language-server]: https://github.com/elm-tooling/elm-language-server
 [elm-tooling]: https://elm-tooling.github.io/elm-tooling-cli
+[node-test-runner]: https://github.com/rtfeldman/node-test-runner
+[rfc 2119]: https://tools.ietf.org/html/rfc2119

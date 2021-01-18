@@ -114,11 +114,7 @@ describe("validate", () => {
       expect(await validateFailHelper("kitchen-sink")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/validate/kitchen-sink/elm-tooling.json⧘
 
-        ⧙14⧘ errors
-
-        ⧙elm.json⧘
-            There should be an elm.json next to elm-tooling.json
-            File does not exist: /Users/you/project/fixtures/validate/kitchen-sink/elm.json
+        ⧙13⧘ errors
 
         ⧙not-a-thing⧘
             Unknown field

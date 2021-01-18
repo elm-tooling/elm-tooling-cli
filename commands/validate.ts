@@ -1,5 +1,3 @@
-import * as path from "path";
-
 import type { Logger } from "../helpers/logger";
 import {
   bold,
@@ -17,7 +15,6 @@ import {
   findReadAndParseElmToolingJson,
   printFieldErrors,
   Tools,
-  validateFileExists,
 } from "../helpers/parse";
 
 export default function validate(
@@ -38,19 +35,6 @@ export default function validate(
       return 1;
 
     case "Parsed": {
-      const elmJsonExists = validateFileExists(
-        path.join(path.dirname(parseResult.elmToolingJsonPath), "elm.json")
-      );
-      const elmJsonErrors =
-        elmJsonExists.tag === "Exists"
-          ? []
-          : [
-              {
-                path: ["elm.json"],
-                message: `There should be an elm.json next to elm-tooling.json\n${elmJsonExists.message}`,
-              },
-            ];
-
       const entrypointsErrors =
         parseResult.entrypoints === undefined
           ? []
@@ -62,7 +46,6 @@ export default function validate(
           : getToolsErrors(parseResult.tools);
 
       const validationErrors: Array<FieldError> = [
-        ...elmJsonErrors,
         ...parseResult.unknownFields.map((field) => ({
           path: [field],
           message: `Unknown field\nKnown fields: ${KNOWN_FIELDS.join(", ")}`,
