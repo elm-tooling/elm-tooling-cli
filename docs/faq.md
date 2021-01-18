@@ -206,7 +206,7 @@ The algorithm is roughly:
 
       4. Make sure the extracted file is executable (`chmod +x`).
 
-   3. Create a link in `./node_modules/.bin/`.
+   3. Create a link in `./node_modules/.bin/`. (The `node_modules/` folder is always located next to your `elm-tooling.json`.)
 
 ## Who uses `elm-tooling`?
 

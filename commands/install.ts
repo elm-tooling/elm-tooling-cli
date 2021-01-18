@@ -13,7 +13,6 @@ import {
   dim,
   elmToolingJsonDocumentationLink,
   Env,
-  findClosest,
   flatMap,
   indent,
   printNumErrors,
@@ -122,22 +121,12 @@ async function installTools(
   elmToolingJsonPath: string,
   tools: Tools
 ): Promise<number> {
-  const nodeModulesPath = findClosest(
+  const nodeModulesBinPath = path.join(
+    path.dirname(elmToolingJsonPath),
     "node_modules",
-    path.dirname(elmToolingJsonPath)
+    ".bin"
   );
-  if (nodeModulesPath === undefined) {
-    logger.error(bold(elmToolingJsonPath));
-    logger.error(
-      `No node_modules/ folder found upwards from: ${path.dirname(
-        elmToolingJsonPath
-      )}`
-    );
-    logger.error("Install your npm dependencies before running this script.");
-    return 1;
-  }
 
-  const nodeModulesBinPath = path.join(nodeModulesPath, ".bin");
   try {
     fs.mkdirSync(nodeModulesBinPath, { recursive: true });
   } catch (errorAny) {
@@ -261,16 +250,11 @@ function removeAllTools(
   logger.log(bold(elmToolingJsonPath));
   const message = `The "tools" field is ${what}. To add tools: elm-tooling tools`;
 
-  const nodeModulesPath = findClosest(
+  const nodeModulesBinPath = path.join(
+    path.dirname(elmToolingJsonPath),
     "node_modules",
-    path.dirname(elmToolingJsonPath)
+    ".bin"
   );
-  if (nodeModulesPath === undefined) {
-    logger.log(message);
-    return 0;
-  }
-
-  const nodeModulesBinPath = path.join(nodeModulesPath, ".bin");
 
   const results = removeTools(
     cwd,

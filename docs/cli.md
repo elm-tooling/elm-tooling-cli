@@ -34,7 +34,7 @@ _Note:_ You need to update `elm-tooling` itself to get new tool versions! See [W
 `elm-tooling install` does two things:
 
 1. Makes sure the [tools](./spec#tools) in the closest `elm-tooling.json` are available on disk. Downloads them if missing.
-2. Creates links in your local `node_modules/.bin/` folder to the downloaded tools, just like the `elm`, `elm-format`, etc, npm packages do. This allows you to run things like `npx elm make src/Main.elm`, and your editor and build tools will automatically find them.
+2. Creates links in your local `./node_modules/.bin/` folder to the downloaded tools, just like the `elm`, `elm-format`, etc, npm packages do. This allows you to run things like `npx elm make src/Main.elm`, and your editor and build tools will automatically find them. (The `node_modules/` folder is always located next to your `elm-tooling.json`.)
 
 In other words, `elm-tooling install` is a drop-in replacement for installing for example `elm` and `elm-format` with `npm`.
 
