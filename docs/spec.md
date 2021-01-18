@@ -9,12 +9,14 @@ This is the specification for the `elm-tooling.json` file, where unofficial Elm 
 
 Known support:
 
-| Name                  | `"entrypoints"` | `"tools"` | `node_modules/.bin/` |
-| --------------------- | :-------------: | :-------: | :------------------: |
-| [elm-language-server] |       ✅        |           |          ✅          |
-| [elm-tooling]         |       ✅        |    ✅     |          ✅          |
+| Name                  | `"entrypoints"` | `"tools"` |
+| --------------------- | :-------------: | :-------: |
+| [elm-language-server] |       ✅        |    🍏     |
+| [elm-tooling]         |       ✅        |    ✅     |
 
-Note: Anything that supports finding `elm` and `elm-format` in your local `node_modules/.bin/` folder can indirectly use the `"tools"` field via [elm-tooling install](./cli#elm-tooling-install).
+✅ Fully supported.<br>
+
+🍏 Supported via `node_modules/.bin/`. Anything that supports finding `elm` (or other tools) in your local `node_modules/.bin/` folder can indirectly use the `"tools"` field via [elm-tooling install](./cli#elm-tooling-install).
 
 ## File location
 
