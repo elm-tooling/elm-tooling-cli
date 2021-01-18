@@ -401,7 +401,7 @@ function downloadFile(
   };
 
   const onClose = (commandName: string) => (
-    code: null | number,
+    code: number | null,
     signal: NodeJS.Signals | null
   ): void => {
     if (errored.includes(commandName)) {
@@ -731,7 +731,7 @@ function callOnProgressIfReasonable(
 }
 
 function exitReason(
-  code: null | number,
+  code: number | null,
   signal: NodeJS.Signals | null
 ): string {
   return code !== null
