@@ -1,3 +1,8 @@
+### Version 1.0.2 (2021-01-18)
+
+- Fixed: `elm-tooling install` no longer finds `node_modules/` up the directory tree. Links to tools are now _always_ created in `node_modules/.bin/` in the same directory as `elm-tooling.json`. `elm-tooling.json` only affects the current project, so `elm-tooling install` shouldn’t touch stuff outside the project. [#23](https://github.com/elm-tooling/elm-tooling-cli/pull/23)
+- Removed: `elm-tooling validate` no longer checks for an `elm.json` next to `elm-tooling.json`, since there are legitimate use cases for only having an `elm-tooling.json`. [#24](https://github.com/elm-tooling/elm-tooling-cli/pull/24)
+
 ### Version 1.0.1 (2021-01-10)
 
 - Improved: `--help` now shows the help text even if there are other arguments passed.

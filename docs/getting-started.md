@@ -78,7 +78,7 @@ With the above steps, you might end up with changes like this:
    "devDependencies": {
 -    "elm": "0.19.1",
 -    "elm-format": "0.8.3"
-+    "elm-tooling": "1.0.1"
++    "elm-tooling": "1.0.2"
    },
    "scripts": {
 +    "postinstall": "elm-tooling install"
