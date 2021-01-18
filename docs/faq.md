@@ -147,8 +147,8 @@ Have you written an Elm related tool in Node.js? If your tool calls for example 
 
 Note:
 
-- Don’t make `elm-tooling.json` part of your `npm` package. `elm-tooling.json` is only for development and CI, not for production code. Use the [getExecutable API](./api#getexecutable) if you need to depend on some other tool.
-- Use `"prepare": "elm-tooling install"` instead of `"postinstall": "elm-tooling install"`. See [Quirks](./quirks).
+- Don’t make `elm-tooling.json` part of your `npm` package. `elm-tooling.json` is only for development and CI, not for production code. Use the [getExecutable API](../api#getexecutable) if you need to depend on some other tool.
+- Use `"prepare": "elm-tooling install"` instead of `"postinstall": "elm-tooling install"`. See [Quirks](../quirks).
 
 ## How does `elm-tooling install` work?
 
@@ -267,7 +267,7 @@ So Node.js based tools are not supported. Only tools that are distributed as pla
 
 ## Why does `elm-tooling` put stuff in `node_modules/.bin/`?
 
-Installing stuff into the local `node_modules/.bin/` folder might sound strange at first, but piggy-backing on the well-supported `npm` ecosystem is currently the best way of doing things. This lets you use the [tools](./spec#tools) field of `elm-tooling.json` without your editor and build tools having to support it.
+Installing stuff into the local `node_modules/.bin/` folder might sound strange at first, but piggy-backing on the well-supported `npm` ecosystem is currently the best way of doing things. This lets you use the [tools](../spec#tools) field of `elm-tooling.json` without your editor and build tools having to support it.
 
 ## _What_ does `elm-tooling` put in `node_modules/.bin/`?
 

@@ -27,13 +27,13 @@ Validate the closest `elm-tooling.json`. If you’re having trouble with some pr
 
 Interactively add, remove and update tools in your `elm-tooling.json`. This is an alternative to editing the `"tools"` field by hand.
 
-_Note:_ You need to update `elm-tooling` itself to get new tool versions! See [Which tools are supported?](./faq#which-tools-are-supported)
+_Note:_ You need to update `elm-tooling` itself to get new tool versions! See [Which tools are supported?](../faq#which-tools-are-supported)
 
 ## elm-tooling install
 
 `elm-tooling install` does two things:
 
-1. Makes sure the [tools](./spec#tools) in the closest `elm-tooling.json` are available on disk. Downloads them if missing.
+1. Makes sure the [tools](../spec#tools) in the closest `elm-tooling.json` are available on disk. Downloads them if missing.
 2. Creates links in your local `./node_modules/.bin/` folder to the downloaded tools, just like the `elm`, `elm-format`, etc, npm packages do. This allows you to run things like `npx elm make src/Main.elm`, and your editor and build tools will automatically find them. (The `node_modules/` folder is always located next to your `elm-tooling.json`.)
 
 In other words, `elm-tooling install` is a drop-in replacement for installing for example `elm` and `elm-format` with `npm`.
@@ -46,4 +46,4 @@ You can set `ELM_HOME` environment variable to customize where tools will be dow
 
 Similarly, `tar` is used to extract archives. Even Windows comes with `tar` these days so you shouldn’t need to install anything.
 
-See also [Quirks](./quirks).
+See also [Quirks](../quirks).

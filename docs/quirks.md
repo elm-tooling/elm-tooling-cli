@@ -11,7 +11,7 @@ Having trouble? Here are some known (mostly npm related) quirks and suggestions 
 
   - Maybe you don’t even need `--production`. Some applications use `npm` only for a build step and does not have any production Node.js server or anything like that.
   - Try `--ignore-scripts`. This will skip the `"postinstall"` script – but also any scripts that your dependencies might run during installation! Sometimes, only `"devDependencies"` (such as node-sass) need to run scripts during installation – so try it! If `--ignore-scripts` works you have nothing to lose.
-  - Make a little wrapper script that runs `elm-tooling install` only if `elm-tooling` is installed. For example, you could write the script in JavaScript and use the [API version of the CLI](./api#elmtoolingcli).
+  - Make a little wrapper script that runs `elm-tooling install` only if `elm-tooling` is installed. For example, you could write the script in JavaScript and use the [API version of the CLI](../api#elmtoolingcli).
   - If you only need `--production` installs in for example a Dockerfile, try adding `RUN sed -i '/postinstall/d' package.json` to remove the `"postinstall"` script from `package.json` before running `npm install --production`. This specific example only works with GNU sed and if your `"postinstall"` script isn’t last (due to trailing commas being invalid JSON).
   - Move `elm-tooling` to `"dependencies"`. `elm-tooling` is small and has no dependencies so it won’t bloat your build very much. Set the `NO_ELM_TOOLING_INSTALL` environment variable to turn `elm-tooling install` into a no-op (see below).
 
