@@ -148,22 +148,29 @@ async function installTools(
     }
   }
 
-  const toolsProgress: Array<number | string> = tools.missing.map(() => 0);
+  const toolsProgress: Array<string> = tools.missing.map(() =>
+    formatProgress(0)
+  );
 
-  const redraw = (): void => {
+  const redraw = (change?: {
+    index: number;
+    progress: number | string;
+  }): void => {
+    if (change !== undefined) {
+      const { index, progress } = change;
+      const progressString = formatProgress(progress);
+      if (toolsProgress[index] === progressString) {
+        return;
+      }
+      toolsProgress[index] = progressString;
+    }
     if (tools.missing.length > 0) {
       logger.progress(
         tools.missing
-          .map((tool, index) => {
-            const progress = toolsProgress[index];
-            const progressString =
-              typeof progress === "string"
-                ? progress.padEnd(4)
-                : `${Math.round(progress * 100)
-                    .toString()
-                    .padStart(3)}%`;
-            return `${bold(progressString)} ${tool.name} ${tool.version}`;
-          })
+          .map(
+            (tool, index) =>
+              `${bold(toolsProgress[index])} ${tool.name} ${tool.version}`
+          )
           .join("\n")
       );
     }
@@ -183,17 +190,14 @@ async function installTools(
     ...(await Promise.all(
       tools.missing.map((tool, index) =>
         downloadAndExtract(tool, (percentage) => {
-          toolsProgress[index] = percentage;
-          redraw();
+          redraw({ index, progress: percentage });
         }).then(
           () => {
-            toolsProgress[index] = 1;
-            redraw();
+            redraw({ index, progress: 1 });
             return linkTool(cwd, nodeModulesBinPath, tool);
           },
           (error: Error) => {
-            toolsProgress[index] = "ERR!";
-            redraw();
+            redraw({ index, progress: "ERR!" });
             return new Error(downloadAndExtractError(tool, error));
           }
         )
@@ -237,6 +241,14 @@ function printResults(
   }
 
   return 0;
+}
+
+function formatProgress(progress: number | string): string {
+  return typeof progress === "string"
+    ? progress.padEnd(4)
+    : `${Math.round(progress * 100)
+        .toString()
+        .padStart(3)}%`;
 }
 
 function removeAllTools(
@@ -463,6 +475,8 @@ function downloadFile(
   };
 }
 
+const PROGRESS_UPDATES_PER_SECOND = 50;
+
 function downloadFileNative(
   url: string,
   {
@@ -513,11 +527,18 @@ function downloadFileNative(
           10
         );
         let length = 0;
+        let lastOnProgress = Date.now();
 
         response.on("data", (chunk: Buffer) => {
           length += chunk.length;
           onData(chunk);
-          if (Number.isFinite(contentLength) && contentLength > 0) {
+          const now = Date.now();
+          if (
+            Number.isFinite(contentLength) &&
+            contentLength > 0 &&
+            now - lastOnProgress >= 1000 / PROGRESS_UPDATES_PER_SECOND
+          ) {
+            lastOnProgress = now;
             callOnProgressIfReasonable(length / contentLength, onProgress);
           }
         });
@@ -773,14 +794,22 @@ export async function getExecutable({
 
   onProgress(0);
 
+  let previousPercentage = 0;
+  const wrappedOnProgress = (percentage: number): void => {
+    if (percentage !== previousPercentage) {
+      previousPercentage = percentage;
+      onProgress(percentage);
+    }
+  };
+
   try {
-    await downloadAndExtract(tool, onProgress);
+    await downloadAndExtract(tool, wrappedOnProgress);
   } catch (errorAny) {
     const error = errorAny as Error;
     throw new Error(removeColor(downloadAndExtractSimpleError(tool, error)));
   }
 
-  onProgress(1);
+  wrappedOnProgress(1);
 
   return tool.absolutePath;
 }
