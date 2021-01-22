@@ -1,3 +1,7 @@
+### Version 1.0.3 (2021-01-23)
+
+- Improved: `elm-tooling` now prints progress more efficiently, resulting in better performance and nicer logs in CI.
+
 ### Version 1.0.2 (2021-01-18)
 
 - Fixed: `elm-tooling install` no longer finds `node_modules/` up the directory tree. Links to tools are now _always_ created in `node_modules/.bin/` in the same directory as `elm-tooling.json`. `elm-tooling.json` only affects the current project, so `elm-tooling install` shouldn’t touch stuff outside the project. [#23](https://github.com/elm-tooling/elm-tooling-cli/pull/23)
