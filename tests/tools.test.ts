@@ -101,6 +101,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -133,6 +134,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘⧙x⧘⧙]⧘ 0.2.8
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -171,6 +173,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -203,7 +206,8 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
 
       ⧙elm-json⧘
-        ⧙[⧘▊⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘▊⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -235,6 +239,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -278,6 +283,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘⧙x⧘⧙]⧘ 0.2.8
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -318,6 +324,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘⧙x⧘⧙]⧘ 0.2.8
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -363,6 +370,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -406,6 +414,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -446,6 +455,7 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -537,6 +547,7 @@ describe("tools", () => {
 
         ⧙elm-json⧘
           ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+          ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
         ⧙Up⧘/⧙Down⧘ to move
         ⧙Space⧘ to toggle

@@ -207,5 +207,31 @@ export const KNOWN_TOOLS: KnownTools = {
         type: "tgz",
       },
     },
+    "0.2.10": {
+      linux: {
+        hash:
+          "6ee94f04bebeb66d5ef322d76fd3dc828015571b92f1259776f716feaaec359d",
+        url:
+          "https://github.com/zwilias/elm-json/releases/download/v0.2.10/elm-json-v0.2.10-x86_64-unknown-linux-musl.tar.gz",
+        fileName: "elm-json",
+        type: "tgz",
+      },
+      mac: {
+        hash:
+          "fcd39c7c014d95df033499d8a39720b38c9f93d0e3b7ecb821cfe3dbfd1affc1",
+        url:
+          "https://github.com/zwilias/elm-json/releases/download/v0.2.10/elm-json-v0.2.10-x86_64-apple-darwin.tar.gz",
+        fileName: "elm-json",
+        type: "tgz",
+      },
+      windows: {
+        hash:
+          "721084dd90042a2b7b99a1334a9dcfa753fcf166ade458e6a3bb5d6649f8e39b",
+        url:
+          "https://github.com/zwilias/elm-json/releases/download/v0.2.10/elm-json-v0.2.10-x86_64-pc-windows-msvc.tar.gz",
+        fileName: "elm-json.exe",
+        type: "tgz",
+      },
+    },
   },
 };
