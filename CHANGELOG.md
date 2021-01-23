@@ -1,3 +1,7 @@
+### Version 1.1.0 (2021-01-23)
+
+- Added: elm-json 0.2.10.
+
 ### Version 1.0.3 (2021-01-23)
 
 - Improved: `elm-tooling` now prints progress more efficiently, resulting in better performance and nicer logs in CI.
