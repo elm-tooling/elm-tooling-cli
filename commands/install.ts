@@ -587,19 +587,13 @@ function extractFile({
   switch (assetType) {
     case "gz": {
       const gunzip = zlib.createGunzip();
-      const write = fs.createWriteStream(file);
+      const write = fs.createWriteStream(file, {
+        // Make executable.
+        mode: 0o755,
+      });
       gunzip.on("error", onError);
       write.on("error", onError);
-      write.on("close", () => {
-        // Make executable.
-        fs.chmod(file, "755", (error) => {
-          if (error === null) {
-            onSuccess();
-          } else {
-            onError(error);
-          }
-        });
-      });
+      write.on("close", onSuccess);
       gunzip.pipe(write);
       return gunzip;
     }
