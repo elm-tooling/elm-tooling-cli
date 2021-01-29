@@ -300,3 +300,9 @@ For people who aren’t Elm experts, it’s nice to have `elm-json` available fo
 ## Why not put stuff in `elm.json` instead?
 
 `elm` has a tendency to remove keys it does not recognize whenever it updates `elm.json`.
+
+## How do I use a proxy?
+
+`elm-tooling` uses `curl` to download stuff if it exists, otherwise `wget`, and finally the `https` Node.js core module. So if you need to do any proxy stuff or something like that, you do that via the environment variables and config files that `curl` and `wget` understand. For example, [curl proxy environment variables](https://everything.curl.dev/usingcurl/proxies#proxy-environment-variables). Most systems – even Windows! – come with either `curl` or `wget`.
+
+This also applies to any npm package that under the hood uses `elm-tooling` to install something.

@@ -42,7 +42,7 @@ You can use `npx` to run the installed tools. For example, `npx elm --help`.
 
 You can set `ELM_HOME` environment variable to customize where tools will be downloaded. The Elm compiler uses this variable too for where to store packages.
 
-`elm-tooling` uses `curl` to download stuff if it exists, otherwise `wget`, and finally the `https` Node.js core module. So if you need to do any proxy stuff or something like that, you do that via the environment variables and config files that `curl` and `wget` understand. Most systems – even Windows! – come with either `curl` or `wget`.
+`elm-tooling` uses `curl` to download stuff if it exists, otherwise `wget`, and finally the `https` Node.js core module. So if you need to do any proxy stuff or something like that, you do that via the environment variables and config files that `curl` and `wget` understand. For example, [curl proxy environment variables](https://everything.curl.dev/usingcurl/proxies#proxy-environment-variables). Most systems – even Windows! – come with either `curl` or `wget`.
 
 Similarly, `tar` is used to extract archives. Even Windows comes with `tar` these days so you shouldn’t need to install anything.
 
