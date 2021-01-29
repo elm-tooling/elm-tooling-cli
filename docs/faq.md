@@ -210,7 +210,7 @@ The algorithm is roughly:
 
 ## Who uses `elm-tooling`?
 
-[elm-test](https://github.com/rtfeldman/node-test-runner) and [elm-review](https://github.com/jfmengels/node-elm-review) (upcoming versions) both use `elm-tooling` to install [elm-json](https://github.com/zwilias/elm-json).
+[elm-test](https://github.com/rtfeldman/node-test-runner) and [elm-review](https://github.com/jfmengels/node-elm-review) both use `elm-tooling` to install [elm-json](https://github.com/zwilias/elm-json).
 
 The [elm-pages-starter](https://github.com/dillonkearns/elm-pages-starter) template uses `elm-tooling.json` and `elm-tooling` to install `elm` and `elm-format`.
 
@@ -291,7 +291,7 @@ IDE:s and editors would have to support `elm-tooling.json` somehow, too, though,
 
 ## What’s the point of having `elm-json` in `elm-tooling.json`?
 
-[elm-test](https://github.com/rtfeldman/node-test-runner) and [elm-review](https://github.com/jfmengels/node-elm-review) (upcoming versions) both use `elm-tooling` to install [elm-json](https://github.com/zwilias/elm-json).
+[elm-test](https://github.com/rtfeldman/node-test-runner) and [elm-review](https://github.com/jfmengels/node-elm-review) both use `elm-tooling` to install [elm-json](https://github.com/zwilias/elm-json).
 
 By having `elm-json` in `elm-tooling.json` you can download _all_ executables in parallel in one go.
 
