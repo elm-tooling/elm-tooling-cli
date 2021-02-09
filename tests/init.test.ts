@@ -84,7 +84,7 @@ describe("init", () => {
       {
           "tools": {
               "elm": "0.19.1",
-              "elm-format": "0.8.4",
+              "elm-format": "0.8.5",
               "elm-json": "0.2.10"
           }
       }
@@ -110,7 +110,7 @@ describe("init", () => {
           ],
           "tools": {
               "elm": "0.19.1",
-              "elm-format": "0.8.4",
+              "elm-format": "0.8.5",
               "elm-json": "0.2.10"
           }
       }
@@ -224,7 +224,7 @@ describe("init", () => {
             ],
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.4",
+                "elm-format": "0.8.5",
                 "elm-json": "0.2.10"
             }
         }
@@ -253,7 +253,7 @@ describe("init", () => {
             ],
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.4",
+                "elm-format": "0.8.5",
                 "elm-json": "0.2.10"
             }
         }
@@ -277,7 +277,7 @@ describe("init", () => {
         {
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.4",
+                "elm-format": "0.8.5",
                 "elm-json": "0.2.10"
             }
         }
@@ -304,7 +304,7 @@ describe("init", () => {
             ],
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.4",
+                "elm-format": "0.8.5",
                 "elm-json": "0.2.10"
             }
         }
@@ -328,7 +328,7 @@ describe("init", () => {
         {
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.4",
+                "elm-format": "0.8.5",
                 "elm-json": "0.2.10"
             }
         }
@@ -355,7 +355,7 @@ describe("init", () => {
             ],
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.4",
+                "elm-format": "0.8.5",
                 "elm-json": "0.2.10"
             }
         }

@@ -179,6 +179,32 @@ export const KNOWN_TOOLS: KnownTools = {
         type: "zip",
       },
     },
+    "0.8.5": {
+      linux: {
+        hash:
+          "147c479e375b9bae8dd633e526677fbd2a87e5445b3638ebee86c1319ffe8e23",
+        url:
+          "https://github.com/avh4/elm-format/releases/download/0.8.5/elm-format-0.8.5-linux-x64.tgz",
+        fileName: "elm-format",
+        type: "tgz",
+      },
+      mac: {
+        hash:
+          "380c5f36b1fdeb2f1cda7c208dc788cb676675b3d5d43d907efc3f0821c010d6",
+        url:
+          "https://github.com/avh4/elm-format/releases/download/0.8.5/elm-format-0.8.5-mac-x64.tgz",
+        fileName: "elm-format",
+        type: "tgz",
+      },
+      windows: {
+        hash:
+          "3cb6f74f24b401314480227b1ccbb2049cceb4a365ac7abb50cd3cfe0e64bbdc",
+        url:
+          "https://github.com/avh4/elm-format/releases/download/0.8.5/elm-format-0.8.5-win-x64.zip",
+        fileName: "elm-format.exe",
+        type: "zip",
+      },
+    },
   },
   "elm-json": {
     "0.2.8": {

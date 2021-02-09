@@ -177,7 +177,7 @@ describe("validate", () => {
 
         ⧙tools["elm-format"]⧘
             Unknown version: 0.8
-            Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4
+            Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4, 0.8.5
 
         ⧙Specification:⧘
             https://elm-tooling.github.io/elm-tooling-cli/spec
