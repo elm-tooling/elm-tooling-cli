@@ -59,3 +59,14 @@ all-downloads/
           "elm-format": "0.8.4"
         }
       }
+  4/
+    elm-tooling/
+      elm-format/
+        0.8.5/
+          elm-format
+    elm-tooling.json
+      {
+        "tools": {
+          "elm-format": "0.8.5"
+        }
+      }
