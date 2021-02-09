@@ -69,7 +69,6 @@ describe("getExecutable", () => {
       Known versions: 0.19.0, 0.19.1
     `));
 
-  // Change this to use `getExecutableHelper` when we have a prerelease in `KNOWN_TOOLS`.
   test("future prereleases should not match", () => {
     expect(
       getLatestMatchingVersion("^1.0.0-beta.1", [
@@ -81,7 +80,6 @@ describe("getExecutable", () => {
     ).toBe("1.0.1");
   });
 
-  // Change this to use `getExecutableHelper` when we have a prerelease in `KNOWN_TOOLS`.
   test("too old prerelease should not match", () => {
     expect(
       getLatestMatchingVersion("^1.0.0-beta.2", [
@@ -89,6 +87,39 @@ describe("getExecutable", () => {
         "1.0.0-beta.1",
       ])
     ).toBeUndefined();
+  });
+
+  test("newer non-prerelease should match", () => {
+    expect(
+      getLatestMatchingVersion("^0.19.1-rc1", [
+        "0.19.1",
+        "0.19.1-rc1",
+        "0.19.0",
+      ])
+    ).toBe("0.19.1");
+  });
+
+  test("latest prerelease with same base should match", () => {
+    expect(
+      getLatestMatchingVersion("^0.19.1-rc1", [
+        "0.19.1-rc3",
+        "0.19.1-rc2",
+        "0.19.1-rc1",
+        "0.19.0",
+      ])
+    ).toBe("0.19.1-rc3");
+  });
+
+  test("release candidate should win over alpha and beta base should match", () => {
+    expect(
+      getLatestMatchingVersion("^0.19.1-alpha1", [
+        "0.19.1-rc",
+        "0.19.1-beta2",
+        "0.19.1-beta1",
+        "0.19.1-alpha1",
+        "0.19.0",
+      ])
+    ).toBe("0.19.1-rc");
   });
 
   test("missing range character", () =>
