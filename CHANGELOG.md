@@ -1,3 +1,7 @@
+### Version 1.2.0 (2021-02-09)
+
+- Added: elm-format 0.8.5.
+
 ### Version 1.1.0 (2021-01-23)
 
 - Added: elm-json 0.2.10.
