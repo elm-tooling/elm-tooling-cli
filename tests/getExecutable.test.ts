@@ -137,10 +137,10 @@ describe("getExecutable", () => {
     expect(
       getExecutableHelper({
         fixture: "already-downloaded",
-        name: "elm",
-        version: "=0.19.1",
+        name: "elm-format",
+        version: "=0.8.4",
       })
     ).resolves.toMatchInlineSnapshot(
-      `/Users/you/project/fixtures/getExecutable/already-downloaded/elm-tooling/elm/0.19.1/elm`
+      `/Users/you/project/fixtures/getExecutable/already-downloaded/elm-tooling/elm-format/0.8.4/elm-format`
     ));
 });
