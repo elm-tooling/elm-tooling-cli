@@ -530,7 +530,7 @@ function hasPrerelease(version: string): boolean {
 }
 
 function hasSameBase(a: string, b: string): boolean {
-  return a.replace(prereleaseRegex, "-") === b.replace(prereleaseRegex, "-");
+  return a.replace(prereleaseRegex, "") === b.replace(prereleaseRegex, "");
 }
 
 export function getToolThrowing({
@@ -617,6 +617,8 @@ export function getLatestVersionInRange(
   sortedValidVersions: Array<string>
 ): string | undefined {
   return sortedValidVersions.find((version) => {
+    // For example, `^0.19.1-rc` should not match `0.19.2-alpha`.
+    // And `^0.19.1` should not match `0.19.2-alpha`.
     if (
       // Known prereleases can only be matched…
       hasPrerelease(version) &&
@@ -629,6 +631,15 @@ export function getLatestVersionInRange(
     ) {
       // If not (via the `!` above), don’t try to match this version.
       return false;
+    }
+
+    // For example, `^0.19.1-rc` should match `0.19.1`.
+    if (
+      !hasPrerelease(version) &&
+      hasPrerelease(lowerBoundInclusive) &&
+      hasSameBase(version, lowerBoundInclusive)
+    ) {
+      return true;
     }
 
     return (
