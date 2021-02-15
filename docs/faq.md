@@ -238,8 +238,13 @@ ln -s ~/.elm/elm-tooling/elm/0.19.1/elm /usr/local/bin/elm
 
 - To remove downloaded executables, remove the directory where `elm-tooling` puts them. The default locations are:
 
-  - macOS and Linux: `~/.elm/`
+  - macOS and Linux: `~/.elm/elm-tooling/`
   - Windows: `%APPDATA%\elm` (for example, `C:\Users\John\AppData\Roaming\elm\elm-tooling`)
+
+  If you’d like to remove just one executable, here are some example paths to look at:
+
+  - macOS and Linux: `~/.elm/elm-tooling/elm/0.19.1/elm`
+  - Windows: `C:\Users\John\AppData\Roaming\elm\elm-tooling\elm\0.19.1\elm.exe`
 
 ## What’s the difference compared to `asdf`?
 
