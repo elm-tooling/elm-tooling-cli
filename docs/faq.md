@@ -222,15 +222,17 @@ Yes! It’s tested on macOS, Linux and Windows, and has great test coverage. It�
 
 There’s no global `elm-tooling.json`. Only local, per-project ones.
 
-As long as you define the needed tools in every project, you don’t really need global installations. Use `npx elm` and `npx elm-format` etc.
+As long as you define the needed tools in every project, you don’t really need global installations. Use `npx elm` and `npx elm-format` etc. A benefit of _not_ having global installations is that you can never run the global version instead of the project version by mistake.
 
 If you want a global `elm` command you could try the [official installer](https://guide.elm-lang.org/install/elm.html).
 
-On macOS and Linux, you could add symlinks in your `$PATH`. For example, on macOS:
+On macOS and Linux, you could alternatively add symlinks in your `$PATH`. For example, on macOS:
 
 ```
 ln -s ~/.elm/elm-tooling/elm/0.19.1/elm /usr/local/bin/elm
 ```
+
+Another approach would be to create a “project” somewhere, and put its `./node_modules/.bin/` in `$PATH`. For example, you could add `~/my-global-elm-tooling/node_modules/.bin/`. Beware that `./node_modules/.bin/` might contain more things than just `elm` and `elm-format` etc, depending on what npm packages you (indirectly) install.
 
 ## How do I uninstall?
 
