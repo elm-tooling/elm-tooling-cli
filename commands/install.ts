@@ -391,11 +391,12 @@ function spawn(
   command: string,
   args: ReadonlyArray<string>
 ): childProcess.ChildProcessWithoutNullStreams {
+  const { PATH = process.env.PATH } = env;
   return childProcess.spawn(
     command,
     args,
-    isWindows && env.PATH !== undefined
-      ? { env: { ...env, PATH: adjustPathForWindows(env.PATH) } }
+    isWindows && PATH !== undefined
+      ? { env: { ...env, PATH: adjustPathForWindows(PATH) } }
       : {}
   );
 }
