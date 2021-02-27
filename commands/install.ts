@@ -15,6 +15,7 @@ import {
   Env,
   flatMap,
   indent,
+  partitionMap,
   printNumErrors,
   removeColor,
 } from "../helpers/mixed";
@@ -189,7 +190,7 @@ async function installTools(
   const results: Array<Error | string | undefined> = [
     ...(await Promise.all(
       tools.missing.map((tool, index) =>
-        downloadAndExtract(tool, (percentage) => {
+        downloadAndExtract(env, tool, (percentage) => {
           redraw({ index, progress: percentage });
         }).then(
           () => {
@@ -302,6 +303,7 @@ function removeTools(
 }
 
 async function downloadAndExtract(
+  env: Env,
   tool: Tool,
   onProgress: (percentage: number) => void
 ): Promise<void> {
@@ -326,13 +328,14 @@ async function downloadAndExtract(
     const hash = crypto.createHash("sha256");
 
     const extractor = extractFile({
+      env,
       assetType: tool.asset.type,
       file: tool.absolutePath,
       onError: removeExtractedAndReject,
       onSuccess: resolve,
     });
 
-    const downloader = downloadFile(tool.asset.url, {
+    const downloader = downloadFile(env, tool.asset.url, {
       onData: (chunk) => {
         hash.update(chunk);
         extractor.write(chunk);
@@ -383,7 +386,37 @@ Actual:   ${actual}
   `.trim();
 }
 
+function spawn(
+  env: Env,
+  command: string,
+  args: ReadonlyArray<string>
+): childProcess.ChildProcessWithoutNullStreams {
+  const { PATH = process.env.PATH } = env;
+  return childProcess.spawn(
+    command,
+    args,
+    isWindows && PATH !== undefined
+      ? { env: { ...env, PATH: adjustPathForWindows(PATH) } }
+      : {}
+  );
+}
+
+// Git Bash ships with GNU `tar` puts its own stuff first in `$PATH`. But we
+// want to run the (BSD) `tar` that ships with Windows, since it supports .zip
+// files and handles absolute paths differently. For consistency, we use this
+// for _all_ spawns, so that we _always_ use Windows’ own `curl` instead of Git
+// Bash’s `curl`.
+function adjustPathForWindows(pathString: string): string {
+  const [system32, rest] = partitionMap(pathString.split(";"), (part) =>
+    part.toLowerCase().includes("system32")
+      ? { tag: "Left", value: part }
+      : { tag: "Right", value: part }
+  );
+  return [...system32, ...rest].join(";");
+}
+
 function downloadFile(
+  env: Env,
   url: string,
   {
     onData,
@@ -435,7 +468,7 @@ function downloadFile(
     }
   };
 
-  const curl = childProcess.spawn("curl", ["-#fL", url]);
+  const curl = spawn(env, "curl", ["-#fL", url]);
   let toKill: { kill: () => void } = curl;
   curl.stdout.on("data", onData);
   curl.stderr.on("data", onStderr);
@@ -444,7 +477,7 @@ function downloadFile(
   curl.on("error", (curlError: Error & { code?: string }) => {
     errored.push("curl");
     if (curlError.code === "ENOENT") {
-      const wget = childProcess.spawn("wget", ["-O", "-", url]);
+      const wget = spawn(env, "wget", ["-O", "-", url]);
       toKill = wget;
       wget.stdout.on("data", onData);
       wget.stderr.on("data", onStderr);
@@ -574,11 +607,13 @@ type MiniWritable = {
 };
 
 function extractFile({
+  env,
   assetType,
   file,
   onError,
   onSuccess,
 }: {
+  env: Env;
   assetType: AssetType;
   file: string;
   onError: (error: Error) => void;
@@ -599,7 +634,7 @@ function extractFile({
     }
 
     case "tgz":
-      return extractTar({ input: "-", file, onError, onSuccess });
+      return extractTar({ env, input: "-", file, onError, onSuccess });
 
     // GNU tar does not support zip files, but only Windows uses zip files and
     // Windows comes with BSD tar which does support them. This could have used
@@ -630,6 +665,7 @@ function extractFile({
 
       write.on("close", () => {
         toDestroy = extractTar({
+          env,
           input: temp,
           file,
           onError: (error) => {
@@ -670,17 +706,19 @@ function extractFile({
 }
 
 function extractTar({
+  env,
   input,
   file,
   onError,
   onSuccess,
 }: {
+  env: Env;
   input: string;
   file: string;
   onError: (error: Error) => void;
   onSuccess: () => void;
 }): MiniWritable {
-  const tar = childProcess.spawn("tar", [
+  const tar = spawn(env, "tar", [
     "zxf",
     input,
     "-C",
@@ -797,7 +835,7 @@ export async function getExecutable({
   };
 
   try {
-    await downloadAndExtract(tool, wrappedOnProgress);
+    await downloadAndExtract(env, tool, wrappedOnProgress);
   } catch (errorAny) {
     const error = errorAny as Error;
     throw new Error(removeColor(downloadAndExtractSimpleError(tool, error)));
