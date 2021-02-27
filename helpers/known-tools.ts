@@ -19,7 +19,7 @@ export type Asset = {
 
 export type AssetType = "gz" | "tgz" | "zip";
 
-export const KNOWN_TOOLS: KnownTools = {
+const knownTools = {
   elm: {
     "0.19.0": {
       linux: {
@@ -260,4 +260,36 @@ export const KNOWN_TOOLS: KnownTools = {
       },
     },
   },
-};
+  "elm-test-rs": {
+    "1.0.0-beta": {
+      linux: {
+        hash:
+          "274de2669e62490bcb60cc9ca5c46f6d93efca34533a21dbcbf93bc6ab18593b",
+        url:
+          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0.0-beta/elm-test-rs_linux.tar.gz",
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      mac: {
+        hash:
+          "a8a8a804fd47867f7a43061708def1361ad0f46086b96c480cf5c0d275120778",
+        url:
+          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0.0-beta/elm-test-rs_macos.tar.gz",
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      windows: {
+        hash:
+          "81ec443859751e814b141d32a11204744703cb728044dd6e3dcd7c675f4c7778",
+        url:
+          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0.0-beta/elm-test-rs_windows.zip",
+        fileName: "elm-test-rs.exe",
+        type: "zip",
+      },
+    },
+  },
+} as const;
+
+export type KnownToolNames = keyof typeof knownTools;
+
+export const KNOWN_TOOLS: KnownTools = knownTools;

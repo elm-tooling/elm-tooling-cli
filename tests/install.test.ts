@@ -155,7 +155,7 @@ describe("install", () => {
 
         ⧙tools["elm-compiler"]⧘
             Unknown tool
-            Known tools: elm, elm-format, elm-json
+            Known tools: elm, elm-format, elm-json, elm-test-rs
 
         ⧙tools["elm-format"]⧘
             Unknown version: 0.8

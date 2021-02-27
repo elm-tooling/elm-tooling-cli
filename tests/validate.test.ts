@@ -153,7 +153,7 @@ describe("validate", () => {
 
         ⧙tools["elm-nope"]⧘
             Unknown tool
-            Known tools: elm, elm-format, elm-json
+            Known tools: elm, elm-format, elm-json, elm-test-rs
 
         ⧙tools["elm-format"]⧘
             Exists but is not a file: /Users/you/project/fixtures/validate/kitchen-sink/elm-tooling/elm-format/0.8.3/elm-format

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
 
-import { KNOWN_TOOLS } from "../helpers/known-tools";
+import { KNOWN_TOOLS, KnownToolNames } from "../helpers/known-tools";
 import type { Logger } from "../helpers/logger";
 import {
   bold,
@@ -21,6 +21,8 @@ import {
   getToolThrowing,
   isWindows,
 } from "../helpers/parse";
+
+const DEFAULT_TOOLS: Array<KnownToolNames> = ["elm", "elm-format", "elm-json"];
 
 export default async function init(
   cwd: string,
@@ -55,12 +57,10 @@ export default async function init(
       ? /* istanbul ignore next */ undefined
       : tryGuessToolsFromNodeModules(cwd, env) ??
         fromEntries(
-          Object.keys(KNOWN_TOOLS)
-            .sort((a, b) => a.localeCompare(b))
-            .map((name) => {
-              const versions = Object.keys(KNOWN_TOOLS[name]);
-              return [name, versions[versions.length - 1]];
-            })
+          DEFAULT_TOOLS.map((name) => {
+            const versions = Object.keys(KNOWN_TOOLS[name]);
+            return [name, versions[versions.length - 1]];
+          })
         );
 
   const elmVersionFromElmJson = getElmVersionFromElmJson(cwd);
