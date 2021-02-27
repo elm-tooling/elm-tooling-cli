@@ -1,6 +1,6 @@
 {
   "name": "elm-tooling",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": "Simon Lydell",
   "license": "MIT",
   "description": "Manage elm-tooling.json. Install Elm tools.",
