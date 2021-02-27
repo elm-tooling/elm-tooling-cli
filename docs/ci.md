@@ -20,3 +20,14 @@ Basically, you need to:
    Note that Windows uses `%APPDATA%\elm` rather than `~/.elm`. If you need to run the same CI workflow both Windows and some other OS, [set `ELM_HOME` to a directory that works everywhere](https://github.com/rtfeldman/node-test-runner/blob/dafa12e58043915bdd8fcd7d2231ccff511a7827/.github/workflows/test.yml#L18-L19).
 
 3. Run whatever commands you want.
+
+## mpizenberg/elm-tooling-action
+
+[mpizenberg/elm-tooling-action](https://github.com/mpizenberg/elm-tooling-action) is a GitHub Action that:
+
+- Contains its own copy of `elm-tooling` and runs `elm-tooling install` for you.
+- Caches `~/.elm` for you (in a way that works on both Windows and other operating systems).
+
+It’s primarily made for projects that don’t have a `package.json` (it’s up to every contributor to install Elm and elm-format etc themselves). Such projects still need to install the tools in CI somehow, and elm-tooling-action fits exactly that need.
+
+You _can_ use elm-tooling-action even if you have a `package.json` and have `elm-tooling` in there. But beware that you might not be running exactly the same version of `elm-tooling` locally and in CI! So if something works locally but not in CI (or vice versa), that could be the culprit. You don’t save super much YAML config by using the action in this case, so it’s currently not recommended. But you decide!
