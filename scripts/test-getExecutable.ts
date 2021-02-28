@@ -76,6 +76,11 @@ Second: ${absolutePath2}
 }
 
 if (require.main === module) {
+  const argv = process.argv.slice(2);
+  if (argv.length > 0) {
+    process.stderr.write(`Expected 0 arguments but got ${argv.length}.\n`);
+    process.exit(1);
+  }
   run().then(
     () => {
       process.stdout.write("\nSuccess!\n");

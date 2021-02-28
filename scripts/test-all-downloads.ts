@@ -18,9 +18,6 @@ const WORK_DIR = path.join(__dirname, "workdirs", "all-downloads");
 const EXPECTED_FILE = path.join(__dirname, "all-downloads.expected.txt");
 const ACTUAL_FILE = path.join(__dirname, "all-downloads.actual.txt");
 
-const CLEAR =
-  process.platform === "win32" ? "\x1B[2J\x1B[0f" : "\x1B[2J\x1B[3J\x1B[H";
-
 // Read file with normalized line endings to make snapshotting easier
 // cross-platform.
 export function readFile(filePath: string): string {
@@ -175,7 +172,9 @@ async function runTool({
   );
 }
 
-export async function run(): Promise<void> {
+export async function run({
+  update = false,
+}: { update?: boolean } = {}): Promise<void> {
   const variants: Array<Array<readonly [string, string]>> = join(
     Object.keys(KNOWN_TOOLS).map((name) =>
       Object.keys(KNOWN_TOOLS[name]).map((version) => [name, version] as const)
@@ -189,7 +188,8 @@ export async function run(): Promise<void> {
   }
   fs.mkdirSync(WORK_DIR, { recursive: true });
 
-  process.stdout.write(CLEAR);
+  // eslint-disable-next-line no-console
+  console.clear();
 
   const exitCodes: Array<Array<number>> = await Promise.all(
     variants.map((tools, index) => {
@@ -255,23 +255,49 @@ export async function run(): Promise<void> {
 
   process.stdout.write(actual);
 
-  if (actual !== expected) {
-    fs.writeFileSync(ACTUAL_FILE, actual);
-    throw new Error(
-      `Unexpected output. Run this to see the difference:\ngit diff --no-index scripts/all-downloads.expected.txt scripts/all-downloads.actual.txt`
-    );
+  if (update) {
+    if (actual === expected) {
+      throw new Error(
+        `Expected the output to change! ${EXPECTED_FILE} is the same as before.`
+      );
+    }
+    fs.writeFileSync(EXPECTED_FILE, actual);
+    process.stdout.write(`Updated ${EXPECTED_FILE}`);
+  } else {
+    if (actual !== expected) {
+      fs.writeFileSync(ACTUAL_FILE, actual);
+      throw new Error(
+        `Unexpected output. Run this to see the difference:\ngit diff --no-index scripts/all-downloads.expected.txt scripts/all-downloads.actual.txt`
+      );
+    }
   }
 }
 
 if (require.main === module) {
-  run().then(
-    () => {
-      process.stdout.write("\nSuccess!\n");
-      process.exit(0);
-    },
-    (error: Error) => {
-      process.stderr.write(`\n${error.stack ?? error.message}\n`);
+  const argv = process.argv.slice(2);
+  if (argv.length > 1) {
+    process.stderr.write(`Expected 0 or 1 arguments but got ${argv.length}\n`);
+    process.exit(1);
+  }
+  const first = argv[0];
+  switch (first) {
+    case undefined:
+    case "update":
+      run({ update: first !== undefined }).then(
+        () => {
+          process.stdout.write("\nSuccess!\n");
+          process.exit(0);
+        },
+        (error: Error) => {
+          process.stderr.write(`\n${error.stack ?? error.message}\n`);
+          process.exit(1);
+        }
+      );
+      break;
+    default:
+      process.stderr.write(
+        `Expected the argument to be "update" or missing but got: ${first}\n`
+      );
       process.exit(1);
-    }
-  );
+  }
 }
