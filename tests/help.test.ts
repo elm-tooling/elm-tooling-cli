@@ -45,7 +45,7 @@ describe("help", () => {
       ⧙elm-tooling install⧘
           Download the tools in the closest elm-tooling.json to:
           ⧙/Users/you/.elm/elm-tooling⧘
-          And create links to them in the closest node_modules/.bin/
+          And create links to them in node_modules/.bin/
 
       ⧙npx elm --help⧘
           Example on how to run installed tools
@@ -98,7 +98,7 @@ describe("help", () => {
       elm-tooling install
           Download the tools in the closest elm-tooling.json to:
           /test/elm-tooling
-          And create links to them in the closest node_modules/.bin/
+          And create links to them in node_modules/.bin/
 
       npx elm --help
           Example on how to run installed tools

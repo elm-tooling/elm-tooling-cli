@@ -15,7 +15,7 @@ ${bold("elm-tooling tools")}
 ${bold("elm-tooling install")}
     Download the tools in the closest elm-tooling.json to:
     ${dim(getElmToolingInstallPath(cwd, env))}
-    And create links to them in the closest node_modules/.bin/
+    And create links to them in node_modules/.bin/
 
 ${bold("npx elm --help")}
     Example on how to run installed tools
