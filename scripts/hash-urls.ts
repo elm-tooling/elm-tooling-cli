@@ -9,9 +9,9 @@ const OS_LIST: Array<OSName> = ["linux", "mac", "windows"];
 async function run(urls: Array<string>): Promise<string> {
   const progress: Array<number> = urls.map(() => 0);
 
-  const assets: Array<Asset> = await Promise.all(
+  const assets: Array<[OSName, Asset]> = await Promise.all(
     urls.map(
-      (url, index): Promise<Asset> => {
+      (url, index): Promise<[OSName, Asset]> => {
         const hash = crypto.createHash("sha256");
         return new Promise((resolve, reject) => {
           downloadFile(process.env, url, {
@@ -31,13 +31,14 @@ async function run(urls: Array<string>): Promise<string> {
             },
             onSuccess: () => {
               progress[index] = 1;
+              const osName = OS_LIST[index] ?? "UNKNOWN";
               const asset: Asset = {
                 hash: hash.digest("hex"),
                 url,
-                fileName: guessFileName(url),
+                fileName: guessFileName(url, osName),
                 type: guessAssetType(url),
               };
-              resolve(asset);
+              resolve([osName, asset]);
             },
           });
         });
@@ -45,17 +46,14 @@ async function run(urls: Array<string>): Promise<string> {
     )
   );
 
-  const osAssets = fromEntries(
-    assets.map((asset, index) => [OS_LIST[index] ?? "UNKNOWN", asset])
-  );
-
   process.stderr.write("\r100%");
-  return JSON.stringify(osAssets, null, 2);
+  return JSON.stringify(fromEntries(assets), null, 2);
 }
 
-function guessFileName(url: string): string {
+function guessFileName(url: string, osName: OSName): string {
   const match = /github\.com\/[^/]+\/([^/]+)/.exec(url);
-  return match === null ? "UNKNOWN" : match[1];
+  const name = match === null ? "UNKNOWN" : match[1];
+  return osName === "windows" ? `${name}.exe` : name;
 }
 
 function guessAssetType(url: string): AssetType {
