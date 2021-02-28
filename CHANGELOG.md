@@ -1,3 +1,7 @@
+### Version 1.3.0 (2021-02-28)
+
+- Added: elm-test-rs 1.0.0.
+
 ### Version 1.2.1 (2021-02-27)
 
 - Fixed: `elm-tooling install` now works in Git Bash on Windows. Travis CI uses Git Bash by default in their Windows environment.
