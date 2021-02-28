@@ -10,12 +10,16 @@ all-downloads/
       elm-json/
         0.2.8/
           elm-json
+      elm-test-rs/
+        1.0.0/
+          elm-test-rs
     elm-tooling.json
       {
         "tools": {
           "elm": "0.19.0",
           "elm-format": "0.8.1",
-          "elm-json": "0.2.8"
+          "elm-json": "0.2.8",
+          "elm-test-rs": "1.0.0"
         }
       }
   1/

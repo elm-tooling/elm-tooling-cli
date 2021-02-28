@@ -42,7 +42,7 @@ describe("getExecutable", () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
       Unknown tool: elmx
-      Known tools: elm, elm-format, elm-json
+      Known tools: elm, elm-format, elm-json, elm-test-rs
     `));
 
   test("unknown version (range)", () =>

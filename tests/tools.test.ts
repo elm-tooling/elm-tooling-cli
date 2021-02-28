@@ -104,6 +104,9 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
@@ -137,6 +140,9 @@ describe("tools", () => {
       ⧙elm-json⧘
         ⧙[⧘⧙x⧘⧙]⧘ 0.2.8
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -178,6 +184,9 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
@@ -211,7 +220,10 @@ describe("tools", () => {
 
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
-        ⧙[⧘▊⧙]⧘ ⧙0.2.10⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+      ⧙elm-test-rs⧘
+        ⧙[⧘▊⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -245,6 +257,9 @@ describe("tools", () => {
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -291,6 +306,9 @@ describe("tools", () => {
         ⧙[⧘⧙x⧘⧙]⧘ 0.2.8
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
@@ -332,6 +350,9 @@ describe("tools", () => {
       ⧙elm-json⧘
         ⧙[⧘⧙x⧘⧙]⧘ 0.2.8
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -380,6 +401,9 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
@@ -425,6 +449,9 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
@@ -466,6 +493,9 @@ describe("tools", () => {
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -512,7 +542,7 @@ describe("tools", () => {
 
         ⧙tools["elm-compiler"]⧘
             Unknown tool
-            Known tools: elm, elm-format, elm-json
+            Known tools: elm, elm-format, elm-json, elm-test-rs
 
         ⧙tools["elm-format"]⧘
             Unknown version: 0.8
@@ -559,6 +589,9 @@ describe("tools", () => {
         ⧙elm-json⧘
           ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
           ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+        ⧙elm-test-rs⧘
+          ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
         ⧙Up⧘/⧙Down⧘ to move
         ⧙Space⧘ to toggle
