@@ -261,28 +261,28 @@ const knownTools = {
     },
   },
   "elm-test-rs": {
-    "1.0.0-beta": {
+    "1.0.0": {
       linux: {
         hash:
-          "274de2669e62490bcb60cc9ca5c46f6d93efca34533a21dbcbf93bc6ab18593b",
+          "a914088083ea8bc004944c98d9a4767cc5225d5811480f49fe1ad2c491baaaaa",
         url:
-          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0.0-beta/elm-test-rs_linux.tar.gz",
+          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_linux.tar.gz",
         fileName: "elm-test-rs",
         type: "tgz",
       },
       mac: {
         hash:
-          "a8a8a804fd47867f7a43061708def1361ad0f46086b96c480cf5c0d275120778",
+          "5f296888b7ba32c47830f00f6d38c56fc86f49d8c0c8998054b0842009a1173f",
         url:
-          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0.0-beta/elm-test-rs_macos.tar.gz",
+          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_macos.tar.gz",
         fileName: "elm-test-rs",
         type: "tgz",
       },
       windows: {
         hash:
-          "81ec443859751e814b141d32a11204744703cb728044dd6e3dcd7c675f4c7778",
+          "c8a35e2e0049b691e4833a6e8ccb094688cdc49aa977c437a8289c57d92a5775",
         url:
-          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0.0-beta/elm-test-rs_windows.zip",
+          "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_windows.zip",
         fileName: "elm-test-rs.exe",
         type: "zip",
       },

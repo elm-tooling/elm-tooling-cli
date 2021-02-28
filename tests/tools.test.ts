@@ -105,7 +105,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -142,7 +142,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -185,7 +185,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -223,7 +223,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘▊⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘▊⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -259,7 +259,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -307,7 +307,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -352,7 +352,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -402,7 +402,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -450,7 +450,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -495,7 +495,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -591,7 +591,7 @@ describe("tools", () => {
           ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
         ⧙elm-test-rs⧘
-          ⧙[⧘ ⧙]⧘ ⧙1.0.0-beta⧘
+          ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
 
         ⧙Up⧘/⧙Down⧘ to move
         ⧙Space⧘ to toggle
