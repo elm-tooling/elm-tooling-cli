@@ -3,7 +3,7 @@
   "type": "commonjs",
   "scripts": {
     "pretest": "prettier --check . && eslint . --report-unused-disable-directives",
-    "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts && ts-node scripts/test-getExecutable.ts",
+    "test": "jest --coverage && ts-node scripts/test-all-downloads.ts && ts-node scripts/test-integration.ts && ts-node scripts/test-getExecutable.ts && ts-node scripts/hash-urls.ts https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_linux.tar.gz https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_macos.tar.gz https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_windows.zip",
     "posttest": "npm run build",
     "build": "ts-node scripts/build.ts"
   },

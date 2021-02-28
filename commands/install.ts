@@ -415,7 +415,7 @@ function adjustPathForWindows(pathString: string): string {
   return [...system32, ...rest].join(";");
 }
 
-function downloadFile(
+export function downloadFile(
   env: Env,
   url: string,
   {
