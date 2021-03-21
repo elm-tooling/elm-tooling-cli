@@ -5,6 +5,7 @@ import * as path from "path";
 import { Asset, KNOWN_TOOLS, OSName } from "./known-tools";
 import {
   bold,
+  Either,
   Env,
   findClosest,
   indent,
@@ -389,78 +390,81 @@ function parseTools(
 
   const [errors, tools]: [
     Array<FieldError>,
-    Array<[boolean, Tool]>
-  ] = partitionMap(Object.entries(json), ([name, version]) => {
-    if (typeof version !== "string") {
-      return {
-        tag: "Left",
-        value: {
-          path: [name],
-          message: `Expected a version as a string but got: ${JSON.stringify(
-            version
-          )}`,
-        },
-      };
-    }
-
-    const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
-      ? KNOWN_TOOLS[name]
-      : undefined;
-
-    if (versions === undefined) {
-      return {
-        tag: "Left",
-        value: {
-          path: [name],
-          message: `Unknown tool\nKnown tools: ${Object.keys(KNOWN_TOOLS).join(
-            ", "
-          )}`,
-        },
-      };
-    }
-
-    const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
-      ? versions[version]
-      : undefined;
-
-    if (osAssets === undefined) {
-      return {
-        tag: "Left",
-        value: {
-          path: [name],
-          message: `Unknown version: ${version}\nKnown versions: ${Object.keys(
-            versions
-          ).join(", ")}`,
-        },
-      };
-    }
-
-    const asset = osAssets[osName];
-
-    const tool = makeTool(cwd, env, name, version, asset);
-
-    const exists = validateFileExists(tool.absolutePath);
-
-    switch (exists.tag) {
-      case "Exists":
-        return {
-          tag: "Right",
-          value: [true, tool] as [boolean, Tool],
-        };
-
-      case "DoesNotExist":
-        return {
-          tag: "Right",
-          value: [false, tool] as [boolean, Tool],
-        };
-
-      case "Error":
+    Array<{ exists: boolean; tool: Tool }>
+  ] = partitionMap(
+    Object.entries(json),
+    ([name, version]): Either<FieldError, { exists: boolean; tool: Tool }> => {
+      if (typeof version !== "string") {
         return {
           tag: "Left",
-          value: { path: [name], message: exists.message },
+          value: {
+            path: [name],
+            message: `Expected a version as a string but got: ${JSON.stringify(
+              version
+            )}`,
+          },
         };
+      }
+
+      const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
+        ? KNOWN_TOOLS[name]
+        : undefined;
+
+      if (versions === undefined) {
+        return {
+          tag: "Left",
+          value: {
+            path: [name],
+            message: `Unknown tool\nKnown tools: ${Object.keys(
+              KNOWN_TOOLS
+            ).join(", ")}`,
+          },
+        };
+      }
+
+      const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
+        ? versions[version]
+        : undefined;
+
+      if (osAssets === undefined) {
+        return {
+          tag: "Left",
+          value: {
+            path: [name],
+            message: `Unknown version: ${version}\nKnown versions: ${Object.keys(
+              versions
+            ).join(", ")}`,
+          },
+        };
+      }
+
+      const asset = osAssets[osName];
+
+      const tool = makeTool(cwd, env, name, version, asset);
+
+      const exists = validateFileExists(tool.absolutePath);
+
+      switch (exists.tag) {
+        case "Exists":
+          return {
+            tag: "Right",
+            value: { exists: true, tool },
+          };
+
+        case "DoesNotExist":
+          return {
+            tag: "Right",
+            value: { exists: false, tool },
+          };
+
+        case "Error":
+          return {
+            tag: "Left",
+            value: { path: [name], message: exists.message },
+          };
+      }
     }
-  });
+  );
 
   if (errors.length > 0) {
     return {
@@ -471,7 +475,7 @@ function parseTools(
 
   const [existing, missing]: [Array<Tool>, Array<Tool>] = partitionMap(
     tools,
-    ([exists, tool]) =>
+    ({ exists, tool }) =>
       exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
   );
 
