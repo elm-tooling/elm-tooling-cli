@@ -290,7 +290,7 @@ On Windows, `npm` creates three shell scripts (cmd, PowerShell and sh) per execu
 
 No!
 
-The `elm-tooling` CLI could be written in something other than Node.js.
+The `elm-tooling` CLI could be written in something other than `Node.js`.
 
 Instead of using for example `npx elm` to run tools, we could have `elm-tooling run elm`. `elm-tooling run` would read `elm-tooling.json` to find which version of the tool to use, and also add any _other_ tools in `elm-tooling.json` to `$PATH` for the execution. This way tools can do stuff like `spawn("elm")` and get the correct version as if it was installed globally.
 
