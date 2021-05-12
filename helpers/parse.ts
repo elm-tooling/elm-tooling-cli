@@ -274,91 +274,89 @@ function parseEntrypoints(
     };
   }
 
-  const [errors, entrypoints]: [
-    Array<FieldError>,
-    Array<Entrypoint>
-  ] = partitionMap(json, (entrypoint, index, _, entrypointsSoFar) => {
-    if (typeof entrypoint !== "string") {
+  const [errors, entrypoints]: [Array<FieldError>, Array<Entrypoint>] =
+    partitionMap(json, (entrypoint, index, _, entrypointsSoFar) => {
+      if (typeof entrypoint !== "string") {
+        return {
+          tag: "Left",
+          value: {
+            path: [index],
+            message: `Expected a string but got: ${JSON.stringify(entrypoint)}`,
+          },
+        };
+      }
+
+      if (entrypoint.includes("\\")) {
+        return {
+          tag: "Left",
+          value: {
+            path: [index],
+            message: `Expected the string to use only "/" as path delimiter but found "\\": ${JSON.stringify(
+              entrypoint
+            )}`,
+          },
+        };
+      }
+
+      if (!entrypoint.startsWith("./")) {
+        return {
+          tag: "Left",
+          value: {
+            path: [index],
+            message: `Expected the string to start with "./" (to indicate that it is a relative path) but got: ${JSON.stringify(
+              entrypoint
+            )}`,
+          },
+        };
+      }
+
+      if (!entrypoint.endsWith(".elm")) {
+        return {
+          tag: "Left",
+          value: {
+            path: [index],
+            message: `Expected the string to end with ".elm" but got: ${JSON.stringify(
+              entrypoint
+            )}`,
+          },
+        };
+      }
+
+      const absolutePath = path.join(
+        path.dirname(elmToolingJsonPath),
+        entrypoint
+      );
+
+      const exists = validateFileExists(absolutePath);
+      if (exists.tag !== "Exists") {
+        return {
+          tag: "Left",
+          value: { path: [index], message: exists.message },
+        };
+      }
+
+      if (
+        entrypointsSoFar.some(
+          (otherEntrypoint) => otherEntrypoint.absolutePath === absolutePath
+        )
+      ) {
+        return {
+          tag: "Left",
+          value: {
+            path: [index],
+            message: `Duplicate entrypoint: ${absolutePath}`,
+          },
+        };
+      }
+
       return {
-        tag: "Left",
+        tag: "Right",
         value: {
-          path: [index],
-          message: `Expected a string but got: ${JSON.stringify(entrypoint)}`,
+          relativePath: entrypoint,
+          absolutePath,
         },
       };
-    }
-
-    if (entrypoint.includes("\\")) {
-      return {
-        tag: "Left",
-        value: {
-          path: [index],
-          message: `Expected the string to use only "/" as path delimiter but found "\\": ${JSON.stringify(
-            entrypoint
-          )}`,
-        },
-      };
-    }
-
-    if (!entrypoint.startsWith("./")) {
-      return {
-        tag: "Left",
-        value: {
-          path: [index],
-          message: `Expected the string to start with "./" (to indicate that it is a relative path) but got: ${JSON.stringify(
-            entrypoint
-          )}`,
-        },
-      };
-    }
-
-    if (!entrypoint.endsWith(".elm")) {
-      return {
-        tag: "Left",
-        value: {
-          path: [index],
-          message: `Expected the string to end with ".elm" but got: ${JSON.stringify(
-            entrypoint
-          )}`,
-        },
-      };
-    }
-
-    const absolutePath = path.join(
-      path.dirname(elmToolingJsonPath),
-      entrypoint
-    );
-
-    const exists = validateFileExists(absolutePath);
-    if (exists.tag !== "Exists") {
-      return {
-        tag: "Left",
-        value: { path: [index], message: exists.message },
-      };
-    }
-
-    if (
-      entrypointsSoFar.some(
-        (otherEntrypoint) => otherEntrypoint.absolutePath === absolutePath
-      )
-    ) {
-      return {
-        tag: "Left",
-        value: {
-          path: [index],
-          message: `Duplicate entrypoint: ${absolutePath}`,
-        },
-      };
-    }
-
-    return {
-      tag: "Right",
-      value: {
-        relativePath: entrypoint,
-        absolutePath,
-      },
-    };
-  });
+    });
 
   if (errors.length > 0) {
     return {
@@ -391,80 +389,80 @@ function parseTools(
   const [errors, tools]: [
     Array<FieldError>,
     Array<{ exists: boolean; tool: Tool }>
-  ] = partitionMap(
-    Object.entries(json),
-    ([name, version]): Either<FieldError, { exists: boolean; tool: Tool }> => {
-      if (typeof version !== "string") {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Expected a version as a string but got: ${JSON.stringify(
-              version
-            )}`,
-          },
-        };
-      }
-
-      const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
-        ? KNOWN_TOOLS[name]
-        : undefined;
-
-      if (versions === undefined) {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Unknown tool\nKnown tools: ${Object.keys(
-              KNOWN_TOOLS
-            ).join(", ")}`,
-          },
-        };
-      }
-
-      const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
-        ? versions[version]
-        : undefined;
-
-      if (osAssets === undefined) {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Unknown version: ${version}\nKnown versions: ${Object.keys(
-              versions
-            ).join(", ")}`,
-          },
-        };
-      }
-
-      const asset = osAssets[osName];
-
-      const tool = makeTool(cwd, env, name, version, asset);
-
-      const exists = validateFileExists(tool.absolutePath);
-
-      switch (exists.tag) {
-        case "Exists":
-          return {
-            tag: "Right",
-            value: { exists: true, tool },
-          };
-
-        case "DoesNotExist":
-          return {
-            tag: "Right",
-            value: { exists: false, tool },
-          };
-
-        case "Error":
-          return {
-            tag: "Left",
-            value: { path: [name], message: exists.message },
-          };
-      }
+  ] = partitionMap(Object.entries(json), ([name, version]): Either<
+    FieldError,
+    { exists: boolean; tool: Tool }
+  > => {
+    if (typeof version !== "string") {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Expected a version as a string but got: ${JSON.stringify(
+            version
+          )}`,
+        },
+      };
     }
-  );
+
+    const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
+      ? KNOWN_TOOLS[name]
+      : undefined;
+
+    if (versions === undefined) {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Unknown tool\nKnown tools: ${Object.keys(KNOWN_TOOLS).join(
+            ", "
+          )}`,
+        },
+      };
+    }
+
+    const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
+      ? versions[version]
+      : undefined;
+
+    if (osAssets === undefined) {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Unknown version: ${version}\nKnown versions: ${Object.keys(
+            versions
+          ).join(", ")}`,
+        },
+      };
+    }
+
+    const asset = osAssets[osName];
+
+    const tool = makeTool(cwd, env, name, version, asset);
+
+    const exists = validateFileExists(tool.absolutePath);
+
+    switch (exists.tag) {
+      case "Exists":
+        return {
+          tag: "Right",
+          value: { exists: true, tool },
+        };
+
+      case "DoesNotExist":
+        return {
+          tag: "Right",
+          value: { exists: false, tool },
+        };
+
+      case "Error":
+        return {
+          tag: "Left",
+          value: { path: [name], message: exists.message },
+        };
+    }
+  });
 
   if (errors.length > 0) {
     return {

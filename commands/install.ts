@@ -445,28 +445,27 @@ export function downloadFile(
     }
   };
 
-  const onClose = (commandName: string) => (
-    code: number | null,
-    signal: NodeJS.Signals | null
-  ): void => {
-    if (errored.includes(commandName)) {
-      return;
-    } else if (code === 0) {
-      onSuccess();
-    } else {
-      const trimmed = stderr
-        .trim()
-        // Remove curl’s progress bar remnants.
-        .replace(/^[\s#O=-]+/g, "");
-      onError(
-        new Error(
-          `${commandName} exited with ${exitReason(code, signal)}:\n${
-            trimmed === "" ? EMPTY_STDERR : trimmed
-          }`
-        )
-      );
-    }
-  };
+  const onClose =
+    (commandName: string) =>
+    (code: number | null, signal: NodeJS.Signals | null): void => {
+      if (errored.includes(commandName)) {
+        return;
+      } else if (code === 0) {
+        onSuccess();
+      } else {
+        const trimmed = stderr
+          .trim()
+          // Remove curl’s progress bar remnants.
+          .replace(/^[\s#O=-]+/g, "");
+        onError(
+          new Error(
+            `${commandName} exited with ${exitReason(code, signal)}:\n${
+              trimmed === "" ? EMPTY_STDERR : trimmed
+            }`
+          )
+        );
+      }
+    };
 
   const curl = spawn(env, "curl", ["-#fL", url]);
   let toKill: { kill: () => void } = curl;

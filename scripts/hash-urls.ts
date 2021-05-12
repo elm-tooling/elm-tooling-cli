@@ -10,40 +10,38 @@ async function run(urls: Array<string>): Promise<string> {
   const progress: Array<number> = urls.map(() => 0);
 
   const assets: Array<[OSName, Asset]> = await Promise.all(
-    urls.map(
-      (url, index): Promise<[OSName, Asset]> => {
-        const hash = crypto.createHash("sha256");
-        return new Promise((resolve, reject) => {
-          downloadFile(process.env, url, {
-            onData: (chunk) => {
-              hash.update(chunk);
-            },
-            onProgress: (percentage) => {
-              progress[index] = percentage;
-              process.stderr.write(
-                `\r${Math.round(
-                  (progress.reduce((a, b) => a + b, 0) / urls.length) * 100
-                )}%`
-              );
-            },
-            onError: (error) => {
-              reject(new Error(`Download failed.\n${url}\n${error.message}`));
-            },
-            onSuccess: () => {
-              progress[index] = 1;
-              const osName = OS_LIST[index] ?? "UNKNOWN";
-              const asset: Asset = {
-                hash: hash.digest("hex"),
-                url,
-                fileName: guessFileName(url, osName),
-                type: guessAssetType(url),
-              };
-              resolve([osName, asset]);
-            },
-          });
+    urls.map((url, index): Promise<[OSName, Asset]> => {
+      const hash = crypto.createHash("sha256");
+      return new Promise((resolve, reject) => {
+        downloadFile(process.env, url, {
+          onData: (chunk) => {
+            hash.update(chunk);
+          },
+          onProgress: (percentage) => {
+            progress[index] = percentage;
+            process.stderr.write(
+              `\r${Math.round(
+                (progress.reduce((a, b) => a + b, 0) / urls.length) * 100
+              )}%`
+            );
+          },
+          onError: (error) => {
+            reject(new Error(`Download failed.\n${url}\n${error.message}`));
+          },
+          onSuccess: () => {
+            progress[index] = 1;
+            const osName = OS_LIST[index] ?? "UNKNOWN";
+            const asset: Asset = {
+              hash: hash.digest("hex"),
+              url,
+              fileName: guessFileName(url, osName),
+              type: guessAssetType(url),
+            };
+            resolve([osName, asset]);
+          },
         });
-      }
-    )
+      });
+    })
   );
 
   process.stderr.write("\r100%");
