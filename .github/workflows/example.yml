@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           # Choose your Node.js version here:
-          node-version: 15.x
+          node-version: 16.x
 
       # IGNORE START: This is just internal stuff specific for this repo.
       - name: Internal cache node_modules
@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: node_modules
-          key: internal-node_modules-ubuntu-latest-15.x-${{ hashFiles('package-lock.json') }}
+          key: internal-node_modules-ubuntu-latest-16.x-${{ hashFiles('package-lock.json') }}
       - name: Internal npm ci
         if: steps.internal-cache-node_modules.outputs.cache-hit != 'true'
         run: npm ci
