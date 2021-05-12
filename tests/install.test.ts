@@ -352,11 +352,11 @@ describe("install", () => {
     expect(bin2).toBe(bin1);
 
     fs.unlinkSync(path.join(binDir, "elm-format"));
-    const { stdout: stdout3, bin: bin3, cwd } = await installSuccessHelper(
-      fixture,
-      {},
-      "src"
-    );
+    const {
+      stdout: stdout3,
+      bin: bin3,
+      cwd,
+    } = await installSuccessHelper(fixture, {}, "src");
 
     // Works from a subdirectory and handles a combination of already done and create.
     expect(stdout3).toMatchInlineSnapshot(`
