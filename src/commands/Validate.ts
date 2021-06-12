@@ -4,6 +4,8 @@ import {
   elmToolingJsonDocumentationLink,
   Env,
   indent,
+  isNonEmptyArray,
+  join,
   KNOWN_FIELDS,
   NonEmptyArray,
 } from "../Helpers";
@@ -17,11 +19,7 @@ import {
   Tools,
 } from "../Parse";
 
-export default function validate(
-  cwd: string,
-  env: Env,
-  logger: Logger
-): number {
+export function validate(cwd: string, env: Env, logger: Logger): number {
   const parseResult = findReadAndParseElmToolingJson(cwd, env);
 
   switch (parseResult.tag) {
@@ -48,13 +46,13 @@ export default function validate(
       const validationErrors: Array<FieldError> = [
         ...parseResult.unknownFields.map((field) => ({
           path: [field],
-          message: `Unknown field\nKnown fields: ${KNOWN_FIELDS.join(", ")}`,
+          message: `Unknown field\nKnown fields: ${join(KNOWN_FIELDS, ", ")}`,
         })),
         ...entrypointsErrors,
         ...toolsErrors.errors,
       ];
 
-      if (validationErrors.length === 0) {
+      if (!isNonEmptyArray(validationErrors)) {
         logger.log(bold(parseResult.elmToolingJsonPath));
         logger.log("No errors found.");
         return 0;
@@ -62,7 +60,10 @@ export default function validate(
         logger.error(bold(parseResult.elmToolingJsonPath));
         logger.error("");
         logger.error(printFieldErrors(validationErrors));
-        if (toolsErrors.tag === "Missing" && toolsErrors.errors.length > 0) {
+        if (
+          toolsErrors.tag === "Missing" &&
+          isNonEmptyArray(toolsErrors.errors)
+        ) {
           logger.error("");
           logger.error(missingToolsText);
         }

@@ -9,12 +9,19 @@ import {
   flatMap,
   fromEntries,
   HIDE_CURSOR,
+  isNonEmptyArray,
+  join,
   ReadStream,
   SHOW_CURSOR,
   toJSON,
   WriteStream,
 } from "../Helpers";
-import { KNOWN_TOOLS } from "../KnownTools";
+import {
+  getLastVersion,
+  KNOWN_TOOL_NAMES,
+  KNOWN_TOOLS,
+  KnownToolNames,
+} from "../KnownTools";
 import type { Logger } from "../Logger";
 import {
   findReadAndParseElmToolingJson,
@@ -22,7 +29,7 @@ import {
   Tool,
 } from "../Parse";
 
-export default async function toolsCommand(
+export async function toolsCommand(
   cwd: string,
   env: Env,
   logger: Logger,
@@ -105,7 +112,7 @@ async function start(
   return new Promise((resolve) => {
     let state: State = {
       tools,
-      cursorTool: tools.length > 0 ? tools[0] : getDefaultCursorTool(),
+      cursorTool: isNonEmptyArray(tools) ? tools[0] : getDefaultCursorTool(),
     };
 
     let cursor: { x: number; y: number } = { x: 0, y: 0 };
@@ -187,23 +194,25 @@ async function start(
 }
 
 function draw(tools: Array<ToolChoice>): string {
-  return Object.keys(KNOWN_TOOLS)
-    .map((name) => {
-      const versions = Object.keys(KNOWN_TOOLS[name]);
+  return join(
+    Object.entries(KNOWN_TOOLS).map(([name, versionObjects]) => {
+      const versions = Object.keys(versionObjects);
       const selectedIndex = versions.findIndex((version) =>
         tools.some((tool) => tool.name === name && tool.version === version)
       );
-      const versionsString = versions
-        .map((version, index) => {
+      const versionsString = join(
+        versions.map((version, index) => {
           const marker = index === selectedIndex ? bold("x") : " ";
           return `  ${dim("[")}${marker}${dim("]")} ${
             index === selectedIndex ? version : dim(version)
           }`;
-        })
-        .join("\n");
+        }),
+        "\n"
+      );
       return `${bold(name)}\n${versionsString}`;
-    })
-    .join("\n\n");
+    }),
+    "\n\n"
+  );
 }
 
 const instructions = `
@@ -213,15 +222,15 @@ ${bold("Enter")} to save
 `.trim();
 
 function getCursorLine(cursorTool: ToolChoice): number {
-  const names = Object.keys(KNOWN_TOOLS);
-  const nameIndex = names.indexOf(cursorTool.name);
+  const names = KNOWN_TOOL_NAMES;
+  const nameIndex = names.indexOf(cursorTool.name as KnownToolNames);
 
   // istanbul ignore if
   if (nameIndex === -1) {
     return 1;
   }
 
-  const name = names[nameIndex];
+  const name = names[nameIndex] as KnownToolNames;
   const versions = Object.keys(KNOWN_TOOLS[name]);
   const versionIndex = versions.indexOf(cursorTool.version);
 
@@ -241,10 +250,8 @@ function getCursorLine(cursorTool: ToolChoice): number {
 }
 
 function getDefaultCursorTool(): ToolChoice {
-  const [name] = Object.keys(KNOWN_TOOLS);
-  const versions = Object.keys(KNOWN_TOOLS[name]);
-  const version = versions[versions.length - 1];
-  return { name, version };
+  const [name] = KNOWN_TOOL_NAMES;
+  return { name, version: getLastVersion(name) };
 }
 
 function update(keypress: string, state: State): [State, Cmd] {
@@ -287,8 +294,8 @@ function update(keypress: string, state: State): [State, Cmd] {
 }
 
 function updateCursorTool(delta: number, cursorTool: ToolChoice): ToolChoice {
-  const all = flatMap(Object.keys(KNOWN_TOOLS), (name) =>
-    Object.keys(KNOWN_TOOLS[name]).map((version) => ({ name, version }))
+  const all = flatMap(Object.entries(KNOWN_TOOLS), ([name, versions]) =>
+    Object.keys(versions).map((version) => ({ name, version }))
   );
   const index = all.findIndex(
     (tool) =>
@@ -299,7 +306,9 @@ function updateCursorTool(delta: number, cursorTool: ToolChoice): ToolChoice {
     return cursorTool;
   }
   const nextIndex = index + delta;
-  return nextIndex < 0 || nextIndex >= all.length ? cursorTool : all[nextIndex];
+  return nextIndex < 0 || nextIndex >= all.length
+    ? cursorTool
+    : (all[nextIndex] as ToolChoice);
 }
 
 function toggleTool(
@@ -319,12 +328,11 @@ function updateElmToolingJson(
   originalObject: Record<string, unknown>,
   toolsList: Array<ToolChoice>
 ): void {
-  const tools =
-    toolsList.length === 0
-      ? undefined
-      : fromEntries(
-          sortTools(toolsList).map(({ name, version }) => [name, version])
-        );
+  const tools = isNonEmptyArray(toolsList)
+    ? fromEntries(
+        sortTools(toolsList).map(({ name, version }) => [name, version])
+      )
+    : undefined;
 
   fs.writeFileSync(elmToolingJsonPath, toJSON({ ...originalObject, tools }));
 }

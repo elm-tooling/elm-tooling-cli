@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import help from "./commands/Help";
-import init from "./commands/Init";
-import install from "./commands/Install";
-import tools from "./commands/Tools";
-import validate from "./commands/Validate";
-import type { Env, ReadStream, WriteStream } from "./Helpers";
+import { help } from "./commands/Help";
+import { init } from "./commands/Init";
+import { install } from "./commands/Install";
+import { toolsCommand } from "./commands/Tools";
+import { validate } from "./commands/Validate";
+import { Env, join, ReadStream, WriteStream } from "./Helpers";
 import { makeLogger } from "./Logger";
 
 type Options = {
@@ -41,7 +41,7 @@ export default async function elmToolingCli(
   // Let each command handle this when needed.
   if (args.length > 1) {
     logger.error(
-      `Expected a single argument but got: ${args.slice(1).join(" ")}`
+      `Expected a single argument but got: ${join(args.slice(1), " ")}`
     );
     return 1;
   }
@@ -62,7 +62,7 @@ export default async function elmToolingCli(
       return install(cwd, env, logger);
 
     case "tools":
-      return tools(cwd, env, logger, stdin, stdout);
+      return toolsCommand(cwd, env, logger, stdin, stdout);
 
     default:
       logger.error(`Unknown command: ${args[0]}`);
@@ -74,13 +74,13 @@ export default async function elmToolingCli(
 if (require.main === module) {
   elmToolingCli(process.argv.slice(2)).then(
     (exitCode) => {
-      process.exit(exitCode);
+      process.exitCode = exitCode;
     },
     (error: Error) => {
       process.stderr.write(
         `Unexpected error:\n${error.stack ?? error.message}\n`
       );
-      process.exit(1);
+      process.exitCode = 1;
     }
   );
 }

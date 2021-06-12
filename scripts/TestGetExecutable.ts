@@ -52,7 +52,8 @@ export async function run(): Promise<void> {
 
   if (
     progress.some(
-      (percentage, index) => index > 0 && progress[index - 1] > percentage
+      (percentage, index) =>
+        index > 0 && (progress[index - 1] as number) > percentage
     )
   ) {
     throw new Error(

@@ -4,16 +4,26 @@ import * as path from "path";
 
 import {
   bold,
-  Either,
   Env,
   findClosest,
+  getOwn,
   indent,
+  isNonEmptyArray,
   isRecord,
+  join,
+  mapNonEmptyArray,
   NonEmptyArray,
   partitionMap,
+  partitionMapNonEmpty,
   printNumErrors,
 } from "./Helpers";
-import { Asset, KNOWN_TOOLS, OSName } from "./KnownTools";
+import {
+  Asset,
+  KNOWN_TOOL_NAMES,
+  KNOWN_TOOLS,
+  OSAssets,
+  OSName,
+} from "./KnownTools";
 
 export const isWindows = os.platform() === "win32";
 
@@ -166,9 +176,7 @@ export function getOSNameAsFieldResult(): FieldResult<OSName> {
     ? // istanbul ignore next
       {
         tag: "Error" as const,
-        errors: [
-          { path: [], message: osName.message },
-        ] as NonEmptyArray<FieldError>,
+        errors: [{ path: [], message: osName.message }],
       }
     : {
         tag: "Parsed",
@@ -198,10 +206,13 @@ export function prefixFieldResult<T>(
     case "Error":
       return {
         tag: "Error",
-        errors: fieldResult.errors.map(({ path: fieldPath, message }) => ({
-          path: [prefix, ...fieldPath],
-          message,
-        })) as NonEmptyArray<FieldError>,
+        errors: mapNonEmptyArray(
+          fieldResult.errors,
+          ({ path: fieldPath, message }) => ({
+            path: [prefix, ...fieldPath],
+            message,
+          })
+        ),
       };
 
     case "Parsed":
@@ -262,7 +273,7 @@ function parseEntrypoints(
     };
   }
 
-  if (json.length === 0) {
+  if (!isNonEmptyArray(json)) {
     return {
       tag: "Error",
       errors: [
@@ -274,8 +285,9 @@ function parseEntrypoints(
     };
   }
 
-  const [errors, entrypoints]: [Array<FieldError>, Array<Entrypoint>] =
-    partitionMap(json, (entrypoint, index, _, entrypointsSoFar) => {
+  const partitioned = partitionMapNonEmpty<unknown, FieldError, Entrypoint>(
+    json,
+    (entrypoint, index, _, entrypointsSoFar) => {
       if (typeof entrypoint !== "string") {
         return {
           tag: "Left",
@@ -356,16 +368,23 @@ function parseEntrypoints(
           absolutePath,
         },
       };
-    });
+    }
+  );
 
-  if (errors.length > 0) {
-    return {
-      tag: "Error",
-      errors: errors as NonEmptyArray<FieldError>,
-    };
+  switch (partitioned.tag) {
+    case "OnlyLeft":
+    case "Both":
+      return {
+        tag: "Error",
+        errors: partitioned.left,
+      };
+
+    case "OnlyRight":
+      return {
+        tag: "Parsed",
+        parsed: partitioned.right,
+      };
   }
-
-  return { tag: "Parsed", parsed: entrypoints as NonEmptyArray<Entrypoint> };
 }
 
 function parseTools(
@@ -386,95 +405,90 @@ function parseTools(
     };
   }
 
-  const [errors, tools]: [
-    Array<FieldError>,
-    Array<{ exists: boolean; tool: Tool }>
-  ] = partitionMap(
-    Object.entries(json),
-    ([name, version]): Either<FieldError, { exists: boolean; tool: Tool }> => {
-      if (typeof version !== "string") {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Expected a version as a string but got: ${JSON.stringify(
-              version
-            )}`,
-          },
-        };
-      }
-
-      const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
-        ? KNOWN_TOOLS[name]
-        : undefined;
-
-      if (versions === undefined) {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Unknown tool\nKnown tools: ${Object.keys(
-              KNOWN_TOOLS
-            ).join(", ")}`,
-          },
-        };
-      }
-
-      const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
-        ? versions[version]
-        : undefined;
-
-      if (osAssets === undefined) {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Unknown version: ${version}\nKnown versions: ${Object.keys(
-              versions
-            ).join(", ")}`,
-          },
-        };
-      }
-
-      const asset = osAssets[osName];
-
-      const tool = makeTool(cwd, env, name, version, asset);
-
-      const exists = validateFileExists(tool.absolutePath);
-
-      switch (exists.tag) {
-        case "Exists":
-          return {
-            tag: "Right",
-            value: { exists: true, tool },
-          };
-
-        case "DoesNotExist":
-          return {
-            tag: "Right",
-            value: { exists: false, tool },
-          };
-
-        case "Error":
-          return {
-            tag: "Left",
-            value: { path: [name], message: exists.message },
-          };
-      }
+  const [errors, tools] = partitionMap<
+    [string, unknown],
+    FieldError,
+    { exists: boolean; tool: Tool }
+  >(Object.entries(json), ([name, version]) => {
+    if (typeof version !== "string") {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Expected a version as a string but got: ${JSON.stringify(
+            version
+          )}`,
+        },
+      };
     }
-  );
 
-  if (errors.length > 0) {
+    const versions = getOwn(KNOWN_TOOLS, name);
+
+    if (versions === undefined) {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Unknown tool\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`,
+        },
+      };
+    }
+
+    const osAssets = getOwn(versions, version);
+
+    if (osAssets === undefined) {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Unknown version: ${version}\nKnown versions: ${join(
+            Object.keys(versions),
+            ", "
+          )}`,
+        },
+      };
+    }
+
+    const asset = osAssets[osName];
+
+    const tool = makeTool(cwd, env, name, version, asset);
+
+    const exists = validateFileExists(tool.absolutePath);
+
+    switch (exists.tag) {
+      case "Exists":
+        return {
+          tag: "Right",
+          value: { exists: true, tool },
+        };
+
+      case "DoesNotExist":
+        return {
+          tag: "Right",
+          value: { exists: false, tool },
+        };
+
+      case "Error":
+        return {
+          tag: "Left",
+          value: { path: [name], message: exists.message },
+        };
+    }
+  });
+
+  if (isNonEmptyArray(errors)) {
     return {
       tag: "Error",
-      errors: errors as NonEmptyArray<FieldError>,
+      errors,
     };
   }
 
-  const [existing, missing]: [Array<Tool>, Array<Tool>] = partitionMap(
-    tools,
-    ({ exists, tool }) =>
-      exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
+  const [existing, missing] = partitionMap<
+    { exists: boolean; tool: Tool },
+    Tool,
+    Tool
+  >(tools, ({ exists, tool }) =>
+    exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
   );
 
   return {
@@ -503,24 +517,27 @@ export function makeTool(
   };
 }
 
-export function printFieldErrors(errors: Array<FieldError>): string {
-  return [
-    printNumErrors(errors.length),
-    ...errors.map(
-      (error) => `${bold(joinPath(error.path))}\n${indent(error.message)}`
-    ),
-  ].join("\n\n");
+export function printFieldErrors(errors: NonEmptyArray<FieldError>): string {
+  return join(
+    [
+      printNumErrors(errors.length),
+      ...errors.map(
+        (error) => `${bold(joinPath(error.path))}\n${indent(error.message)}`
+      ),
+    ],
+    "\n\n"
+  );
 }
 
 function joinPath(errorPath: Array<number | string>): string {
   // istanbul ignore if
-  if (errorPath.length === 0) {
+  if (!isNonEmptyArray(errorPath)) {
     return "General";
   }
   const rest = errorPath
     .slice(1)
     .map((segment) => `[${JSON.stringify(segment)}]`);
-  return `${errorPath[0]}${rest.join("")}`;
+  return `${errorPath[0]}${join(rest, "")}`;
 }
 
 const versionRangeRegex = /^([=~^])(\d+)\.(\d+)\.(\d+)([+-].+)?$/;
@@ -553,15 +570,11 @@ export function getToolThrowing({
     throw osName;
   }
 
-  const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
-    ? KNOWN_TOOLS[name]
-    : undefined;
+  const versions = getOwn(KNOWN_TOOLS, name);
 
   if (versions === undefined) {
     throw new Error(
-      `Unknown tool: ${name}\nKnown tools: ${Object.keys(KNOWN_TOOLS).join(
-        ", "
-      )}`
+      `Unknown tool: ${name}\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`
     );
   }
 
@@ -572,13 +585,16 @@ export function getToolThrowing({
 
   if (matchingVersion === undefined) {
     throw new Error(
-      `No ${name} versions matching: ${versionRange}\nKnown versions: ${Object.keys(
-        versions
-      ).join(", ")}`
+      `No ${name} versions matching: ${versionRange}\nKnown versions: ${join(
+        Object.keys(versions),
+        ", "
+      )}`
     );
   }
 
-  const asset = versions[matchingVersion][osName];
+  // `matchingVersion` is derived from `Object.keys` above, so it’s safe to use
+  // as index.
+  const asset = (versions[matchingVersion] as OSAssets)[osName];
 
   return makeTool(cwd, env, name, matchingVersion, asset);
 }

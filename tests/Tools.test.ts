@@ -3,6 +3,7 @@ import * as path from "path";
 
 import elmToolingCli from "../src";
 import {
+  assertExitCode,
   clean,
   CursorWriteStream,
   FailReadStream,
@@ -39,11 +40,13 @@ async function toolsSuccessHelper(
     fs.writeFileSync(elmToolingJsonPath, original);
   }
 
+  const stdoutString = stdout.getOutput();
+
+  assertExitCode(0, exitCode, stdoutString, stderr.content);
   expect(stderr.content).toBe("");
-  expect(exitCode).toBe(0);
 
   return {
-    stdout: clean(stdout.getOutput()),
+    stdout: clean(stdoutString),
     json,
   };
 }
@@ -72,8 +75,8 @@ async function toolsFailHelperAbsolute(
     stderr,
   });
 
+  assertExitCode(1, exitCode, stdout.content, stderr.content);
   expect(stdout.content).toBe("");
-  expect(exitCode).toBe(1);
 
   return clean(stderr.content);
 }
@@ -570,9 +573,11 @@ describe("tools", () => {
         stderr,
       });
 
-      expect(exitCode).toBe(1);
+      const stdoutString = stdout.getOutput();
 
-      expect(clean(stdout.getOutput())).toMatchInlineSnapshot(`
+      assertExitCode(1, exitCode, stdoutString, stderr.content);
+
+      expect(clean(stdoutString)).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/tools/readonly/elm-tooling.json⧘
 
         ⧙elm⧘

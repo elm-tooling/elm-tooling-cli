@@ -1,4 +1,6 @@
-export type KnownTools = Record<string, Versions>;
+import type { NonEmptyArray } from "./Helpers";
+
+export type KnownTools = Record<KnownToolNames, Versions>;
 
 export type Versions = Record<string, OSAssets>;
 
@@ -233,3 +235,13 @@ const knownTools = {
 export type KnownToolNames = keyof typeof knownTools;
 
 export const KNOWN_TOOLS: KnownTools = knownTools;
+
+export const KNOWN_TOOL_NAMES: NonEmptyArray<KnownToolNames> = Object.keys(
+  KNOWN_TOOLS
+) as NonEmptyArray<KnownToolNames>;
+
+export function getLastVersion(name: KnownToolNames): string {
+  const versions = Object.keys(KNOWN_TOOLS[name]);
+  // We know that all tools in this file has at least one version.
+  return versions[versions.length - 1] as string;
+}

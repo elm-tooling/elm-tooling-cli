@@ -1,5 +1,6 @@
 import elmToolingCli from "../src";
 import {
+  assertExitCode,
   clean,
   FailReadStream,
   MemoryWriteStream,
@@ -18,8 +19,8 @@ async function indexHelper(args: Array<string>): Promise<string> {
     stderr,
   });
 
+  assertExitCode(1, exitCode, stdout.content, stderr.content);
   expect(stdout.content).toBe("");
-  expect(exitCode).toBe(1);
 
   return clean(stderr.content);
 }
