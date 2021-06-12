@@ -22,7 +22,7 @@ import {
   Tool,
 } from "../Parse";
 
-export default async function toolsCommand(
+export async function toolsCommand(
   cwd: string,
   env: Env,
   logger: Logger,

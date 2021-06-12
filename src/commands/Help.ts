@@ -1,7 +1,7 @@
 import { bold, dim, Env } from "../Helpers";
 import { getElmToolingInstallPath } from "../Parse";
 
-export default function help(cwd: string, env: Env): string {
+export function help(cwd: string, env: Env): string {
   return `
 ${bold("elm-tooling init")}
     Create a sample elm-tooling.json in the current directory

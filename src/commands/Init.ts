@@ -25,7 +25,7 @@ import {
 const DEFAULT_TOOLS: Array<KnownToolNames> = ["elm", "elm-format", "elm-json"];
 DEFAULT_TOOLS.sort((a, b) => a.localeCompare(b));
 
-export default async function init(
+export async function init(
   cwd: string,
   env: Env,
   logger: Logger

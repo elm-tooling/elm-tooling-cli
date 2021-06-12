@@ -34,7 +34,7 @@ import {
 
 const EMPTY_STDERR = dim("(empty stderr)");
 
-export default async function install(
+export async function install(
   cwd: string,
   env: Env,
   logger: Logger

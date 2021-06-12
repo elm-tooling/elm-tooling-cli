@@ -17,11 +17,7 @@ import {
   Tools,
 } from "../Parse";
 
-export default function validate(
-  cwd: string,
-  env: Env,
-  logger: Logger
-): number {
+export function validate(cwd: string, env: Env, logger: Logger): number {
   const parseResult = findReadAndParseElmToolingJson(cwd, env);
 
   switch (parseResult.tag) {

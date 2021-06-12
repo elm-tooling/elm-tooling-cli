@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
-import help from "./commands/Help";
-import init from "./commands/Init";
-import install from "./commands/Install";
-import tools from "./commands/Tools";
-import validate from "./commands/Validate";
+import { help } from "./commands/Help";
+import { init } from "./commands/Init";
+import { install } from "./commands/Install";
+import { toolsCommand } from "./commands/Tools";
+import { validate } from "./commands/Validate";
 import type { Env, ReadStream, WriteStream } from "./Helpers";
 import { makeLogger } from "./Logger";
 
@@ -62,7 +62,7 @@ export default async function elmToolingCli(
       return install(cwd, env, logger);
 
     case "tools":
-      return tools(cwd, env, logger, stdin, stdout);
+      return toolsCommand(cwd, env, logger, stdin, stdout);
 
     default:
       logger.error(`Unknown command: ${args[0]}`);
