@@ -23,5 +23,6 @@ module.exports = {
     // Testing error handling is still manual, though.
     // We still get 40-50% coverage at least.
     "./src/commands/Install.ts": ignoreCoverage,
+    "./src/RollupEntry.ts": ignoreCoverage,
   },
 };

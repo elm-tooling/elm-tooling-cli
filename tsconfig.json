@@ -4,8 +4,9 @@
     "forceConsistentCasingInFileNames": true,
     "importsNotUsedAsValues": "error",
     "isolatedModules": true,
-    "module": "CommonJS",
+    "module": "ESNext",
     "moduleResolution": "node",
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -18,7 +19,6 @@
     "lib": [
       "ES2018",
     ],
-    "outDir": "build"
   },
   "exclude": [
     "scripts",
