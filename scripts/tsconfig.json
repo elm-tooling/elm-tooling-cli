@@ -3,7 +3,6 @@
   "exclude": [],
   "compilerOptions": {
     "esModuleInterop": true,
-    "noEmit": true,
     "module": "CommonJS",
   }
 }
