@@ -17,7 +17,7 @@ It’s much easier to work on this project if your editor can run these tools fo
 
 ## Adding a new version
 
-1. Add a new entry in `helpers/known-tools.ts`.
+1. Add a new entry in `src/known-tools.ts`.
 
    There’s a script that can help you do it.
 

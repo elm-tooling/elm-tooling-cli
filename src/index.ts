@@ -5,8 +5,8 @@ import init from "./commands/init";
 import install from "./commands/install";
 import tools from "./commands/tools";
 import validate from "./commands/validate";
-import { makeLogger } from "./helpers/logger";
-import type { Env, ReadStream, WriteStream } from "./helpers/mixed";
+import type { Env, ReadStream, WriteStream } from "./helpers";
+import { makeLogger } from "./logger";
 
 type Options = {
   cwd?: string;

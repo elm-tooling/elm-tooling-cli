@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { bold, dim, indent } from "./mixed";
+import { bold, dim, indent } from "./helpers";
 import { isWindows, Tool } from "./parse";
 
 type LinkResult = Error | "AllGood" | "Created";

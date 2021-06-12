@@ -5,14 +5,9 @@ import * as readline from "readline";
 import * as rimraf from "rimraf";
 import * as stream from "stream";
 
-import elmToolingCli from "..";
-import { KNOWN_TOOLS } from "../helpers/known-tools";
-import {
-  ElmTooling,
-  flatMap,
-  fromEntries,
-  WriteStream,
-} from "../helpers/mixed";
+import elmToolingCli from "../src";
+import { ElmTooling, flatMap, fromEntries, WriteStream } from "../src/helpers";
+import { KNOWN_TOOLS } from "../src/known-tools";
 
 const WORK_DIR = path.join(__dirname, "workdirs", "all-downloads");
 const EXPECTED_FILE = path.join(__dirname, "all-downloads.expected.txt");

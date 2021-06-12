@@ -1,6 +1,6 @@
 import * as path from "path";
 
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
 import {
   clean,
   FailReadStream,

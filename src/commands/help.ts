@@ -1,5 +1,5 @@
-import { bold, dim, Env } from "../helpers/mixed";
-import { getElmToolingInstallPath } from "../helpers/parse";
+import { bold, dim, Env } from "../helpers";
+import { getElmToolingInstallPath } from "../parse";
 
 export default function help(cwd: string, env: Env): string {
   return `

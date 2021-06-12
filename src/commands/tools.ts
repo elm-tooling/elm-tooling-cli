@@ -1,8 +1,6 @@
 import * as fs from "fs";
 import * as readline from "readline";
 
-import { KNOWN_TOOLS } from "../helpers/known-tools";
-import type { Logger } from "../helpers/logger";
 import {
   bold,
   dim,
@@ -15,12 +13,14 @@ import {
   SHOW_CURSOR,
   toJSON,
   WriteStream,
-} from "../helpers/mixed";
+} from "../helpers";
+import { KNOWN_TOOLS } from "../known-tools";
+import type { Logger } from "../logger";
 import {
   findReadAndParseElmToolingJson,
   printFieldErrors,
   Tool,
-} from "../helpers/parse";
+} from "../parse";
 
 export default async function toolsCommand(
   cwd: string,

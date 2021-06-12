@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import type { ElmTooling } from "../helpers/mixed";
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
+import type { ElmTooling } from "../src/helpers";
 import {
   clean,
   FailReadStream,

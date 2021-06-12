@@ -2,8 +2,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as readline from "readline";
 
-import { KNOWN_TOOLS, KnownToolNames } from "../helpers/known-tools";
-import type { Logger } from "../helpers/logger";
 import {
   bold,
   ElmTooling,
@@ -14,13 +12,15 @@ import {
   isRecord,
   NonEmptyArray,
   toJSON,
-} from "../helpers/mixed";
+} from "../helpers";
+import { KNOWN_TOOLS, KnownToolNames } from "../known-tools";
+import type { Logger } from "../logger";
 import {
   getLatestVersionInRange,
   getOSName,
   getToolThrowing,
   isWindows,
-} from "../helpers/parse";
+} from "../parse";
 
 const DEFAULT_TOOLS: Array<KnownToolNames> = ["elm", "elm-format", "elm-json"];
 DEFAULT_TOOLS.sort((a, b) => a.localeCompare(b));

@@ -15,13 +15,13 @@ const ignoreCoverage = {
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
-  coveragePathIgnorePatterns: ["/node_modules/", "/scripts/", "/tests/"],
+  collectCoverageFrom: ["src/**/*.ts"],
   coverageThreshold: {
     global: process.platform === "win32" ? ignoreCoverage : requireCoverage,
     // Download is exercised in `scripts/test-all-downloads.ts`.
-    // The linking stuff gets coverage since it’s in `helpers/link.ts`.
+    // The linking stuff gets coverage since it’s in `src/link.ts`.
     // Testing error handling is still manual, though.
     // We still get 40-50% coverage at least.
-    "./commands/install.ts": ignoreCoverage,
+    "./src/commands/install.ts": ignoreCoverage,
   },
 };

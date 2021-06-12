@@ -1,6 +1,6 @@
 import * as readline from "readline";
 
-import { bold, dim } from "../helpers/mixed";
+import { bold, dim } from "../src/helpers";
 import { clean, CursorWriteStream, stringSnapshotSerializer } from "./helpers";
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);

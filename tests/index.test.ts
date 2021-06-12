@@ -1,4 +1,4 @@
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
 import {
   clean,
   FailReadStream,

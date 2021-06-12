@@ -1,5 +1,5 @@
-import type { Env } from "../helpers/mixed";
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
+import type { Env } from "../src/helpers";
 import {
   clean,
   FailReadStream,
