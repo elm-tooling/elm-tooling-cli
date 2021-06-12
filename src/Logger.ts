@@ -1,15 +1,15 @@
-import * as readline from "readline";
-
 import { Env, removeColor, WriteStream } from "./Helpers";
 
 export type Logger = {
   handleColor: (string: string) => string;
   log: (message: string) => void;
   error: (message: string) => void;
-  progress: (message: string) => void;
+  raw: {
+    NO_COLOR: boolean;
+    stdout: WriteStream;
+    stderr: WriteStream;
+  };
 };
-
-let previousProgress: number | undefined = undefined;
 
 export function makeLogger({
   env,
@@ -27,21 +27,15 @@ export function makeLogger({
   return {
     handleColor,
     log(message) {
-      previousProgress = undefined;
       stdout.write(`${handleColor(message)}\n`);
     },
     error(message) {
-      previousProgress = undefined;
       stderr.write(`${handleColor(message)}\n`);
     },
-    // istanbul ignore next
-    progress(passedMessage) {
-      const message = handleColor(passedMessage);
-      if (previousProgress !== undefined) {
-        readline.moveCursor(stdout, 0, -previousProgress);
-      }
-      previousProgress = message.split("\n").length;
-      stdout.write(`${message}\n`);
+    raw: {
+      NO_COLOR,
+      stdout,
+      stderr,
     },
   };
 }

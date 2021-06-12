@@ -54,7 +54,7 @@ async function run(): Promise<void> {
   const bundle = await rollup({
     input: entry,
     external: builtinModules,
-    plugins: [typescript()],
+    plugins: [typescript({ module: "ESNext" })],
     onwarn: (warning) => {
       // Rollup warnings _do_ have a real `.toString()` method.
       // eslint-disable-next-line @typescript-eslint/no-base-to-string

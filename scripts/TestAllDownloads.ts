@@ -80,6 +80,8 @@ class MemoryWriteStream extends stream.Writable implements WriteStream {
   }
 }
 
+const cursorMove = /^\x1B\[(\d*)([AB])$/;
+
 class CurorWriteStream extends stream.Writable implements WriteStream {
   constructor(
     private variants: Array<Array<readonly [string, string]>>,
@@ -93,20 +95,23 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
   private hasWritten = false;
 
   override _write(
-    chunk: Buffer | string,
+    chunkBuffer: Buffer | string,
     _encoding: BufferEncoding,
     callback: (error?: Error | null) => void
   ): void {
+    const chunk = chunkBuffer.toString();
+    const cursorMoveMatch = cursorMove.exec(chunk);
     // Only care about the first line and the progress, not the “link created” lines.
-    if (!this.hasWritten || chunk.toString().includes("%")) {
-      readline.cursorTo(
-        process.stdout,
-        0,
-        this.hasWritten ? this.y + 1 : this.y
-      );
+    if (!this.hasWritten || chunk.includes("%") || cursorMoveMatch !== null) {
+      readline.cursorTo(process.stdout, 0, this.y);
       process.stdout.write(chunk);
       readline.cursorTo(process.stdout, 0, calculateHeight(this.variants));
       this.hasWritten = true;
+      this.y += chunk.split("\n").length - 1;
+      if (cursorMoveMatch !== null) {
+        const dy = Number(cursorMoveMatch[1] ?? "1");
+        this.y += cursorMoveMatch[2] === "A" ? -dy : dy;
+      }
     }
     callback();
   }
