@@ -30,7 +30,7 @@ async function run(urls: Array<string>): Promise<string> {
           },
           onSuccess: () => {
             progress[index] = 1;
-            const osName = OS_LIST[index] ?? "UNKNOWN";
+            const osName = OS_LIST[index] ?? ("UNKNOWN" as OSName);
             const asset: Asset = {
               hash: hash.digest("hex"),
               url,
@@ -50,7 +50,7 @@ async function run(urls: Array<string>): Promise<string> {
 
 function guessFileName(url: string, osName: OSName): string {
   const match = /github\.com\/[^/]+\/([^/]+)/.exec(url);
-  const name = match === null ? "UNKNOWN" : match[1];
+  const name = match === null || match[1] === undefined ? "UNKNOWN" : match[1];
   return osName === "windows" ? `${name}.exe` : name;
 }
 

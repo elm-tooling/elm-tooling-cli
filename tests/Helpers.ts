@@ -184,7 +184,10 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
         default: {
           const match = cursorMove.exec(part);
           if (match !== null) {
-            const { dx, dy } = parseCursorMove(Number(match[1]), match[2]);
+            const { dx, dy } = parseCursorMove(
+              Number(match[1]),
+              match[2] as string
+            );
             const cursor = { x: this.cursor.x + dx, y: this.cursor.y + dy };
             if (cursor.x < 0 || cursor.y < 0) {
               callback(
@@ -205,7 +208,7 @@ export class CursorWriteStream extends stream.Writable implements WriteStream {
             if (yDiff > 0) {
               this.lines.push(...Array.from({ length: yDiff }, () => ""));
             }
-            const line = this.lines[this.cursor.y];
+            const line = this.lines[this.cursor.y] ?? "";
             const xDiff = this.cursor.x - line.replace(color, "").length;
             const paddedLine = xDiff > 0 ? line + " ".repeat(xDiff) : line;
             const partLength = part.replace(color, "").length;

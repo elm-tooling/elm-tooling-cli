@@ -22,7 +22,10 @@ export function readFile(filePath: string): string {
 function join<T>(listOfLists: Array<Array<T>>): Array<Array<T | undefined>> {
   const longestLength = Math.max(0, ...listOfLists.map((list) => list.length));
   return Array.from({ length: longestLength }, (_, i) =>
-    Array.from({ length: listOfLists.length }, (_2, j) => listOfLists[j][i])
+    Array.from(
+      { length: listOfLists.length },
+      (_2, j) => (listOfLists[j] as Array<T>)[i]
+    )
   );
 }
 
@@ -171,8 +174,8 @@ export async function run({
   update = false,
 }: { update?: boolean } = {}): Promise<void> {
   const variants: Array<Array<readonly [string, string]>> = join(
-    Object.keys(KNOWN_TOOLS).map((name) =>
-      Object.keys(KNOWN_TOOLS[name]).map((version) => [name, version] as const)
+    Object.entries(KNOWN_TOOLS).map(([name, versions]) =>
+      Object.keys(versions).map((version) => [name, version] as const)
     )
   ).map((tools) => removeUndefined(tools));
 

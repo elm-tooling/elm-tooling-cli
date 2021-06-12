@@ -7,13 +7,22 @@ import {
   Either,
   Env,
   findClosest,
+  getOwn,
   indent,
+  isNonEmptyArray,
   isRecord,
+  mapNonEmptyArray,
   NonEmptyArray,
   partitionMap,
   printNumErrors,
 } from "./Helpers";
-import { Asset, KNOWN_TOOLS, OSName } from "./KnownTools";
+import {
+  Asset,
+  KNOWN_TOOL_NAMES,
+  KNOWN_TOOLS,
+  OSAssets,
+  OSName,
+} from "./KnownTools";
 
 export const isWindows = os.platform() === "win32";
 
@@ -166,9 +175,7 @@ export function getOSNameAsFieldResult(): FieldResult<OSName> {
     ? // istanbul ignore next
       {
         tag: "Error" as const,
-        errors: [
-          { path: [], message: osName.message },
-        ] as NonEmptyArray<FieldError>,
+        errors: [{ path: [], message: osName.message }],
       }
     : {
         tag: "Parsed",
@@ -198,10 +205,13 @@ export function prefixFieldResult<T>(
     case "Error":
       return {
         tag: "Error",
-        errors: fieldResult.errors.map(({ path: fieldPath, message }) => ({
-          path: [prefix, ...fieldPath],
-          message,
-        })) as NonEmptyArray<FieldError>,
+        errors: mapNonEmptyArray(
+          fieldResult.errors,
+          ({ path: fieldPath, message }) => ({
+            path: [prefix, ...fieldPath],
+            message,
+          })
+        ),
       };
 
     case "Parsed":
@@ -262,7 +272,7 @@ function parseEntrypoints(
     };
   }
 
-  if (json.length === 0) {
+  if (!isNonEmptyArray(json)) {
     return {
       tag: "Error",
       errors: [
@@ -358,13 +368,16 @@ function parseEntrypoints(
       };
     });
 
-  if (errors.length > 0) {
+  if (isNonEmptyArray(errors)) {
     return {
       tag: "Error",
-      errors: errors as NonEmptyArray<FieldError>,
+      errors,
     };
   }
 
+  // At this point `entrypoints` must be non-empty, because `errors` and
+  // `entrypoints` are the left and right of a partition of a non-empty list,
+  // and `errors` was shown to be empty above.
   return { tag: "Parsed", parsed: entrypoints as NonEmptyArray<Entrypoint> };
 }
 
@@ -404,25 +417,21 @@ function parseTools(
         };
       }
 
-      const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
-        ? KNOWN_TOOLS[name]
-        : undefined;
+      const versions = getOwn(KNOWN_TOOLS, name);
 
       if (versions === undefined) {
         return {
           tag: "Left",
           value: {
             path: [name],
-            message: `Unknown tool\nKnown tools: ${Object.keys(
-              KNOWN_TOOLS
-            ).join(", ")}`,
+            message: `Unknown tool\nKnown tools: ${KNOWN_TOOL_NAMES.join(
+              ", "
+            )}`,
           },
         };
       }
 
-      const osAssets = Object.prototype.hasOwnProperty.call(versions, version)
-        ? versions[version]
-        : undefined;
+      const osAssets = getOwn(versions, version);
 
       if (osAssets === undefined) {
         return {
@@ -464,10 +473,10 @@ function parseTools(
     }
   );
 
-  if (errors.length > 0) {
+  if (isNonEmptyArray(errors)) {
     return {
       tag: "Error",
-      errors: errors as NonEmptyArray<FieldError>,
+      errors,
     };
   }
 
@@ -514,7 +523,7 @@ export function printFieldErrors(errors: Array<FieldError>): string {
 
 function joinPath(errorPath: Array<number | string>): string {
   // istanbul ignore if
-  if (errorPath.length === 0) {
+  if (!isNonEmptyArray(errorPath)) {
     return "General";
   }
   const rest = errorPath
@@ -553,15 +562,11 @@ export function getToolThrowing({
     throw osName;
   }
 
-  const versions = Object.prototype.hasOwnProperty.call(KNOWN_TOOLS, name)
-    ? KNOWN_TOOLS[name]
-    : undefined;
+  const versions = getOwn(KNOWN_TOOLS, name);
 
   if (versions === undefined) {
     throw new Error(
-      `Unknown tool: ${name}\nKnown tools: ${Object.keys(KNOWN_TOOLS).join(
-        ", "
-      )}`
+      `Unknown tool: ${name}\nKnown tools: ${KNOWN_TOOL_NAMES.join(", ")}`
     );
   }
 
@@ -578,7 +583,9 @@ export function getToolThrowing({
     );
   }
 
-  const asset = versions[matchingVersion][osName];
+  // `matchingVersion` is derived from `Object.keys` above, so it’s safe to use
+  // as index.
+  const asset = (versions[matchingVersion] as OSAssets)[osName];
 
   return makeTool(cwd, env, name, matchingVersion, asset);
 }

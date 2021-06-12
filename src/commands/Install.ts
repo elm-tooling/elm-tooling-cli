@@ -12,11 +12,18 @@ import {
   Env,
   flatMap,
   indent,
+  isNonEmptyArray,
   partitionMap,
   printNumErrors,
   removeColor,
 } from "../Helpers";
-import { AssetType, KNOWN_TOOLS, OSName } from "../KnownTools";
+import {
+  AssetType,
+  KNOWN_TOOL_NAMES,
+  KNOWN_TOOLS,
+  KnownToolNames,
+  OSName,
+} from "../KnownTools";
 import { linkTool, unlinkTool } from "../Link";
 import type { Logger } from "../Logger";
 import {
@@ -170,7 +177,10 @@ async function installTools(
         tools.missing
           .map(
             (tool, index) =>
-              `${bold(toolsProgress[index])} ${tool.name} ${tool.version}`
+              // We know that `index` is in range here.
+              `${bold(toolsProgress[index] as string)} ${tool.name} ${
+                tool.version
+              }`
           )
           .join("\n")
       );
@@ -183,7 +193,7 @@ async function installTools(
   const presentNames = tools.missing
     .concat(tools.existing)
     .map(({ name }) => name);
-  const toolsToRemove = Object.keys(KNOWN_TOOLS).filter(
+  const toolsToRemove = KNOWN_TOOL_NAMES.filter(
     (name) => !presentNames.includes(name)
   );
 
@@ -274,7 +284,7 @@ function removeAllTools(
     env,
     osName,
     nodeModulesBinPath,
-    Object.keys(KNOWN_TOOLS)
+    KNOWN_TOOL_NAMES
   );
 
   if (results.every((result) => result === undefined)) {
@@ -290,12 +300,12 @@ function removeTools(
   env: Env,
   osName: OSName,
   nodeModulesBinPath: string,
-  names: Array<string>
+  names: Array<KnownToolNames>
 ): Array<Error | string | undefined> {
   return flatMap(names, (name) => {
     const versions = KNOWN_TOOLS[name];
-    return Object.keys(versions).map((version) => {
-      const asset = versions[version][osName];
+    return Object.entries(versions).map(([version, foo]) => {
+      const asset = foo[osName];
       const tool = makeTool(cwd, env, name, version, asset);
       return unlinkTool(cwd, nodeModulesBinPath, tool);
     });
@@ -439,9 +449,10 @@ export function downloadFile(
     stderr += chunk.toString();
     // Extract progress percentage from curl/wget.
     const matches = stderr.match(/\d+(?:[.,]\d+)?%/g) ?? [];
-    if (matches.length > 0) {
+    if (isNonEmptyArray(matches)) {
       callOnProgressIfReasonable(
-        parseFloat(matches[matches.length - 1].replace(",", ".")) / 100,
+        parseFloat((matches[matches.length - 1] as string).replace(",", ".")) /
+          100,
         onProgress
       );
     }

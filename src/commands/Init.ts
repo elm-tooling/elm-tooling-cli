@@ -9,11 +9,12 @@ import {
   findClosest,
   flatMap,
   fromEntries,
+  isNonEmptyArray,
   isRecord,
-  NonEmptyArray,
+  split,
   toJSON,
 } from "../Helpers";
-import { KNOWN_TOOLS, KnownToolNames } from "../KnownTools";
+import { getLastVersion, KNOWN_TOOLS, KnownToolNames } from "../KnownTools";
 import type { Logger } from "../Logger";
 import {
   getLatestVersionInRange,
@@ -57,20 +58,12 @@ export async function init(
     getOSName() instanceof Error
       ? /* istanbul ignore next */ undefined
       : tryGuessToolsFromNodeModules(cwd, env) ??
-        fromEntries(
-          DEFAULT_TOOLS.map((name) => {
-            const versions = Object.keys(KNOWN_TOOLS[name]);
-            return [name, versions[versions.length - 1]];
-          })
-        );
+        fromEntries(DEFAULT_TOOLS.map((name) => [name, getLastVersion(name)]));
 
   const elmVersionFromElmJson = getElmVersionFromElmJson(cwd);
 
   const json: ElmTooling = {
-    entrypoints:
-      entrypoints.length === 0
-        ? undefined
-        : (entrypoints as NonEmptyArray<string>),
+    entrypoints: isNonEmptyArray(entrypoints) ? entrypoints : undefined,
     tools:
       elmVersionFromElmJson === undefined
         ? tools
@@ -150,14 +143,14 @@ function tryGetSourceDirectories(cwd: string): Array<string> {
           ? path.resolve(path.dirname(elmJsonPath), item)
           : []
       );
-      if (directories.length === 0) {
+      if (!isNonEmptyArray(directories)) {
         throw new Error(
           `Expected "source-directories" to contain at least one string but got: ${JSON.stringify(
             elmJson["source-directories"]
           )}`
         );
       }
-      return directories as NonEmptyArray<string>;
+      return directories;
     }
 
     case "package":
@@ -204,8 +197,8 @@ function tryGuessToolsFromNodeModules(
   }
 
   const pairs: Array<[string, string]> = flatMap(
-    Object.keys(KNOWN_TOOLS),
-    (name) => {
+    Object.entries(KNOWN_TOOLS),
+    ([name, versions]) => {
       try {
         const pkg: unknown = JSON.parse(
           fs.readFileSync(
@@ -223,13 +216,13 @@ function tryGuessToolsFromNodeModules(
         }
 
         // Exact version match.
-        if (Object.hasOwnProperty.call(KNOWN_TOOLS[name], version)) {
+        if (Object.hasOwnProperty.call(versions, version)) {
           return [[name, version]];
         }
 
         // Support for example 0.19.1-3 -> 0.19.1.
-        const alternateVersion = version.split(/[+-]/)[0];
-        if (Object.hasOwnProperty.call(KNOWN_TOOLS[name], alternateVersion)) {
+        const alternateVersion = split(version, /[+-]/)[0];
+        if (Object.hasOwnProperty.call(versions, alternateVersion)) {
           return [[name, alternateVersion]];
         }
 
@@ -292,8 +285,10 @@ function getElmVersionFromElmJsonHelper(cwd: string): string {
       const [, lowerBoundInclusive, upperBoundExclusive] = match;
 
       const version = getLatestVersionInRange(
-        lowerBoundInclusive,
-        upperBoundExclusive,
+        // `lowerBoundInclusive` and `upperBoundExclusive` are always matched in
+        // the regex, but TypeScript doesn’t know that.
+        lowerBoundInclusive as string,
+        upperBoundExclusive as string,
         Object.keys(KNOWN_TOOLS.elm).reverse()
       );
 
