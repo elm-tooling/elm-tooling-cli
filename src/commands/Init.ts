@@ -11,6 +11,7 @@ import {
   fromEntries,
   isNonEmptyArray,
   isRecord,
+  NonEmptyArray,
   split,
   toJSON,
 } from "../Helpers";
@@ -23,7 +24,11 @@ import {
   isWindows,
 } from "../Parse";
 
-const DEFAULT_TOOLS: Array<KnownToolNames> = ["elm", "elm-format", "elm-json"];
+const DEFAULT_TOOLS: NonEmptyArray<KnownToolNames> = [
+  "elm",
+  "elm-format",
+  "elm-json",
+];
 DEFAULT_TOOLS.sort((a, b) => a.localeCompare(b));
 
 export async function init(
@@ -241,7 +246,7 @@ function tryGuessToolsFromNodeModules(
     }
   );
 
-  return pairs.length > 0 ? fromEntries(pairs) : undefined;
+  return isNonEmptyArray(pairs) ? fromEntries(pairs) : undefined;
 }
 
 function getElmVersionFromElmJson(cwd: string): string | undefined {

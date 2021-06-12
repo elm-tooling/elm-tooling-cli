@@ -4,6 +4,7 @@ import {
   elmToolingJsonDocumentationLink,
   Env,
   indent,
+  isNonEmptyArray,
   KNOWN_FIELDS,
   NonEmptyArray,
 } from "../Helpers";
@@ -50,7 +51,7 @@ export function validate(cwd: string, env: Env, logger: Logger): number {
         ...toolsErrors.errors,
       ];
 
-      if (validationErrors.length === 0) {
+      if (!isNonEmptyArray(validationErrors)) {
         logger.log(bold(parseResult.elmToolingJsonPath));
         logger.log("No errors found.");
         return 0;
@@ -58,7 +59,10 @@ export function validate(cwd: string, env: Env, logger: Logger): number {
         logger.error(bold(parseResult.elmToolingJsonPath));
         logger.error("");
         logger.error(printFieldErrors(validationErrors));
-        if (toolsErrors.tag === "Missing" && toolsErrors.errors.length > 0) {
+        if (
+          toolsErrors.tag === "Missing" &&
+          isNonEmptyArray(toolsErrors.errors)
+        ) {
           logger.error("");
           logger.error(missingToolsText);
         }

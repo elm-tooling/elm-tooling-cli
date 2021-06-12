@@ -13,6 +13,7 @@ import {
   flatMap,
   indent,
   isNonEmptyArray,
+  mapNonEmptyArray,
   partitionMap,
   printNumErrors,
   removeColor,
@@ -172,17 +173,16 @@ async function installTools(
       }
       toolsProgress[index] = progressString;
     }
-    if (tools.missing.length > 0) {
+    if (isNonEmptyArray(tools.missing)) {
       logger.progress(
-        tools.missing
-          .map(
-            (tool, index) =>
-              // We know that `index` is in range here.
-              `${bold(toolsProgress[index] as string)} ${tool.name} ${
-                tool.version
-              }`
-          )
-          .join("\n")
+        mapNonEmptyArray(
+          tools.missing,
+          (tool, index) =>
+            // We know that `index` is in range here.
+            `${bold(toolsProgress[index] as string)} ${tool.name} ${
+              tool.version
+            }`
+        ).join("\n")
       );
     }
   };
@@ -236,11 +236,11 @@ function printResults(
     result instanceof Error ? result : []
   );
 
-  if (messages.length > 0) {
+  if (isNonEmptyArray(messages)) {
     logger.log(messages.join("\n"));
   }
 
-  if (installErrors.length > 0) {
+  if (isNonEmptyArray(installErrors)) {
     logger.error("");
     logger.error(
       [

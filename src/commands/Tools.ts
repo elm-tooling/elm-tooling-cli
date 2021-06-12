@@ -325,12 +325,11 @@ function updateElmToolingJson(
   originalObject: Record<string, unknown>,
   toolsList: Array<ToolChoice>
 ): void {
-  const tools =
-    toolsList.length === 0
-      ? undefined
-      : fromEntries(
-          sortTools(toolsList).map(({ name, version }) => [name, version])
-        );
+  const tools = isNonEmptyArray(toolsList)
+    ? fromEntries(
+        sortTools(toolsList).map(({ name, version }) => [name, version])
+      )
+    : undefined;
 
   fs.writeFileSync(elmToolingJsonPath, toJSON({ ...originalObject, tools }));
 }

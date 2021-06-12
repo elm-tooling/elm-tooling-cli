@@ -512,7 +512,7 @@ export function makeTool(
   };
 }
 
-export function printFieldErrors(errors: Array<FieldError>): string {
+export function printFieldErrors(errors: NonEmptyArray<FieldError>): string {
   return [
     printNumErrors(errors.length),
     ...errors.map(

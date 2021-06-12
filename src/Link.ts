@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { bold, dim, indent } from "./Helpers";
+import { bold, dim, indent, NonEmptyArray } from "./Helpers";
 import { isWindows, Tool } from "./Parse";
 
 type LinkResult = Error | "AllGood" | "Created";
@@ -10,7 +10,7 @@ type UnlinkResult = Error | "DidNothing" | "Removed";
 
 type Strategy =
   | { tag: "Link"; linkPath: string }
-  | { tag: "Shims"; items: Array<[string, string]> };
+  | { tag: "Shims"; items: NonEmptyArray<[string, string]> };
 
 export function linkTool(
   cwd: string,
@@ -188,7 +188,7 @@ function removeSymlink(tool: Tool, linkPath: string): UnlinkResult {
 // istanbul ignore next
 function symlinkShimWindows(
   tool: Tool,
-  items: Array<[string, string]>
+  items: NonEmptyArray<[string, string]>
 ): LinkResult {
   try {
     if (
