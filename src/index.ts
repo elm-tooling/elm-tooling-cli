@@ -5,7 +5,7 @@ import { init } from "./commands/Init";
 import { install } from "./commands/Install";
 import { toolsCommand } from "./commands/Tools";
 import { validate } from "./commands/Validate";
-import type { Env, ReadStream, WriteStream } from "./Helpers";
+import { Env, join, ReadStream, WriteStream } from "./Helpers";
 import { makeLogger } from "./Logger";
 
 type Options = {
@@ -41,7 +41,7 @@ export default async function elmToolingCli(
   // Let each command handle this when needed.
   if (args.length > 1) {
     logger.error(
-      `Expected a single argument but got: ${args.slice(1).join(" ")}`
+      `Expected a single argument but got: ${join(args.slice(1), " ")}`
     );
     return 1;
   }

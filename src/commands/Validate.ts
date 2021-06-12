@@ -5,6 +5,7 @@ import {
   Env,
   indent,
   isNonEmptyArray,
+  join,
   KNOWN_FIELDS,
   NonEmptyArray,
 } from "../Helpers";
@@ -45,7 +46,7 @@ export function validate(cwd: string, env: Env, logger: Logger): number {
       const validationErrors: Array<FieldError> = [
         ...parseResult.unknownFields.map((field) => ({
           path: [field],
-          message: `Unknown field\nKnown fields: ${KNOWN_FIELDS.join(", ")}`,
+          message: `Unknown field\nKnown fields: ${join(KNOWN_FIELDS, ", ")}`,
         })),
         ...entrypointsErrors,
         ...toolsErrors.errors,

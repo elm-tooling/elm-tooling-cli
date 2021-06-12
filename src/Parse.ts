@@ -11,6 +11,7 @@ import {
   indent,
   isNonEmptyArray,
   isRecord,
+  join,
   mapNonEmptyArray,
   NonEmptyArray,
   partitionMap,
@@ -424,7 +425,8 @@ function parseTools(
           tag: "Left",
           value: {
             path: [name],
-            message: `Unknown tool\nKnown tools: ${KNOWN_TOOL_NAMES.join(
+            message: `Unknown tool\nKnown tools: ${join(
+              KNOWN_TOOL_NAMES,
               ", "
             )}`,
           },
@@ -438,9 +440,10 @@ function parseTools(
           tag: "Left",
           value: {
             path: [name],
-            message: `Unknown version: ${version}\nKnown versions: ${Object.keys(
-              versions
-            ).join(", ")}`,
+            message: `Unknown version: ${version}\nKnown versions: ${join(
+              Object.keys(versions),
+              ", "
+            )}`,
           },
         };
       }
@@ -513,12 +516,15 @@ export function makeTool(
 }
 
 export function printFieldErrors(errors: NonEmptyArray<FieldError>): string {
-  return [
-    printNumErrors(errors.length),
-    ...errors.map(
-      (error) => `${bold(joinPath(error.path))}\n${indent(error.message)}`
-    ),
-  ].join("\n\n");
+  return join(
+    [
+      printNumErrors(errors.length),
+      ...errors.map(
+        (error) => `${bold(joinPath(error.path))}\n${indent(error.message)}`
+      ),
+    ],
+    "\n\n"
+  );
 }
 
 function joinPath(errorPath: Array<number | string>): string {
@@ -529,7 +535,7 @@ function joinPath(errorPath: Array<number | string>): string {
   const rest = errorPath
     .slice(1)
     .map((segment) => `[${JSON.stringify(segment)}]`);
-  return `${errorPath[0]}${rest.join("")}`;
+  return `${errorPath[0]}${join(rest, "")}`;
 }
 
 const versionRangeRegex = /^([=~^])(\d+)\.(\d+)\.(\d+)([+-].+)?$/;
@@ -566,7 +572,7 @@ export function getToolThrowing({
 
   if (versions === undefined) {
     throw new Error(
-      `Unknown tool: ${name}\nKnown tools: ${KNOWN_TOOL_NAMES.join(", ")}`
+      `Unknown tool: ${name}\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`
     );
   }
 
@@ -577,9 +583,10 @@ export function getToolThrowing({
 
   if (matchingVersion === undefined) {
     throw new Error(
-      `No ${name} versions matching: ${versionRange}\nKnown versions: ${Object.keys(
-        versions
-      ).join(", ")}`
+      `No ${name} versions matching: ${versionRange}\nKnown versions: ${join(
+        Object.keys(versions),
+        ", "
+      )}`
     );
   }
 

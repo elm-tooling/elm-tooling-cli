@@ -10,6 +10,7 @@ import {
   fromEntries,
   HIDE_CURSOR,
   isNonEmptyArray,
+  join,
   ReadStream,
   SHOW_CURSOR,
   toJSON,
@@ -193,23 +194,25 @@ async function start(
 }
 
 function draw(tools: Array<ToolChoice>): string {
-  return Object.entries(KNOWN_TOOLS)
-    .map(([name, versionObjects]) => {
+  return join(
+    Object.entries(KNOWN_TOOLS).map(([name, versionObjects]) => {
       const versions = Object.keys(versionObjects);
       const selectedIndex = versions.findIndex((version) =>
         tools.some((tool) => tool.name === name && tool.version === version)
       );
-      const versionsString = versions
-        .map((version, index) => {
+      const versionsString = join(
+        versions.map((version, index) => {
           const marker = index === selectedIndex ? bold("x") : " ";
           return `  ${dim("[")}${marker}${dim("]")} ${
             index === selectedIndex ? version : dim(version)
           }`;
-        })
-        .join("\n");
+        }),
+        "\n"
+      );
       return `${bold(name)}\n${versionsString}`;
-    })
-    .join("\n\n");
+    }),
+    "\n\n"
+  );
 }
 
 const instructions = `

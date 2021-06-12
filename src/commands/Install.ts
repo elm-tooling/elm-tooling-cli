@@ -13,6 +13,7 @@ import {
   flatMap,
   indent,
   isNonEmptyArray,
+  join,
   mapNonEmptyArray,
   partitionMap,
   printNumErrors,
@@ -175,14 +176,17 @@ async function installTools(
     }
     if (isNonEmptyArray(tools.missing)) {
       logger.progress(
-        mapNonEmptyArray(
-          tools.missing,
-          (tool, index) =>
-            // We know that `index` is in range here.
-            `${bold(toolsProgress[index] as string)} ${tool.name} ${
-              tool.version
-            }`
-        ).join("\n")
+        join(
+          mapNonEmptyArray(
+            tools.missing,
+            (tool, index) =>
+              // We know that `index` is in range here.
+              `${bold(toolsProgress[index] as string)} ${tool.name} ${
+                tool.version
+              }`
+          ),
+          "\n"
+        )
       );
     }
   };
@@ -237,16 +241,19 @@ function printResults(
   );
 
   if (isNonEmptyArray(messages)) {
-    logger.log(messages.join("\n"));
+    logger.log(join(messages, "\n"));
   }
 
   if (isNonEmptyArray(installErrors)) {
     logger.error("");
     logger.error(
-      [
-        printNumErrors(installErrors.length),
-        ...installErrors.map((error) => error.message),
-      ].join("\n\n")
+      join(
+        [
+          printNumErrors(installErrors.length),
+          ...installErrors.map((error) => error.message),
+        ],
+        "\n\n"
+      )
     );
     return 1;
   }
@@ -424,7 +431,7 @@ function adjustPathForWindows(pathString: string): string {
         ? { tag: "Left", value: part }
         : { tag: "Right", value: part }
   );
-  return [...system32, ...rest].join(path.delimiter);
+  return join([...system32, ...rest], path.delimiter);
 }
 
 export function downloadFile(

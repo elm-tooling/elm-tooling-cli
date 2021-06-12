@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { bold, dim, indent, NonEmptyArray } from "./Helpers";
+import { bold, dim, indent, join, NonEmptyArray } from "./Helpers";
 import { isWindows, Tool } from "./Parse";
 
 type LinkResult = Error | "AllGood" | "Created";
@@ -261,12 +261,14 @@ function removeSymlinkShimWindows(
 export function makeShScript(toolAbsolutePath: string): string {
   return lf(`
 #!/bin/sh
-${toolAbsolutePath
-  .split(/(')/)
-  .map((segment) =>
-    segment === "" ? "" : segment === "'" ? "\\'" : `'${segment}'`
-  )
-  .join("")} "$@"
+${join(
+  toolAbsolutePath
+    .split(/(')/)
+    .map((segment) =>
+      segment === "" ? "" : segment === "'" ? "\\'" : `'${segment}'`
+    ),
+  ""
+)} "$@"
 `);
 }
 

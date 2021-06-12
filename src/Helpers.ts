@@ -153,3 +153,10 @@ export function mapNonEmptyArray<T, U>(
 ): NonEmptyArray<U> {
   return array.map(f) as NonEmptyArray<U>;
 }
+
+/**
+ * More type safe version of `Array#join`.
+ */
+export function join(array: Array<string>, separator: string): string {
+  return array.join(separator);
+}
