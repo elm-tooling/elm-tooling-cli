@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as rimraf from "rimraf";
 
-import elmToolingCli from "..";
+import elmToolingCli from "../src";
 
 export async function run(): Promise<void> {
   const dir = path.join(

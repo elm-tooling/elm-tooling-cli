@@ -2,7 +2,6 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
-import { Asset, KNOWN_TOOLS, OSName } from "./known-tools";
 import {
   bold,
   Either,
@@ -13,7 +12,8 @@ import {
   NonEmptyArray,
   partitionMap,
   printNumErrors,
-} from "./mixed";
+} from "./Helpers";
+import { Asset, KNOWN_TOOLS, OSName } from "./KnownTools";
 
 export const isWindows = os.platform() === "win32";
 

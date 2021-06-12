@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import help from "./commands/help";
-import init from "./commands/init";
-import install from "./commands/install";
-import tools from "./commands/tools";
-import validate from "./commands/validate";
-import { makeLogger } from "./helpers/logger";
-import type { Env, ReadStream, WriteStream } from "./helpers/mixed";
+import help from "./commands/Help";
+import init from "./commands/Init";
+import install from "./commands/Install";
+import tools from "./commands/Tools";
+import validate from "./commands/Validate";
+import type { Env, ReadStream, WriteStream } from "./Helpers";
+import { makeLogger } from "./Logger";
 
 type Options = {
   cwd?: string;

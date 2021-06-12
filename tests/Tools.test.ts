@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
 import {
   clean,
   CursorWriteStream,
@@ -10,7 +10,7 @@ import {
   RawReadStream,
   readFile,
   stringSnapshotSerializer,
-} from "./helpers";
+} from "./Helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "tools");
 

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as rimraf from "rimraf";
 
-import getExecutable from "../getExecutable";
+import getExecutable from "../src/getExecutable";
 
 const WORK_DIR = path.join(__dirname, "workdirs", "getExecutable");
 

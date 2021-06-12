@@ -1,4 +1,3 @@
-import type { Logger } from "../helpers/logger";
 import {
   bold,
   dim,
@@ -7,7 +6,8 @@ import {
   indent,
   KNOWN_FIELDS,
   NonEmptyArray,
-} from "../helpers/mixed";
+} from "../Helpers";
+import type { Logger } from "../Logger";
 import {
   Entrypoint,
   FieldError,
@@ -15,7 +15,7 @@ import {
   findReadAndParseElmToolingJson,
   printFieldErrors,
   Tools,
-} from "../helpers/parse";
+} from "../Parse";
 
 export default function validate(
   cwd: string,

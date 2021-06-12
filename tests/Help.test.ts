@@ -1,11 +1,11 @@
-import type { Env } from "../helpers/mixed";
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
+import type { Env } from "../src/Helpers";
 import {
   clean,
   FailReadStream,
   MemoryWriteStream,
   stringSnapshotSerializer,
-} from "./helpers";
+} from "./Helpers";
 
 async function helpHelper(args: Array<string>, env: Env): Promise<string> {
   const stdout = new MemoryWriteStream();

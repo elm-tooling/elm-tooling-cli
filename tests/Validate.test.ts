@@ -1,12 +1,12 @@
 import * as path from "path";
 
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
 import {
   clean,
   FailReadStream,
   MemoryWriteStream,
   stringSnapshotSerializer,
-} from "./helpers";
+} from "./Helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "validate");
 

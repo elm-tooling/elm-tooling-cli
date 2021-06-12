@@ -1,10 +1,10 @@
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
 import {
   clean,
   FailReadStream,
   MemoryWriteStream,
   stringSnapshotSerializer,
-} from "./helpers";
+} from "./Helpers";
 
 async function indexHelper(args: Array<string>): Promise<string> {
   const stdout = new MemoryWriteStream();

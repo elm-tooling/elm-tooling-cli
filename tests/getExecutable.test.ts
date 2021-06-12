@@ -1,8 +1,8 @@
 import * as path from "path";
 
-import getExecutable from "../getExecutable";
-import { getLatestMatchingVersion } from "../helpers/parse";
-import { clean, IS_WINDOWS, stringSnapshotSerializer } from "./helpers";
+import getExecutable from "../src/getExecutable";
+import { getLatestMatchingVersion } from "../src/Parse";
+import { clean, IS_WINDOWS, stringSnapshotSerializer } from "./Helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "getExecutable");
 

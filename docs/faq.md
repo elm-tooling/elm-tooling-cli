@@ -258,7 +258,7 @@ The [asdf](https://asdf-vm.com/) version manager has support for [Elm](https://g
 
 ## Which tools are supported?
 
-Since Elm tools are so few and update so infrequently, `elm-tooling` can go with a very simple and reliable approach: Supported tool names, versions and SHA256 are hard coded – see [known-tools](https://github.com/elm-tooling/elm-tooling-cli/blob/main/helpers/known-tools.ts).
+Since Elm tools are so few and update so infrequently, `elm-tooling` can go with a very simple and reliable approach: Supported tool names, versions and SHA256 are hard coded – see [KnownTools.ts](https://github.com/elm-tooling/elm-tooling-cli/blob/main/src/KnownTools.ts).
 
 Open an issue or pull request if you’d like to see support for another tool or version!
 

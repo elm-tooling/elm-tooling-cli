@@ -1,8 +1,8 @@
 import * as crypto from "crypto";
 
-import { downloadFile } from "../commands/install";
-import type { Asset, AssetType, OSName } from "../helpers/known-tools";
-import { fromEntries } from "../helpers/mixed";
+import { downloadFile } from "../src/commands/Install";
+import { fromEntries } from "../src/Helpers";
+import type { Asset, AssetType, OSName } from "../src/KnownTools";
 
 const OS_LIST: Array<OSName> = ["linux", "mac", "windows"];
 

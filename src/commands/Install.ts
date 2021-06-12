@@ -5,9 +5,6 @@ import * as https from "https";
 import * as path from "path";
 import * as zlib from "zlib";
 
-import { AssetType, KNOWN_TOOLS, OSName } from "../helpers/known-tools";
-import { linkTool, unlinkTool } from "../helpers/link";
-import type { Logger } from "../helpers/logger";
 import {
   bold,
   dim,
@@ -18,7 +15,10 @@ import {
   partitionMap,
   printNumErrors,
   removeColor,
-} from "../helpers/mixed";
+} from "../Helpers";
+import { AssetType, KNOWN_TOOLS, OSName } from "../KnownTools";
+import { linkTool, unlinkTool } from "../Link";
+import type { Logger } from "../Logger";
 import {
   findReadAndParseElmToolingJson,
   getOSNameAsFieldResult,
@@ -30,7 +30,7 @@ import {
   Tool,
   Tools,
   validateFileExists,
-} from "../helpers/parse";
+} from "../Parse";
 
 const EMPTY_STDERR = dim("(empty stderr)");
 

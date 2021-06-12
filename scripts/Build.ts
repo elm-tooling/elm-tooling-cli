@@ -23,8 +23,8 @@ type FileToCopy = {
 
 const FILES_TO_COPY: Array<FileToCopy> = [
   { src: "LICENSE" },
-  { src: "index.d.ts" },
-  { src: "getExecutable.d.ts" },
+  { src: "src/index.d.ts", dest: "index.d.ts" },
+  { src: "src/getExecutable.d.ts", dest: "getExecutable.d.ts" },
   { src: "package-real.json", dest: "package.json" },
   { src: "README-npm.md", dest: "README.md" },
 ];
@@ -57,7 +57,7 @@ function adjustDefaultExport(content: string): string {
 
 modifyFile(path.join(BUILD, "index.js"), adjustDefaultExport);
 modifyFile(path.join(BUILD, "getExecutable.js"), adjustDefaultExport);
-modifyFile(path.join(BUILD, "commands", "help.js"), (content) =>
+modifyFile(path.join(BUILD, "commands", "Help.js"), (content) =>
   content.replace(/%VERSION%/g, PKG.version)
 );
 

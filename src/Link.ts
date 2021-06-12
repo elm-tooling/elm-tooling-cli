@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { bold, dim, indent } from "./mixed";
-import { isWindows, Tool } from "./parse";
+import { bold, dim, indent } from "./Helpers";
+import { isWindows, Tool } from "./Parse";
 
 type LinkResult = Error | "AllGood" | "Created";
 

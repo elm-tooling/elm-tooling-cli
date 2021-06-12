@@ -1,15 +1,15 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import type { ElmTooling } from "../helpers/mixed";
-import elmToolingCli from "../index";
+import elmToolingCli from "../src";
+import type { ElmTooling } from "../src/Helpers";
 import {
   clean,
   FailReadStream,
   MemoryWriteStream,
   readFile,
   stringSnapshotSerializer,
-} from "./helpers";
+} from "./Helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "init");
 

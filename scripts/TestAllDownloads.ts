@@ -5,18 +5,13 @@ import * as readline from "readline";
 import * as rimraf from "rimraf";
 import * as stream from "stream";
 
-import elmToolingCli from "..";
-import { KNOWN_TOOLS } from "../helpers/known-tools";
-import {
-  ElmTooling,
-  flatMap,
-  fromEntries,
-  WriteStream,
-} from "../helpers/mixed";
+import elmToolingCli from "../src";
+import { ElmTooling, flatMap, fromEntries, WriteStream } from "../src/Helpers";
+import { KNOWN_TOOLS } from "../src/KnownTools";
 
-const WORK_DIR = path.join(__dirname, "workdirs", "all-downloads");
-const EXPECTED_FILE = path.join(__dirname, "all-downloads.expected.txt");
-const ACTUAL_FILE = path.join(__dirname, "all-downloads.actual.txt");
+const WORK_DIR = path.join(__dirname, "workdirs", "TestAllDownloads");
+const EXPECTED_FILE = path.join(__dirname, "TestAllDownloads.expected.txt");
+const ACTUAL_FILE = path.join(__dirname, "TestAllDownloads.actual.txt");
 
 // Read file with normalized line endings to make snapshotting easier
 // cross-platform.
@@ -267,7 +262,7 @@ export async function run({
     if (actual !== expected) {
       fs.writeFileSync(ACTUAL_FILE, actual);
       throw new Error(
-        `Unexpected output. Run this to see the difference:\ngit diff --no-index scripts/all-downloads.expected.txt scripts/all-downloads.actual.txt`
+        `Unexpected output. Run this to see the difference:\ngit diff --no-index scripts/TestAllDownloads.expected.txt scripts/TestAllDownloads.actual.txt`
       );
     }
   }

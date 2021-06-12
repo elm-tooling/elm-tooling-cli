@@ -1,6 +1,6 @@
 import * as readline from "readline";
 
-import { Env, removeColor, WriteStream } from "./mixed";
+import { Env, removeColor, WriteStream } from "./Helpers";
 
 export type Logger = {
   handleColor: (string: string) => string;
