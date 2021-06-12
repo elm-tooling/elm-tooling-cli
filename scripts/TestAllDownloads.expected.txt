@@ -1,4 +1,4 @@
-all-downloads/
+TestAllDownloads/
   0/
     elm-tooling/
       elm/

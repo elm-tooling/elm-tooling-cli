@@ -13,14 +13,14 @@ import {
   SHOW_CURSOR,
   toJSON,
   WriteStream,
-} from "../helpers";
-import { KNOWN_TOOLS } from "../known-tools";
-import type { Logger } from "../logger";
+} from "../Helpers";
+import { KNOWN_TOOLS } from "../KnownTools";
+import type { Logger } from "../Logger";
 import {
   findReadAndParseElmToolingJson,
   printFieldErrors,
   Tool,
-} from "../parse";
+} from "../Parse";
 
 export default async function toolsCommand(
   cwd: string,

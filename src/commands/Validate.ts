@@ -6,8 +6,8 @@ import {
   indent,
   KNOWN_FIELDS,
   NonEmptyArray,
-} from "../helpers";
-import type { Logger } from "../logger";
+} from "../Helpers";
+import type { Logger } from "../Logger";
 import {
   Entrypoint,
   FieldError,
@@ -15,7 +15,7 @@ import {
   findReadAndParseElmToolingJson,
   printFieldErrors,
   Tools,
-} from "../parse";
+} from "../Parse";
 
 export default function validate(
   cwd: string,

@@ -15,10 +15,10 @@ import {
   partitionMap,
   printNumErrors,
   removeColor,
-} from "../helpers";
-import { AssetType, KNOWN_TOOLS, OSName } from "../known-tools";
-import { linkTool, unlinkTool } from "../link";
-import type { Logger } from "../logger";
+} from "../Helpers";
+import { AssetType, KNOWN_TOOLS, OSName } from "../KnownTools";
+import { linkTool, unlinkTool } from "../Link";
+import type { Logger } from "../Logger";
 import {
   findReadAndParseElmToolingJson,
   getOSNameAsFieldResult,
@@ -30,7 +30,7 @@ import {
   Tool,
   Tools,
   validateFileExists,
-} from "../parse";
+} from "../Parse";
 
 const EMPTY_STDERR = dim("(empty stderr)");
 

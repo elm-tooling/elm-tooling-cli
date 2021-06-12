@@ -6,5 +6,5 @@ dist
 elm-stuff
 node_modules
 scripts/workdirs
-scripts/all-downloads.actual.txt
+scripts/TestAllDownloads.actual.txt
 tmp.*

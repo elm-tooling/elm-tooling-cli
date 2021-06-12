@@ -8,7 +8,7 @@ import {
   ReadStream,
   SHOW_CURSOR,
   WriteStream,
-} from "../src/helpers";
+} from "../src/Helpers";
 
 export const IS_WINDOWS = os.platform() === "win32";
 

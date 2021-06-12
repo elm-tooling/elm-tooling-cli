@@ -18,10 +18,10 @@ module.exports = {
   collectCoverageFrom: ["src/**/*.ts"],
   coverageThreshold: {
     global: process.platform === "win32" ? ignoreCoverage : requireCoverage,
-    // Download is exercised in `scripts/test-all-downloads.ts`.
-    // The linking stuff gets coverage since it’s in `src/link.ts`.
+    // Download is exercised in `scripts/TestAllDownloads.ts`.
+    // The linking stuff gets coverage since it’s in `src/Link.ts`.
     // Testing error handling is still manual, though.
     // We still get 40-50% coverage at least.
-    "./src/commands/install.ts": ignoreCoverage,
+    "./src/commands/Install.ts": ignoreCoverage,
   },
 };

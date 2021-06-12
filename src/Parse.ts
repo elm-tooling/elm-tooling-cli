@@ -12,8 +12,8 @@ import {
   NonEmptyArray,
   partitionMap,
   printNumErrors,
-} from "./helpers";
-import { Asset, KNOWN_TOOLS, OSName } from "./known-tools";
+} from "./Helpers";
+import { Asset, KNOWN_TOOLS, OSName } from "./KnownTools";
 
 export const isWindows = os.platform() === "win32";
 

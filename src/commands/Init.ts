@@ -12,15 +12,15 @@ import {
   isRecord,
   NonEmptyArray,
   toJSON,
-} from "../helpers";
-import { KNOWN_TOOLS, KnownToolNames } from "../known-tools";
-import type { Logger } from "../logger";
+} from "../Helpers";
+import { KNOWN_TOOLS, KnownToolNames } from "../KnownTools";
+import type { Logger } from "../Logger";
 import {
   getLatestVersionInRange,
   getOSName,
   getToolThrowing,
   isWindows,
-} from "../parse";
+} from "../Parse";
 
 const DEFAULT_TOOLS: Array<KnownToolNames> = ["elm", "elm-format", "elm-json"];
 DEFAULT_TOOLS.sort((a, b) => a.localeCompare(b));

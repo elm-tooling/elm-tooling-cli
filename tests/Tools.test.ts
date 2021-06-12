@@ -10,7 +10,7 @@ import {
   RawReadStream,
   readFile,
   stringSnapshotSerializer,
-} from "./helpers";
+} from "./Helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "tools");
 

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import elmToolingCli from "../src";
-import type { Env } from "../src/helpers";
+import type { Env } from "../src/Helpers";
 import {
   clean,
   duoStream,
@@ -11,7 +11,7 @@ import {
   MemoryWriteStream,
   readFile,
   stringSnapshotSerializer,
-} from "./helpers";
+} from "./Helpers";
 
 const FIXTURES_DIR = path.join(__dirname, "fixtures", "install");
 
