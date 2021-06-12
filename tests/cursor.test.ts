@@ -8,7 +8,11 @@ expect.addSnapshotSerializer(stringSnapshotSerializer);
 describe("cursor", () => {
   test("moving back and forth with color", () => {
     const stream = new CursorWriteStream();
-    stream.on("error", fail);
+
+    // Should not error:
+    stream.on("error", (error) => {
+      expect(error).toBeUndefined();
+    });
 
     readline.moveCursor(stream, 0, 2);
 
