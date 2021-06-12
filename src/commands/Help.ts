@@ -1,7 +1,8 @@
 import { bold, dim, Env } from "../Helpers";
 import { getElmToolingInstallPath } from "../Parse";
+import type { Cwd } from "../PathHelpers";
 
-export function help(cwd: string, env: Env): string {
+export function help(cwd: Cwd, env: Env): string {
   return `
 ${bold("elm-tooling init")}
     Create a sample elm-tooling.json in the current directory
@@ -14,7 +15,7 @@ ${bold("elm-tooling tools")}
 
 ${bold("elm-tooling install")}
     Download the tools in the closest elm-tooling.json to:
-    ${dim(getElmToolingInstallPath(cwd, env))}
+    ${dim(getElmToolingInstallPath(cwd, env).absolutePath)}
     And create links to them in node_modules/.bin/
 
 ${bold("npx elm --help")}

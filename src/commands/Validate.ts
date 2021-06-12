@@ -18,8 +18,9 @@ import {
   printFieldErrors,
   Tools,
 } from "../Parse";
+import type { Cwd } from "../PathHelpers";
 
-export function validate(cwd: string, env: Env, logger: Logger): number {
+export function validate(cwd: Cwd, env: Env, logger: Logger): number {
   const parseResult = findReadAndParseElmToolingJson(cwd, env);
 
   switch (parseResult.tag) {
@@ -28,7 +29,9 @@ export function validate(cwd: string, env: Env, logger: Logger): number {
       return 1;
 
     case "ReadAsJsonObjectError":
-      logger.error(bold(parseResult.elmToolingJsonPath));
+      logger.error(
+        bold(parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath)
+      );
       logger.error(parseResult.message);
       return 1;
 
@@ -53,11 +56,19 @@ export function validate(cwd: string, env: Env, logger: Logger): number {
       ];
 
       if (!isNonEmptyArray(validationErrors)) {
-        logger.log(bold(parseResult.elmToolingJsonPath));
+        logger.log(
+          bold(
+            parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
+          )
+        );
         logger.log("No errors found.");
         return 0;
       } else {
-        logger.error(bold(parseResult.elmToolingJsonPath));
+        logger.error(
+          bold(
+            parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
+          )
+        );
         logger.error("");
         logger.error(printFieldErrors(validationErrors));
         if (
@@ -106,7 +117,7 @@ function getToolsErrors(fieldResult: FieldResult<Tools>): ToolsErrors {
         tag: "Missing",
         errors: fieldResult.parsed.missing.map((tool) => ({
           path: ["tools", tool.name],
-          message: `File does not exist: ${tool.absolutePath}`,
+          message: `File does not exist: ${tool.location.theToolPath.absolutePath}`,
         })),
       };
   }

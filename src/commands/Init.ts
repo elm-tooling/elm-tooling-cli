@@ -6,7 +6,6 @@ import {
   bold,
   ElmTooling,
   Env,
-  findClosest,
   flatMap,
   fromEntries,
   isNonEmptyArray,
@@ -23,6 +22,15 @@ import {
   getToolThrowing,
   isWindows,
 } from "../Parse";
+import {
+  absoluteDirname,
+  AbsolutePath,
+  absolutePathFromString,
+  Cwd,
+  ElmJsonPath,
+  ElmToolingJsonPath,
+  findClosest,
+} from "../PathHelpers";
 
 const DEFAULT_TOOLS: NonEmptyArray<KnownToolNames> = [
   "elm",
@@ -32,14 +40,17 @@ const DEFAULT_TOOLS: NonEmptyArray<KnownToolNames> = [
 DEFAULT_TOOLS.sort((a, b) => a.localeCompare(b));
 
 export async function init(
-  cwd: string,
+  cwd: Cwd,
   env: Env,
   logger: Logger
 ): Promise<number> {
-  const absolutePath = path.join(cwd, "elm-tooling.json");
+  const elmToolingJsonPath: ElmToolingJsonPath = {
+    tag: "ElmToolingJsonPath",
+    theElmToolingJsonPath: absolutePathFromString(cwd.path, "elm-tooling.json"),
+  };
 
-  if (fs.existsSync(absolutePath)) {
-    logger.error(bold(absolutePath));
+  if (fs.existsSync(elmToolingJsonPath.theElmToolingJsonPath.absolutePath)) {
+    logger.error(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
     logger.error("Already exists!");
     return 1;
   }
@@ -51,7 +62,10 @@ export async function init(
   const entrypoints = await tryGuessEntrypoints(cwd).then(
     (paths) =>
       paths.map((file) => {
-        const relative = path.relative(path.dirname(absolutePath), file);
+        const relative = path.relative(
+          path.dirname(elmToolingJsonPath.theElmToolingJsonPath.absolutePath),
+          file.absolutePath
+        );
         // istanbul ignore next
         const normalized = isWindows ? relative.replace(/\\/g, "/") : relative;
         return `./${normalized}`;
@@ -75,14 +89,17 @@ export async function init(
         : { ...tools, elm: elmVersionFromElmJson },
   };
 
-  fs.writeFileSync(absolutePath, toJSON(json));
-  logger.log(bold(absolutePath));
+  fs.writeFileSync(
+    elmToolingJsonPath.theElmToolingJsonPath.absolutePath,
+    toJSON(json)
+  );
+  logger.log(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
   logger.log("Created! Open it in a text editor and have a look!");
   logger.log("To install tools: elm-tooling install");
   return 0;
 }
 
-async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
+async function tryGuessEntrypoints(cwd: Cwd): Promise<Array<AbsolutePath>> {
   const sourceDirectories = tryGetSourceDirectories(cwd);
   if (sourceDirectories.length === 0) {
     return [];
@@ -90,15 +107,19 @@ async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
 
   const files = flatMap(sourceDirectories, (directory) =>
     fs
-      .readdirSync(directory, { encoding: "utf-8", withFileTypes: true })
+      .readdirSync(directory.absolutePath, {
+        encoding: "utf-8",
+        withFileTypes: true,
+      })
       .filter((entry) => entry.isFile() && entry.name.endsWith(".elm"))
-      .map((entry) => path.join(directory, entry.name))
+      .map((entry) => absolutePathFromString(directory, entry.name))
   );
 
   const results = await Promise.all(
     files.map((file) =>
       isMainFile(file).then(
-        (isMain) => (isMain ? file : new Error(`${file} is not a main file.`)),
+        (isMain) =>
+          isMain ? file : new Error(`${file.absolutePath} is not a main file.`),
         // istanbul ignore next
         (error: Error) => error
       )
@@ -107,7 +128,7 @@ async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
 
   const entrypoints = flatMap(results, (result) =>
     result instanceof Error ? [] : result
-  ).sort((a, b) => a.localeCompare(b));
+  ).sort((a, b) => a.absolutePath.localeCompare(b.absolutePath));
 
   if (entrypoints.length === 0) {
     throw new Error("Expected at least 1 entrypoint but got 0.");
@@ -116,9 +137,17 @@ async function tryGuessEntrypoints(cwd: string): Promise<Array<string>> {
   return entrypoints;
 }
 
-function tryGetElmJson(cwd: string): [Record<string, unknown>, string] {
-  const elmJsonPath = path.join(cwd, "elm.json");
-  const elmJson: unknown = JSON.parse(fs.readFileSync(elmJsonPath, "utf8"));
+function tryGetElmJson(cwd: Cwd): {
+  elmJsonPath: ElmJsonPath;
+  elmJson: Record<string, unknown>;
+} {
+  const elmJsonPath: ElmJsonPath = {
+    tag: "ElmJsonPath",
+    theElmJsonPath: absolutePathFromString(cwd.path, "elm.json"),
+  };
+  const elmJson: unknown = JSON.parse(
+    fs.readFileSync(elmJsonPath.theElmJsonPath.absolutePath, "utf8")
+  );
 
   if (!isRecord(elmJson)) {
     throw new Error(
@@ -128,11 +157,11 @@ function tryGetElmJson(cwd: string): [Record<string, unknown>, string] {
     );
   }
 
-  return [elmJson, elmJsonPath];
+  return { elmJsonPath, elmJson };
 }
 
-function tryGetSourceDirectories(cwd: string): Array<string> {
-  const [elmJson, elmJsonPath] = tryGetElmJson(cwd);
+function tryGetSourceDirectories(cwd: Cwd): Array<AbsolutePath> {
+  const { elmJsonPath, elmJson } = tryGetElmJson(cwd);
 
   switch (elmJson.type) {
     case "application": {
@@ -145,7 +174,10 @@ function tryGetSourceDirectories(cwd: string): Array<string> {
       }
       const directories = flatMap(elmJson["source-directories"], (item) =>
         typeof item === "string"
-          ? path.resolve(path.dirname(elmJsonPath), item)
+          ? absolutePathFromString(
+              absoluteDirname(elmJsonPath.theElmJsonPath),
+              item
+            )
           : []
       );
       if (!isNonEmptyArray(directories)) {
@@ -170,11 +202,11 @@ function tryGetSourceDirectories(cwd: string): Array<string> {
   }
 }
 
-async function isMainFile(file: string): Promise<boolean> {
+async function isMainFile(file: AbsolutePath): Promise<boolean> {
   return new Promise((resolve) => {
     let found = false;
     const rl = readline.createInterface({
-      input: fs.createReadStream(file),
+      input: fs.createReadStream(file.absolutePath),
       crlfDelay: Infinity,
     });
 
@@ -192,10 +224,10 @@ async function isMainFile(file: string): Promise<boolean> {
 }
 
 function tryGuessToolsFromNodeModules(
-  cwd: string,
+  cwd: Cwd,
   env: Env
 ): Record<string, string> | undefined {
-  const nodeModulesPath = findClosest("node_modules", cwd);
+  const nodeModulesPath = findClosest("node_modules", cwd.path);
   // istanbul ignore if
   if (nodeModulesPath === undefined) {
     return undefined;
@@ -205,11 +237,12 @@ function tryGuessToolsFromNodeModules(
     Object.entries(KNOWN_TOOLS),
     ([name, versions]) => {
       try {
+        const pkgPath = absolutePathFromString(
+          nodeModulesPath,
+          path.join(name, "package.json")
+        );
         const pkg: unknown = JSON.parse(
-          fs.readFileSync(
-            path.join(nodeModulesPath, name, "package.json"),
-            "utf8"
-          )
+          fs.readFileSync(pkgPath.absolutePath, "utf8")
         );
 
         const version =
@@ -249,7 +282,7 @@ function tryGuessToolsFromNodeModules(
   return isNonEmptyArray(pairs) ? fromEntries(pairs) : undefined;
 }
 
-function getElmVersionFromElmJson(cwd: string): string | undefined {
+function getElmVersionFromElmJson(cwd: Cwd): string | undefined {
   try {
     return getElmVersionFromElmJsonHelper(cwd);
   } catch (_error) {
@@ -259,8 +292,8 @@ function getElmVersionFromElmJson(cwd: string): string | undefined {
 
 const elmVersionRangeRegex = /^\s*(\S+)\s*<=\s*v\s*<\s*(\S+)\s*$/;
 
-function getElmVersionFromElmJsonHelper(cwd: string): string {
-  const [elmJson] = tryGetElmJson(cwd);
+function getElmVersionFromElmJsonHelper(cwd: Cwd): string {
+  const { elmJson } = tryGetElmJson(cwd);
 
   const elmVersion = elmJson["elm-version"];
   if (typeof elmVersion !== "string") {

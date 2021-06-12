@@ -40,11 +40,20 @@ import {
   Tools,
   validateFileExists,
 } from "../Parse";
+import {
+  absoluteDirname,
+  AbsolutePath,
+  absolutePathFromString,
+  Cwd,
+  ElmToolingJsonPath,
+  getNodeModulesBinPath,
+  NodeModulesBinPath,
+} from "../PathHelpers";
 
 const EMPTY_STDERR = dim("(empty stderr)");
 
 export async function install(
-  cwd: string,
+  cwd: Cwd,
   env: Env,
   logger: Logger
 ): Promise<number> {
@@ -60,7 +69,9 @@ export async function install(
       return 1;
 
     case "ReadAsJsonObjectError":
-      logger.error(bold(parseResult.elmToolingJsonPath));
+      logger.error(
+        bold(parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath)
+      );
       logger.error(parseResult.message);
       return 1;
 
@@ -71,7 +82,12 @@ export async function install(
 
           switch (osResult.tag) {
             case "Error":
-              logger.error(bold(parseResult.elmToolingJsonPath));
+              logger.error(
+                bold(
+                  parseResult.elmToolingJsonPath.theElmToolingJsonPath
+                    .absolutePath
+                )
+              );
               logger.error("");
               logger.error(printFieldErrors(osResult.errors));
               // The spec documentation link does not help here.
@@ -90,7 +106,11 @@ export async function install(
         }
 
         case "Error":
-          logger.error(bold(parseResult.elmToolingJsonPath));
+          logger.error(
+            bold(
+              parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
+            )
+          );
           logger.error("");
           logger.error(printFieldErrors(parseResult.tools.errors));
           logger.error("");
@@ -125,35 +145,35 @@ export async function install(
 }
 
 async function installTools(
-  cwd: string,
+  cwd: Cwd,
   env: Env,
   logger: Logger,
-  elmToolingJsonPath: string,
+  elmToolingJsonPath: ElmToolingJsonPath,
   tools: Tools
 ): Promise<number> {
-  const nodeModulesBinPath = path.join(
-    path.dirname(elmToolingJsonPath),
-    "node_modules",
-    ".bin"
-  );
+  const nodeModulesBinPath = getNodeModulesBinPath(elmToolingJsonPath);
 
   try {
-    fs.mkdirSync(nodeModulesBinPath, { recursive: true });
+    fs.mkdirSync(nodeModulesBinPath.theNodeModulesBinPath.absolutePath, {
+      recursive: true,
+    });
   } catch (errorAny) {
     const error = errorAny as Error;
-    logger.error(bold(elmToolingJsonPath));
-    logger.error(`Failed to create ${nodeModulesBinPath}:\n${error.message}`);
+    logger.error(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
+    logger.error(
+      `Failed to create ${nodeModulesBinPath.theNodeModulesBinPath.absolutePath}:\n${error.message}`
+    );
     return 1;
   }
 
   for (const tool of tools.missing) {
-    const dir = path.dirname(tool.absolutePath);
+    const dir = absoluteDirname(tool.location.theToolPath);
     try {
-      fs.mkdirSync(dir, { recursive: true });
+      fs.mkdirSync(dir.absolutePath, { recursive: true });
     } catch (errorAny) {
       const error = errorAny as Error;
-      logger.error(bold(elmToolingJsonPath));
-      logger.error(`Failed to create ${dir}:\n${error.message}`);
+      logger.error(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
+      logger.error(`Failed to create ${dir.absolutePath}:\n${error.message}`);
       return 1;
     }
   }
@@ -187,7 +207,7 @@ async function installTools(
     }
   };
 
-  logger.log(bold(elmToolingJsonPath));
+  logger.log(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
   for (const [index, tool] of tools.missing.entries()) {
     updateStatusLine(tool, 0, index);
   }
@@ -267,21 +287,17 @@ function formatProgress(progress: number | string): string {
 }
 
 function removeAllTools(
-  cwd: string,
+  cwd: Cwd,
   env: Env,
   logger: Logger,
   osName: OSName,
-  elmToolingJsonPath: string,
+  elmToolingJsonPath: ElmToolingJsonPath,
   what: string
 ): number {
-  logger.log(bold(elmToolingJsonPath));
+  logger.log(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
   const message = `The "tools" field is ${what}. To add tools: elm-tooling tools`;
 
-  const nodeModulesBinPath = path.join(
-    path.dirname(elmToolingJsonPath),
-    "node_modules",
-    ".bin"
-  );
+  const nodeModulesBinPath = getNodeModulesBinPath(elmToolingJsonPath);
 
   const results = removeTools(
     cwd,
@@ -300,10 +316,10 @@ function removeAllTools(
 }
 
 function removeTools(
-  cwd: string,
+  cwd: Cwd,
   env: Env,
   osName: OSName,
-  nodeModulesBinPath: string,
+  nodeModulesBinPath: NodeModulesBinPath,
   names: Array<KnownToolNames>
 ): Array<Error | string | undefined> {
   return flatMap(names, (name) => {
@@ -327,7 +343,7 @@ async function downloadAndExtract(
         hash.destroy();
         extractor.destroy();
         downloader.kill();
-        fs.unlinkSync(tool.absolutePath);
+        fs.unlinkSync(tool.location.theToolPath.absolutePath);
         reject(error);
       } catch (removeErrorAny) {
         const removeError = removeErrorAny as Error & { code?: string };
@@ -344,7 +360,7 @@ async function downloadAndExtract(
     const extractor = extractFile({
       env,
       assetType: tool.asset.type,
-      file: tool.absolutePath,
+      file: tool.location.theToolPath,
       onError: removeExtractedAndReject,
       onSuccess: resolve,
     });
@@ -376,7 +392,7 @@ ${bold(`${tool.name} ${tool.version}`)}
 ${indent(
   `
 ${dim(`< ${tool.asset.url}`)}
-${dim(`> ${tool.absolutePath}`)}
+${dim(`> ${tool.location.theToolPath.absolutePath}`)}
 ${error.message}
   `.trim()
 )}
@@ -387,7 +403,7 @@ function downloadAndExtractSimpleError(tool: Tool, error: Error): string {
   return `
 Failed to download:
 < ${tool.asset.url}
-> ${tool.absolutePath}
+> ${tool.location.theToolPath.absolutePath}
 ${error.message}
   `.trim();
 }
@@ -631,14 +647,14 @@ function extractFile({
 }: {
   env: Env;
   assetType: AssetType;
-  file: string;
+  file: AbsolutePath;
   onError: (error: Error) => void;
   onSuccess: () => void;
 }): MiniWritable {
   switch (assetType) {
     case "gz": {
       const gunzip = zlib.createGunzip();
-      const write = fs.createWriteStream(file, {
+      const write = fs.createWriteStream(file.absolutePath, {
         // Make executable.
         mode: 0o755,
       });
@@ -658,7 +674,7 @@ function extractFile({
     // https://stackoverflow.com/questions/63783342/windows-using-tar-to-unzip-zip-from-stdin-works-in-terminal-but-not-in-node-js
     // Workaround: Save the zip to disk, extract it and remove the zip again.
     case "zip": {
-      const temp = `${file}.zip`;
+      const temp = `${file.absolutePath}.zip`;
       const write = fs.createWriteStream(temp);
       let toDestroy: MiniWritable = write;
 
@@ -730,7 +746,7 @@ function extractTar({
 }: {
   env: Env;
   input: string;
-  file: string;
+  file: AbsolutePath;
   onError: (error: Error) => void;
   onSuccess: () => void;
 }): MiniWritable {
@@ -738,8 +754,8 @@ function extractTar({
     "zxf",
     input,
     "-C",
-    path.dirname(file),
-    path.basename(file),
+    path.dirname(file.absolutePath),
+    path.basename(file.absolutePath),
   ]);
   let stderr = "";
 
@@ -813,7 +829,7 @@ function exitReason(
 export async function getExecutable({
   name,
   version,
-  cwd = process.cwd(),
+  cwd: cwdString = process.cwd(),
   env = process.env,
   onProgress,
 }: {
@@ -823,22 +839,31 @@ export async function getExecutable({
   env?: Env;
   onProgress: (percentage: number) => void;
 }): Promise<string> {
+  const cwd: Cwd = {
+    tag: "Cwd",
+    path: absolutePathFromString(
+      { tag: "AbsolutePath", absolutePath: process.cwd() },
+      cwdString
+    ),
+  };
   const tool = getToolThrowing({ name, version, cwd, env });
 
-  const exists = validateFileExists(tool.absolutePath);
+  const exists = validateFileExists(tool.location.theToolPath);
   switch (exists.tag) {
     case "Error":
       throw new Error(exists.message);
 
     case "Exists":
-      return tool.absolutePath;
+      return tool.location.theToolPath.absolutePath;
 
     case "DoesNotExist":
       // Keep going.
       break;
   }
 
-  fs.mkdirSync(path.dirname(tool.absolutePath), { recursive: true });
+  fs.mkdirSync(absoluteDirname(tool.location.theToolPath).absolutePath, {
+    recursive: true,
+  });
 
   onProgress(0);
 
@@ -859,5 +884,5 @@ export async function getExecutable({
 
   wrappedOnProgress(1);
 
-  return tool.absolutePath;
+  return tool.location.theToolPath.absolutePath;
 }

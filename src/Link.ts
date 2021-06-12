@@ -3,18 +3,31 @@ import * as path from "path";
 
 import { bold, dim, indent, join, NonEmptyArray } from "./Helpers";
 import { isWindows, Tool } from "./Parse";
+import {
+  absolutePathFromString,
+  Cwd,
+  LinkPath,
+  NodeModulesBinPath,
+  ShimPath,
+  ToolPath,
+} from "./PathHelpers";
 
 type LinkResult = Error | "AllGood" | "Created";
 
 type UnlinkResult = Error | "DidNothing" | "Removed";
 
 type Strategy =
-  | { tag: "Link"; linkPath: string }
-  | { tag: "Shims"; items: NonEmptyArray<[string, string]> };
+  | { tag: "Link"; linkPath: LinkPath }
+  | { tag: "Shims"; items: NonEmptyArray<Shim> };
+
+type Shim = {
+  shimPath: ShimPath;
+  code: string;
+};
 
 export function linkTool(
-  cwd: string,
-  nodeModulesBinPath: string,
+  cwd: Cwd,
+  nodeModulesBinPath: NodeModulesBinPath,
   tool: Tool
 ): Error | string {
   const { linkPathPresentationString, what, strategy } = linkHelper(
@@ -35,7 +48,7 @@ export function linkTool(
 
     case "Created":
       return `${bold(`${tool.name} ${tool.version}`)} ${what} created: ${dim(
-        `${linkPathPresentationString} -> ${tool.absolutePath}`
+        `${linkPathPresentationString} -> ${tool.location.theToolPath.absolutePath}`
       )}\n${indent(`To run: npx ${tool.name}`)}`;
   }
 }
@@ -55,8 +68,8 @@ function linkToolWithStrategy(tool: Tool, strategy: Strategy): LinkResult {
 }
 
 export function unlinkTool(
-  cwd: string,
-  nodeModulesBinPath: string,
+  cwd: Cwd,
+  nodeModulesBinPath: NodeModulesBinPath,
   tool: Tool
 ): Error | string | undefined {
   const { linkPathPresentationString, what, strategy } = linkHelper(
@@ -98,44 +111,69 @@ function unlinkToolWithStrategy(tool: Tool, strategy: Strategy): UnlinkResult {
 }
 
 function linkHelper(
-  cwd: string,
-  nodeModulesBinPath: string,
+  cwd: Cwd,
+  nodeModulesBinPath: NodeModulesBinPath,
   tool: Tool
 ): {
   linkPathPresentationString: string;
   what: string;
   strategy: Strategy;
 } {
-  const linkPath = path.join(nodeModulesBinPath, tool.name);
-  const relativeLinkPath = path.relative(cwd, linkPath);
+  const linkPath: LinkPath = {
+    tag: "LinkPath",
+    theLinkPath: absolutePathFromString(
+      nodeModulesBinPath.theNodeModulesBinPath,
+      tool.name
+    ),
+  };
+
+  const relativeLinkPath = path.relative(
+    cwd.path.absolutePath,
+    linkPath.theLinkPath.absolutePath
+  );
+
   const possiblyRelativeLinkPath = relativeLinkPath.startsWith("node_modules")
     ? relativeLinkPath
-    : linkPath;
+    : linkPath.theLinkPath.absolutePath;
 
-  return isWindows
-    ? // istanbul ignore next
-      {
-        linkPathPresentationString: `${possiblyRelativeLinkPath}{,.cmd,.ps1}`,
-        what: "shims",
-        strategy: {
-          tag: "Shims",
-          items: [
-            [linkPath, makeShScript(tool.absolutePath)],
-            [`${linkPath}.cmd`, makeCmdScript(tool.absolutePath)],
-            [`${linkPath}.ps1`, makePs1Script(tool.absolutePath)],
-          ],
-        },
-      }
-    : {
-        linkPathPresentationString: possiblyRelativeLinkPath,
-        what: "link",
-        strategy: { tag: "Link", linkPath },
-      };
+  // istanbul ignore if
+  if (isWindows) {
+    return {
+      linkPathPresentationString: `${possiblyRelativeLinkPath}{,.cmd,.ps1}`,
+      what: "shims",
+      strategy: {
+        tag: "Shims",
+        items: [
+          {
+            shimPath: makeShimPath(linkPath, ""),
+            code: makeShScript(tool.location),
+          },
+          {
+            shimPath: makeShimPath(linkPath, ".cmd"),
+            code: makeCmdScript(tool.location),
+          },
+          {
+            shimPath: makeShimPath(linkPath, ".ps1"),
+            code: makePs1Script(tool.location),
+          },
+        ],
+      },
+    };
+  }
+
+  return {
+    linkPathPresentationString: possiblyRelativeLinkPath,
+    what: "link",
+    strategy: { tag: "Link", linkPath },
+  };
 }
 
-function symlink(tool: Tool, linkPath: string): LinkResult {
+function symlink(tool: Tool, linkPath: LinkPath): LinkResult {
   try {
-    if (fs.readlinkSync(linkPath) === tool.absolutePath) {
+    if (
+      fs.readlinkSync(linkPath.theLinkPath.absolutePath) ===
+      tool.location.theToolPath.absolutePath
+    ) {
       return "AllGood";
     }
   } catch (_error) {
@@ -143,32 +181,38 @@ function symlink(tool: Tool, linkPath: string): LinkResult {
   }
 
   try {
-    fs.unlinkSync(linkPath);
+    fs.unlinkSync(linkPath.theLinkPath.absolutePath);
   } catch (errorAny) {
     const error = errorAny as Error & { code?: string };
     if (error.code !== "ENOENT") {
       return new Error(
-        `Failed to remove old link for ${tool.name} at ${linkPath}:\n${error.message}`
+        `Failed to remove old link for ${tool.name} at ${linkPath.theLinkPath.absolutePath}:\n${error.message}`
       );
     }
   }
 
   try {
-    fs.symlinkSync(tool.absolutePath, linkPath);
+    fs.symlinkSync(
+      tool.location.theToolPath.absolutePath,
+      linkPath.theLinkPath.absolutePath
+    );
   } catch (errorAny) /* istanbul ignore next */ {
     const error = errorAny as Error;
     return new Error(
-      `Failed to create link for ${tool.name} at ${linkPath}:\n${error.message}`
+      `Failed to create link for ${tool.name} at ${linkPath.theLinkPath.absolutePath}:\n${error.message}`
     );
   }
 
   return "Created";
 }
 
-function removeSymlink(tool: Tool, linkPath: string): UnlinkResult {
+function removeSymlink(tool: Tool, linkPath: LinkPath): UnlinkResult {
   try {
-    if (fs.readlinkSync(linkPath) === tool.absolutePath) {
-      fs.unlinkSync(linkPath);
+    if (
+      fs.readlinkSync(linkPath.theLinkPath.absolutePath) ===
+      tool.location.theToolPath.absolutePath
+    ) {
+      fs.unlinkSync(linkPath.theLinkPath.absolutePath);
       return "Removed";
     }
   } catch (errorAny) {
@@ -178,7 +222,7 @@ function removeSymlink(tool: Tool, linkPath: string): UnlinkResult {
     // istanbul ignore if
     if (error.code !== "EINVAL" && error.code !== "ENOENT") {
       return new Error(
-        `Failed to remove old link for ${tool.name} at ${linkPath}:\n${error.message}`
+        `Failed to remove old link for ${tool.name} at ${linkPath.theLinkPath.absolutePath}:\n${error.message}`
       );
     }
   }
@@ -188,12 +232,13 @@ function removeSymlink(tool: Tool, linkPath: string): UnlinkResult {
 // istanbul ignore next
 function symlinkShimWindows(
   tool: Tool,
-  items: NonEmptyArray<[string, string]>
+  items: NonEmptyArray<Shim>
 ): LinkResult {
   try {
     if (
       items.every(
-        ([itemPath, content]) => fs.readFileSync(itemPath, "utf8") === content
+        ({ shimPath, code }) =>
+          fs.readFileSync(shimPath.theShimPath.absolutePath, "utf8") === code
       )
     ) {
       return "AllGood";
@@ -202,26 +247,26 @@ function symlinkShimWindows(
     // Continue below.
   }
 
-  for (const [itemPath] of items) {
+  for (const { shimPath } of items) {
     try {
-      fs.unlinkSync(itemPath);
+      fs.unlinkSync(shimPath.theShimPath.absolutePath);
     } catch (errorAny) {
       const error = errorAny as Error & { code?: string };
       if (error.code !== "ENOENT") {
         return new Error(
-          `Failed to remove old shim for ${tool.name} at ${itemPath}:\n${error.message}`
+          `Failed to remove old shim for ${tool.name} at ${shimPath.theShimPath.absolutePath}:\n${error.message}`
         );
       }
     }
   }
 
-  for (const [itemPath, content] of items) {
+  for (const { shimPath, code } of items) {
     try {
-      fs.writeFileSync(itemPath, content);
+      fs.writeFileSync(shimPath.theShimPath.absolutePath, code);
     } catch (errorAny) {
       const error = errorAny as Error;
       return new Error(
-        `Failed to create shim for ${tool.name} at ${itemPath}:\n${error.message}`
+        `Failed to create shim for ${tool.name} at ${shimPath.theShimPath.absolutePath}:\n${error.message}`
       );
     }
   }
@@ -232,14 +277,14 @@ function symlinkShimWindows(
 // istanbul ignore next
 function removeSymlinkShimWindows(
   tool: Tool,
-  items: Array<[string, string]>
+  items: Array<Shim>
 ): UnlinkResult {
   let didNothing = true;
 
-  for (const [itemPath, content] of items) {
+  for (const { shimPath, code } of items) {
     try {
-      if (fs.readFileSync(itemPath, "utf8") === content) {
-        fs.unlinkSync(itemPath);
+      if (fs.readFileSync(shimPath.theShimPath.absolutePath, "utf8") === code) {
+        fs.unlinkSync(shimPath.theShimPath.absolutePath);
         didNothing = false;
       }
     } catch (errorAny) {
@@ -248,7 +293,7 @@ function removeSymlinkShimWindows(
       // If the path does not exists there’s nothing to do.
       if (error.code !== "EISDIR" && error.code !== "ENOENT") {
         return new Error(
-          `Failed to remove old shim for ${tool.name} at ${itemPath}:\n${error.message}`
+          `Failed to remove old shim for ${tool.name} at ${shimPath.theShimPath.absolutePath}:\n${error.message}`
         );
       }
     }
@@ -257,12 +302,23 @@ function removeSymlinkShimWindows(
   return didNothing ? "DidNothing" : "Removed";
 }
 
+// istanbul ignore next
+function makeShimPath(linkPath: LinkPath, suffix: string): ShimPath {
+  return {
+    tag: "ShimPath",
+    theShimPath: {
+      tag: "AbsolutePath",
+      absolutePath: linkPath.theLinkPath.absolutePath + suffix,
+    },
+  };
+}
+
 // Windows-style paths works fine, at least in Git bash.
-export function makeShScript(toolAbsolutePath: string): string {
+export function makeShScript(toolPath: ToolPath): string {
   return lf(`
 #!/bin/sh
 ${join(
-  toolAbsolutePath
+  toolPath.theToolPath.absolutePath
     .split(/(')/)
     .map((segment) =>
       segment === "" ? "" : segment === "'" ? "\\'" : `'${segment}'`
@@ -273,18 +329,18 @@ ${join(
 }
 
 // Note: Paths on Windows cannot contain `"`.
-export function makeCmdScript(toolAbsolutePath: string): string {
+export function makeCmdScript(toolPath: ToolPath): string {
   return crlf(`
 @ECHO off
-"${toolAbsolutePath}" %*
+"${toolPath.theToolPath.absolutePath}" %*
 `);
 }
 
 // The shebang is for PowerShell on unix: https://github.com/npm/cmd-shim/pull/34
-export function makePs1Script(toolAbsolutePath: string): string {
+export function makePs1Script(toolPath: ToolPath): string {
   return lf(`
 #!/usr/bin/env pwsh
-& '${toolAbsolutePath.replace(/'/g, "''")}' $args
+& '${toolPath.theToolPath.absolutePath.replace(/'/g, "''")}' $args
 `);
 }
 

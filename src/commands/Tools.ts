@@ -28,9 +28,10 @@ import {
   printFieldErrors,
   Tool,
 } from "../Parse";
+import type { Cwd, ElmToolingJsonPath } from "../PathHelpers";
 
 export async function toolsCommand(
-  cwd: string,
+  cwd: Cwd,
   env: Env,
   logger: Logger,
   stdin: ReadStream,
@@ -49,7 +50,9 @@ export async function toolsCommand(
       return 1;
 
     case "ReadAsJsonObjectError":
-      logger.error(bold(parseResult.elmToolingJsonPath));
+      logger.error(
+        bold(parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath)
+      );
       logger.error(parseResult.message);
       return 1;
 
@@ -64,7 +67,11 @@ export async function toolsCommand(
 
       switch (parseResult.tools?.tag) {
         case "Error":
-          logger.error(bold(parseResult.elmToolingJsonPath));
+          logger.error(
+            bold(
+              parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
+            )
+          );
           logger.error("");
           logger.error(printFieldErrors(parseResult.tools.errors));
           logger.error("");
@@ -72,11 +79,19 @@ export async function toolsCommand(
           return 1;
 
         case undefined:
-          logger.log(bold(parseResult.elmToolingJsonPath));
+          logger.log(
+            bold(
+              parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
+            )
+          );
           return start(logger, stdin, stdout, [], save);
 
         case "Parsed":
-          logger.log(bold(parseResult.elmToolingJsonPath));
+          logger.log(
+            bold(
+              parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
+            )
+          );
           return start(
             logger,
             stdin,
@@ -324,7 +339,7 @@ function toggleTool(
 }
 
 function updateElmToolingJson(
-  elmToolingJsonPath: string,
+  elmToolingJsonPath: ElmToolingJsonPath,
   originalObject: Record<string, unknown>,
   toolsList: Array<ToolChoice>
 ): void {
@@ -334,7 +349,10 @@ function updateElmToolingJson(
       )
     : undefined;
 
-  fs.writeFileSync(elmToolingJsonPath, toJSON({ ...originalObject, tools }));
+  fs.writeFileSync(
+    elmToolingJsonPath.theElmToolingJsonPath.absolutePath,
+    toJSON({ ...originalObject, tools })
+  );
 }
 
 function sortTools<T extends ToolChoice>(tools: Array<T>): Array<T> {
