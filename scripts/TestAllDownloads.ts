@@ -102,7 +102,12 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
     const chunk = chunkBuffer.toString();
     const cursorMoveMatch = cursorMove.exec(chunk);
     // Only care about the first line and the progress, not the “link created” lines.
-    if (!this.hasWritten || chunk.includes("%") || cursorMoveMatch !== null) {
+    if (
+      !this.hasWritten ||
+      chunk.includes("%") ||
+      chunk.includes("ERR!") ||
+      cursorMoveMatch !== null
+    ) {
       readline.cursorTo(process.stdout, 0, this.y);
       process.stdout.write(chunk);
       readline.cursorTo(process.stdout, 0, calculateHeight(this.variants));
