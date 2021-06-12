@@ -2,6 +2,7 @@ import * as path from "path";
 
 import elmToolingCli from "../src";
 import {
+  assertExitCode,
   clean,
   FailReadStream,
   MemoryWriteStream,
@@ -24,8 +25,8 @@ async function validateSuccessHelper(fixture: string): Promise<string> {
     stderr,
   });
 
+  assertExitCode(0, exitCode, stdout.content, stderr.content);
   expect(stderr.content).toBe("");
-  expect(exitCode).toBe(0);
 
   return clean(stdout.content);
 }
@@ -46,8 +47,8 @@ async function validateFailHelperAbsolute(dir: string): Promise<string> {
     stderr,
   });
 
+  assertExitCode(1, exitCode, stdout.content, stderr.content);
   expect(stdout.content).toBe("");
-  expect(exitCode).toBe(1);
 
   return clean(stderr.content);
 }

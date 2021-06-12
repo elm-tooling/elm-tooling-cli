@@ -4,6 +4,7 @@ import * as path from "path";
 import elmToolingCli from "../src";
 import type { ElmTooling } from "../src/Helpers";
 import {
+  assertExitCode,
   clean,
   FailReadStream,
   MemoryWriteStream,
@@ -38,8 +39,8 @@ async function initSuccessHelper(
     stderr,
   });
 
+  assertExitCode(0, exitCode, stdout.content, stderr.content);
   expect(stderr.content).toBe("");
-  expect(exitCode).toBe(0);
 
   return {
     stdout: clean(stdout.content),
@@ -61,8 +62,8 @@ async function initFailHelper(fixture: string): Promise<string> {
     stderr,
   });
 
+  assertExitCode(1, exitCode, stdout.content, stderr.content);
   expect(stdout.content).toBe("");
-  expect(exitCode).toBe(1);
 
   return clean(stderr.content);
 }

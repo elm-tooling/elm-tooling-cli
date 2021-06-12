@@ -264,6 +264,38 @@ export function clean(string: string): string {
     : cleaned;
 }
 
+export function assertExitCode(
+  expectedExitCode: number,
+  actualExitCode: number,
+  stdout: string,
+  stderr: string
+): void {
+  if (expectedExitCode !== actualExitCode) {
+    throw new Error(
+      `
+exit ${actualExitCode} (expected ${expectedExitCode})
+
+${printStdio(stdout, stderr)}
+      `.trim()
+    );
+  }
+}
+
+function printStdio(stdout: string, stderr: string): string {
+  return stdout !== "" && stderr === ""
+    ? stdout
+    : stdout === "" && stderr !== ""
+    ? stderr
+    : stdout === "" && stderr === ""
+    ? "(no output)"
+    : `
+STDOUT:
+${stdout}
+STDERR:
+${stderr}
+`.trim();
+}
+
 // Make snapshots easier to read.
 // Before: `"\\"string\\""`
 // After: `"string"`

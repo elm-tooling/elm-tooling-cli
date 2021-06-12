@@ -4,6 +4,7 @@ import * as path from "path";
 import elmToolingCli from "../src";
 import type { Env } from "../src/Helpers";
 import {
+  assertExitCode,
   clean,
   duoStream,
   FailReadStream,
@@ -48,8 +49,8 @@ async function installSuccessHelper(
     stderr,
   });
 
+  assertExitCode(0, exitCode, stdout.content, stderr.content);
   expect(stderr.content).toBe("");
-  expect(exitCode).toBe(0);
 
   const binDir = path.join(dir, "node_modules", ".bin");
   const bin = fs.existsSync(binDir)
@@ -90,7 +91,7 @@ async function installFailHelperAbsolute(dir: string): Promise<string> {
     stderr: unmarkedStream,
   });
 
-  expect(exitCode).toBe(1);
+  assertExitCode(1, exitCode, unmarkedStream.content, "");
 
   return cleanInstall(clean(unmarkedStream.content));
 }
