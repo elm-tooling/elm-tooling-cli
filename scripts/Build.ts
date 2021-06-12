@@ -66,6 +66,7 @@ async function run(): Promise<void> {
     format: "cjs",
     hoistTransitiveImports: false,
     chunkFileNames: "[name].js",
+    interop: "esModule",
   });
 
   for (const item of output) {

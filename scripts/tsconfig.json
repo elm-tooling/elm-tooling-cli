@@ -2,6 +2,7 @@
   "extends": "../tsconfig.json",
   "exclude": [],
   "compilerOptions": {
+    "esModuleInterop": true,
     "noEmit": true,
     "module": "CommonJS",
   }
