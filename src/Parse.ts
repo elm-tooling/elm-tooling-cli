@@ -4,7 +4,6 @@ import * as path from "path";
 
 import {
   bold,
-  Either,
   Env,
   findClosest,
   getOwn,
@@ -15,6 +14,7 @@ import {
   mapNonEmptyArray,
   NonEmptyArray,
   partitionMap,
+  partitionMapNonEmpty,
   printNumErrors,
 } from "./Helpers";
 import {
@@ -285,8 +285,9 @@ function parseEntrypoints(
     };
   }
 
-  const [errors, entrypoints]: [Array<FieldError>, Array<Entrypoint>] =
-    partitionMap(json, (entrypoint, index, _, entrypointsSoFar) => {
+  const partitioned = partitionMapNonEmpty<unknown, FieldError, Entrypoint>(
+    json,
+    (entrypoint, index, _, entrypointsSoFar) => {
       if (typeof entrypoint !== "string") {
         return {
           tag: "Left",
@@ -367,19 +368,23 @@ function parseEntrypoints(
           absolutePath,
         },
       };
-    });
+    }
+  );
 
-  if (isNonEmptyArray(errors)) {
-    return {
-      tag: "Error",
-      errors,
-    };
+  switch (partitioned.tag) {
+    case "OnlyLeft":
+    case "Both":
+      return {
+        tag: "Error",
+        errors: partitioned.left,
+      };
+
+    case "OnlyRight":
+      return {
+        tag: "Parsed",
+        parsed: partitioned.right,
+      };
   }
-
-  // At this point `entrypoints` must be non-empty, because `errors` and
-  // `entrypoints` are the left and right of a partition of a non-empty list,
-  // and `errors` was shown to be empty above.
-  return { tag: "Parsed", parsed: entrypoints as NonEmptyArray<Entrypoint> };
 }
 
 function parseTools(
@@ -400,81 +405,76 @@ function parseTools(
     };
   }
 
-  const [errors, tools]: [
-    Array<FieldError>,
-    Array<{ exists: boolean; tool: Tool }>
-  ] = partitionMap(
-    Object.entries(json),
-    ([name, version]): Either<FieldError, { exists: boolean; tool: Tool }> => {
-      if (typeof version !== "string") {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Expected a version as a string but got: ${JSON.stringify(
-              version
-            )}`,
-          },
-        };
-      }
-
-      const versions = getOwn(KNOWN_TOOLS, name);
-
-      if (versions === undefined) {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Unknown tool\nKnown tools: ${join(
-              KNOWN_TOOL_NAMES,
-              ", "
-            )}`,
-          },
-        };
-      }
-
-      const osAssets = getOwn(versions, version);
-
-      if (osAssets === undefined) {
-        return {
-          tag: "Left",
-          value: {
-            path: [name],
-            message: `Unknown version: ${version}\nKnown versions: ${join(
-              Object.keys(versions),
-              ", "
-            )}`,
-          },
-        };
-      }
-
-      const asset = osAssets[osName];
-
-      const tool = makeTool(cwd, env, name, version, asset);
-
-      const exists = validateFileExists(tool.absolutePath);
-
-      switch (exists.tag) {
-        case "Exists":
-          return {
-            tag: "Right",
-            value: { exists: true, tool },
-          };
-
-        case "DoesNotExist":
-          return {
-            tag: "Right",
-            value: { exists: false, tool },
-          };
-
-        case "Error":
-          return {
-            tag: "Left",
-            value: { path: [name], message: exists.message },
-          };
-      }
+  const [errors, tools] = partitionMap<
+    [string, unknown],
+    FieldError,
+    { exists: boolean; tool: Tool }
+  >(Object.entries(json), ([name, version]) => {
+    if (typeof version !== "string") {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Expected a version as a string but got: ${JSON.stringify(
+            version
+          )}`,
+        },
+      };
     }
-  );
+
+    const versions = getOwn(KNOWN_TOOLS, name);
+
+    if (versions === undefined) {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Unknown tool\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`,
+        },
+      };
+    }
+
+    const osAssets = getOwn(versions, version);
+
+    if (osAssets === undefined) {
+      return {
+        tag: "Left",
+        value: {
+          path: [name],
+          message: `Unknown version: ${version}\nKnown versions: ${join(
+            Object.keys(versions),
+            ", "
+          )}`,
+        },
+      };
+    }
+
+    const asset = osAssets[osName];
+
+    const tool = makeTool(cwd, env, name, version, asset);
+
+    const exists = validateFileExists(tool.absolutePath);
+
+    switch (exists.tag) {
+      case "Exists":
+        return {
+          tag: "Right",
+          value: { exists: true, tool },
+        };
+
+      case "DoesNotExist":
+        return {
+          tag: "Right",
+          value: { exists: false, tool },
+        };
+
+      case "Error":
+        return {
+          tag: "Left",
+          value: { path: [name], message: exists.message },
+        };
+    }
+  });
 
   if (isNonEmptyArray(errors)) {
     return {
@@ -483,10 +483,12 @@ function parseTools(
     };
   }
 
-  const [existing, missing]: [Array<Tool>, Array<Tool>] = partitionMap(
-    tools,
-    ({ exists, tool }) =>
-      exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
+  const [existing, missing] = partitionMap<
+    { exists: boolean; tool: Tool },
+    Tool,
+    Tool
+  >(tools, ({ exists, tool }) =>
+    exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
   );
 
   return {
