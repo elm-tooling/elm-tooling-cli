@@ -192,5 +192,11 @@ module.exports = {
         project: ["./tests/tsconfig.json"],
       },
     },
+    {
+      files: ["rollup.config.js"],
+      parserOptions: {
+        sourceType: "module",
+      },
+    },
   ],
 };

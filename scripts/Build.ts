@@ -39,6 +39,7 @@ for (const { src, dest = src } of FILES_TO_COPY) {
   fs.copyFileSync(path.join(DIR, src), path.join(BUILD, dest));
 }
 
+// TODO: Call Rollup’s API instead, and adjust everything.
 childProcess.spawnSync("npx", ["--no-install", "tsc"], {
   shell: true,
   stdio: "inherit",
@@ -61,6 +62,8 @@ modifyFile(path.join(BUILD, "commands", "Help.js"), (content) =>
   content.replace(/%VERSION%/g, PKG.version)
 );
 
+// TODO: Add shebang to index.js
+// #!/usr/bin/env node
 fs.chmodSync(path.join(BUILD, "index.js"), "755");
 
 modifyFile(path.join(DIR, "docs", "getting-started.md"), (content) =>

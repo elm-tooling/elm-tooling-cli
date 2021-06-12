@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { help } from "./commands/Help";
 import { init } from "./commands/Init";
 import { install } from "./commands/Install";
