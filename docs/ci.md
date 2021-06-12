@@ -11,7 +11,7 @@ See the [Example GitHub Actions workflow](https://github.com/elm-tooling/elm-too
 
 Basically, you need to:
 
-1. Install npm packages, with `NO_ELM_TOOLING_INSTALL` set. It’s nice to cache `node_modules` (based on your `package-lock.json`) for speed and reliability.
+1. Install npm packages, with `NO_ELM_TOOLING_INSTALL` set. It’s nice to cache `node_modules` (based on your `package.json` and `package-lock.json`) for speed and reliability.
 
    Setting the `NO_ELM_TOOLING_INSTALL` environment variable turns `elm-tooling install` into a no-op, in case you have a `"postinstall": "elm-tooling install"` script in your `package.json`. In CI it’s better to install npm packages and `elm-tooling.json` tools separately so you can cache `node_modules` and `~/.elm` separately.
 
