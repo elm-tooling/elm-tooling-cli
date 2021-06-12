@@ -3,6 +3,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
+import * as readline from "readline";
 import * as zlib from "zlib";
 
 import {
@@ -14,7 +15,6 @@ import {
   indent,
   isNonEmptyArray,
   join,
-  mapNonEmptyArray,
   partitionMap,
   printNumErrors,
   removeColor,
@@ -158,41 +158,39 @@ async function installTools(
     }
   }
 
-  const toolsProgress: Array<string> = tools.missing.map(() =>
-    formatProgress(0)
-  );
+  const isInteractive = logger.raw.stdout.isTTY;
 
-  const redraw = (change?: {
-    index: number;
-    progress: number | string;
-  }): void => {
-    if (change !== undefined) {
-      const { index, progress } = change;
-      const progressString = formatProgress(progress);
-      if (toolsProgress[index] === progressString) {
-        return;
-      }
-      toolsProgress[index] = progressString;
+  const previousProgress = new Map<number, string>();
+
+  const updateStatusLine = (
+    tool: Tool,
+    progress: number | string,
+    index: number
+  ): void => {
+    const formattedProgress = formatProgress(progress);
+    const previous = previousProgress.get(index);
+    if (previous === formattedProgress) {
+      return;
     }
-    if (isNonEmptyArray(tools.missing)) {
-      logger.progress(
-        join(
-          mapNonEmptyArray(
-            tools.missing,
-            (tool, index) =>
-              // We know that `index` is in range here.
-              `${bold(toolsProgress[index] as string)} ${tool.name} ${
-                tool.version
-              }`
-          ),
-          "\n"
-        )
+    previousProgress.set(index, formattedProgress);
+    const moveCursor = previous !== undefined && isInteractive;
+    if (moveCursor) {
+      readline.moveCursor(logger.raw.stdout, 0, -tools.missing.length + index);
+    }
+    logger.log(`${bold(formattedProgress)} ${tool.name} ${tool.version}`);
+    if (moveCursor) {
+      readline.moveCursor(
+        logger.raw.stdout,
+        0,
+        tools.missing.length - index - 1
       );
     }
   };
 
   logger.log(bold(elmToolingJsonPath));
-  redraw();
+  for (const [index, tool] of tools.missing.entries()) {
+    updateStatusLine(tool, 0, index);
+  }
 
   const presentNames = tools.missing
     .concat(tools.existing)
@@ -205,14 +203,14 @@ async function installTools(
     ...(await Promise.all(
       tools.missing.map((tool, index) =>
         downloadAndExtract(env, tool, (percentage) => {
-          redraw({ index, progress: percentage });
+          updateStatusLine(tool, percentage, index);
         }).then(
           () => {
-            redraw({ index, progress: 1 });
+            updateStatusLine(tool, 1, index);
             return linkTool(cwd, nodeModulesBinPath, tool);
           },
           (error: Error) => {
-            redraw({ index, progress: "ERR!" });
+            updateStatusLine(tool, "ERR!", index);
             return new Error(downloadAndExtractError(tool, error));
           }
         )
@@ -224,7 +222,6 @@ async function installTools(
     ...removeTools(cwd, env, tools.osName, nodeModulesBinPath, toolsToRemove),
   ];
 
-  redraw();
   return printResults(logger, results);
 }
 
