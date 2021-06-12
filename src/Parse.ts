@@ -5,7 +5,6 @@ import * as path from "path";
 import {
   bold,
   Env,
-  findClosest,
   getOwn,
   indent,
   isNonEmptyArray,
@@ -24,10 +23,19 @@ import {
   OSAssets,
   OSName,
 } from "./KnownTools";
+import {
+  absoluteDirname,
+  AbsolutePath,
+  absolutePathFromString,
+  Cwd,
+  ElmToolingJsonPath,
+  findClosest,
+  ToolPath,
+} from "./PathHelpers";
 
 export const isWindows = os.platform() === "win32";
 
-export function getElmToolingInstallPath(cwd: string, env: Env): string {
+export function getElmToolingInstallPath(cwd: Cwd, env: Env): AbsolutePath {
   // istanbul ignore next
   const elmHome =
     env.ELM_HOME ??
@@ -38,7 +46,7 @@ export function getElmToolingInstallPath(cwd: string, env: Env): string {
         )
       : path.join(os.homedir(), ".elm"));
 
-  return path.join(path.resolve(cwd, elmHome), "elm-tooling");
+  return absolutePathFromString(cwd.path, path.join(elmHome, "elm-tooling"));
 }
 
 export type ParseResult =
@@ -48,7 +56,7 @@ export type ParseResult =
     }
   | {
       tag: "Parsed";
-      elmToolingJsonPath: string;
+      elmToolingJsonPath: ElmToolingJsonPath;
       originalObject: Record<string, unknown>;
       unknownFields: Array<string>;
       entrypoints?: FieldResult<NonEmptyArray<Entrypoint>>;
@@ -56,7 +64,7 @@ export type ParseResult =
     }
   | {
       tag: "ReadAsJsonObjectError";
-      elmToolingJsonPath: string;
+      elmToolingJsonPath: ElmToolingJsonPath;
       message: string;
     };
 
@@ -71,7 +79,7 @@ export type FieldError = {
 
 export type Entrypoint = {
   relativePath: string;
-  absolutePath: string;
+  absolutePath: AbsolutePath;
 };
 
 export type Tools = {
@@ -83,25 +91,35 @@ export type Tools = {
 export type Tool = {
   name: string;
   version: string;
-  absolutePath: string;
+  location: ToolPath;
   asset: Asset;
 };
 
 export function findReadAndParseElmToolingJson(
-  cwd: string,
+  cwd: Cwd,
   env: Env
 ): ParseResult {
-  const elmToolingJsonPath = findClosest("elm-tooling.json", cwd);
-  if (elmToolingJsonPath === undefined) {
+  const elmToolingJsonPathRaw = findClosest("elm-tooling.json", cwd.path);
+  if (elmToolingJsonPathRaw === undefined) {
     return {
       tag: "ElmToolingJsonNotFound",
       message: "No elm-tooling.json found. To create one: elm-tooling init",
     };
   }
 
+  const elmToolingJsonPath: ElmToolingJsonPath = {
+    tag: "ElmToolingJsonPath",
+    theElmToolingJsonPath: elmToolingJsonPathRaw,
+  };
+
   let json: unknown = undefined;
   try {
-    json = JSON.parse(fs.readFileSync(elmToolingJsonPath, "utf-8"));
+    json = JSON.parse(
+      fs.readFileSync(
+        elmToolingJsonPath.theElmToolingJsonPath.absolutePath,
+        "utf-8"
+      )
+    );
   } catch (errorAny) {
     const error = errorAny as Error;
     return {
@@ -225,11 +243,14 @@ export type FileExists =
   | { tag: "Error"; message: string }
   | { tag: "Exists" };
 
-export function validateFileExists(fullPath: string): FileExists {
+export function validateFileExists(fullPath: AbsolutePath): FileExists {
   try {
-    const stats = fs.statSync(fullPath);
+    const stats = fs.statSync(fullPath.absolutePath);
     if (!stats.isFile()) {
-      return { tag: "Error", message: `Exists but is not a file: ${fullPath}` };
+      return {
+        tag: "Error",
+        message: `Exists but is not a file: ${fullPath.absolutePath}`,
+      };
     }
   } catch (errorAny) {
     const error = errorAny as Error & { code?: string };
@@ -237,20 +258,20 @@ export function validateFileExists(fullPath: string): FileExists {
       case "ENOENT":
         return {
           tag: "DoesNotExist",
-          message: `File does not exist: ${fullPath}`,
+          message: `File does not exist: ${fullPath.absolutePath}`,
         };
       case "ENOTDIR":
         return {
           tag: "Error",
-          message: `A part of this path exist, but is not a directory (which it needs to be): ${path.dirname(
-            fullPath
-          )}`,
+          message: `A part of this path exist, but is not a directory (which it needs to be): ${
+            absoluteDirname(fullPath).absolutePath
+          }`,
         };
       // istanbul ignore next
       default:
         return {
           tag: "Error",
-          message: `File error for ${fullPath}: ${error.message}`,
+          message: `File error for ${fullPath.absolutePath}: ${error.message}`,
         };
     }
   }
@@ -258,7 +279,7 @@ export function validateFileExists(fullPath: string): FileExists {
 }
 
 function parseEntrypoints(
-  elmToolingJsonPath: string,
+  elmToolingJsonPath: ElmToolingJsonPath,
   json: unknown
 ): FieldResult<NonEmptyArray<Entrypoint>> {
   if (!Array.isArray(json)) {
@@ -334,12 +355,12 @@ function parseEntrypoints(
         };
       }
 
-      const absolutePath = path.join(
-        path.dirname(elmToolingJsonPath),
+      const entrypointPath = absolutePathFromString(
+        absoluteDirname(elmToolingJsonPath.theElmToolingJsonPath),
         entrypoint
       );
 
-      const exists = validateFileExists(absolutePath);
+      const exists = validateFileExists(entrypointPath);
       if (exists.tag !== "Exists") {
         return {
           tag: "Left",
@@ -349,14 +370,16 @@ function parseEntrypoints(
 
       if (
         entrypointsSoFar.some(
-          (otherEntrypoint) => otherEntrypoint.absolutePath === absolutePath
+          (otherEntrypoint) =>
+            otherEntrypoint.absolutePath.absolutePath ===
+            entrypointPath.absolutePath
         )
       ) {
         return {
           tag: "Left",
           value: {
             path: [index],
-            message: `Duplicate entrypoint: ${absolutePath}`,
+            message: `Duplicate entrypoint: ${entrypointPath.absolutePath}`,
           },
         };
       }
@@ -365,7 +388,7 @@ function parseEntrypoints(
         tag: "Right",
         value: {
           relativePath: entrypoint,
-          absolutePath,
+          absolutePath: entrypointPath,
         },
       };
     }
@@ -388,7 +411,7 @@ function parseEntrypoints(
 }
 
 function parseTools(
-  cwd: string,
+  cwd: Cwd,
   env: Env,
   osName: OSName,
   json: unknown
@@ -453,7 +476,7 @@ function parseTools(
 
     const tool = makeTool(cwd, env, name, version, asset);
 
-    const exists = validateFileExists(tool.absolutePath);
+    const exists = validateFileExists(tool.location.theToolPath);
 
     switch (exists.tag) {
       case "Exists":
@@ -498,7 +521,7 @@ function parseTools(
 }
 
 export function makeTool(
-  cwd: string,
+  cwd: Cwd,
   env: Env,
   name: string,
   version: string,
@@ -507,12 +530,13 @@ export function makeTool(
   return {
     name,
     version,
-    absolutePath: path.join(
-      getElmToolingInstallPath(cwd, env),
-      name,
-      version,
-      asset.fileName
-    ),
+    location: {
+      tag: "ToolPath",
+      theToolPath: absolutePathFromString(
+        getElmToolingInstallPath(cwd, env),
+        path.join(name, version, asset.fileName)
+      ),
+    },
     asset,
   };
 }
@@ -560,7 +584,7 @@ export function getToolThrowing({
 }: {
   name: string;
   version: string;
-  cwd: string;
+  cwd: Cwd;
   env: Env;
 }): Tool {
   const osName = getOSName();

@@ -1,5 +1,3 @@
-import * as fs from "fs";
-import * as path from "path";
 import type { Readable, Writable } from "stream";
 
 export type NonEmptyArray<T> = [T, ...Array<T>];
@@ -30,15 +28,6 @@ export function toJSON(json: unknown): string {
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-export function findClosest(name: string, dir: string): string | undefined {
-  const entry = path.join(dir, name);
-  return fs.existsSync(entry)
-    ? entry
-    : dir === path.parse(dir).root
-    ? undefined
-    : findClosest(name, path.dirname(dir));
 }
 
 export type Either<Left, Right> =

@@ -5,6 +5,7 @@ import { toolsCommand } from "./commands/Tools";
 import { validate } from "./commands/Validate";
 import { Env, join, ReadStream, WriteStream } from "./Helpers";
 import { makeLogger } from "./Logger";
+import { absolutePathFromString, Cwd } from "./PathHelpers";
 
 type Options = {
   cwd?: string;
@@ -18,7 +19,7 @@ export default async function elmToolingCli(
   args: Array<string>,
   // istanbul ignore next
   {
-    cwd = process.cwd(),
+    cwd: cwdString = process.cwd(),
     env = process.env,
     stdin = process.stdin,
     stdout = process.stdout,
@@ -26,6 +27,13 @@ export default async function elmToolingCli(
   }: Options = {}
 ): Promise<number> {
   const logger = makeLogger({ env, stdout, stderr });
+  const cwd: Cwd = {
+    tag: "Cwd",
+    path: absolutePathFromString(
+      { tag: "AbsolutePath", absolutePath: process.cwd() },
+      cwdString
+    ),
+  };
 
   const isHelp = args.some(
     (arg) => arg === "-h" || arg === "-help" || arg === "--help"
