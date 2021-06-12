@@ -407,12 +407,14 @@ function spawn(
 // for _all_ spawns, so that we _always_ use Windows’ own `curl` instead of Git
 // Bash’s `curl`.
 function adjustPathForWindows(pathString: string): string {
-  const [system32, rest] = partitionMap(pathString.split(";"), (part) =>
-    part.toLowerCase().includes("system32")
-      ? { tag: "Left", value: part }
-      : { tag: "Right", value: part }
+  const [system32, rest] = partitionMap(
+    pathString.split(path.delimiter),
+    (part) =>
+      part.toLowerCase().includes("system32")
+        ? { tag: "Left", value: part }
+        : { tag: "Right", value: part }
   );
-  return [...system32, ...rest].join(";");
+  return [...system32, ...rest].join(path.delimiter);
 }
 
 export function downloadFile(
