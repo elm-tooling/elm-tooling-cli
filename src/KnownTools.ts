@@ -241,7 +241,7 @@ const knownTools = {
       linux: {
         hash: "a914088083ea8bc004944c98d9a4767cc5225d5811480f49fe1ad2c491baaaaa",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_linux.tar.gz",
-        fileSize: 0,
+        fileSize: 3610634,
         fileName: "elm-test-rs",
         type: "tgz",
       },
@@ -255,7 +255,7 @@ const knownTools = {
       windows: {
         hash: "c8a35e2e0049b691e4833a6e8ccb094688cdc49aa977c437a8289c57d92a5775",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_windows.zip",
-        fileSize: 0,
+        fileSize: 1939029,
         fileName: "elm-test-rs.exe",
         type: "zip",
       },
