@@ -856,7 +856,12 @@ function extractTar({
   });
 
   return {
-    destroy: () => tar.kill(),
+    destroy: () => {
+      // Without destroying stdin, the program exits early with a cryptic EPIPE
+      // error – when using `downloadFileNative`.
+      tar.stdin.destroy();
+      return tar.kill();
+    },
     write: (chunk) => tar.stdin.write(chunk),
     end: () => {
       tar.stdin.end();
