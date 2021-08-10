@@ -459,7 +459,9 @@ type Command = SpawnCommand | string;
 
 function commandToString(command: Command): string {
   // `spawnargs` actually contains `spawnfile` too.
-  return typeof command === "string" ? command : command.spawnargs.join(" ");
+  return typeof command === "string"
+    ? command
+    : command.spawnargs.map((arg) => (arg === "" ? '""' : arg)).join(" ");
 }
 
 function spawn(
