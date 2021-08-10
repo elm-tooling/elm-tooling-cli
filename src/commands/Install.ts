@@ -553,7 +553,7 @@ export function downloadFile(
   // `-w ""` overrides `-w "\n"` which people might have in their .curlrc due to this:
   // https://stackoverflow.com/a/14614203/2010616
   // Otherwise they’ll get a byte/hash mismatch due to the extra newline.
-  const curl = spawn(env, "curl", ["-#fL", "-w", "", url]);
+  const curl = spawn(env, "curl", ["-#fLw", "", url]);
   let toKill: { kill: () => void } = curl;
   curl.stdout.on("data", onData);
   curl.stderr.on("data", onStderr);
