@@ -616,19 +616,17 @@ function downloadFileNative(
     },
   };
 
-  const errorPrefix = "[Node.js https.get]";
   const usedCommand = `require("https").get(${JSON.stringify(url)})`;
+  const errorPrefix = `${usedCommand}\nThe above call errored: `;
 
   const request = https.get(url, (response) => {
     switch (response.statusCode) {
       case 302: {
         const redirect = response.headers.location;
         if (redirect === undefined) {
-          onError(
-            new Error(`${errorPrefix}: Got 302 without location header.`)
-          );
+          onError(new Error(`${errorPrefix}Got 302 without location header.`));
         } else if (maxRedirects <= 0) {
-          onError(new Error(`${errorPrefix}: Too many redirects.`));
+          onError(new Error(`${errorPrefix}Too many redirects.`));
         } else {
           toKill = downloadFileNative(
             redirect,
@@ -676,7 +674,7 @@ function downloadFileNative(
       default:
         onError(
           new Error(
-            `${errorPrefix}: Unexpected status code: ${
+            `${errorPrefix}Unexpected status code: ${
               response.statusCode ?? "unknown"
             }`
           )
