@@ -124,7 +124,7 @@ async function start(
   tools: Array<Tool>,
   save: (tools: Array<ToolChoice>) => void
 ): Promise<number> {
-  return new Promise((resolve) => {
+  return new Promise<number>((resolve) => {
     let state: State = {
       tools,
       cursorTool: isNonEmptyArray(tools) ? tools[0] : getDefaultCursorTool(),
@@ -205,6 +205,8 @@ async function start(
           break;
       }
     });
+  }).finally(() => {
+    stdin.pause();
   });
 }
 
