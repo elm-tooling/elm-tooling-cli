@@ -15,110 +15,32 @@ nav_order: 3
 
 ## Why install Elm tools using `elm-tooling` instead of `npm`?
 
-Installing `elm`, `elm-format` and `elm-json` using `npm` and `elm-tooling`:
+Installing `elm`, `elm-format` and `elm-json` using `npm` (version 7) and `elm-tooling`:
 
-| Metric                | npm        | elm-tooling |
-| --------------------- | ---------- | ----------- |
-| Number of packages    | 70         | 1           |
-| `node_modules/` size  | 45 MB      | 120 KB      |
-| Installation time     | 9 s        | 2 s         |
-| Re-installation time  | 9 s        | 0.5 s       |
-| Processing            | Sequential | Parallel    |
-| Download verification | None       | SHA256      |
+| Metric                | npm    | elm-tooling |
+| --------------------- | ------ | ----------- |
+| Number of packages    | 65     | 1           |
+| `node_modules/` size  | 40 MiB | 116 KiB     |
+| Installation time     | 8 s    | 2.5 s       |
+| Re-installation time  | 1.6 s  | 1.5 s       |
+| Download verification | None   | SHA256      |
 
 Comments:
 
-- Number of packages: Why are 70 npm packages installed just to get `elm`, `elm-format` and `elm-json` onto my computer?
+- Number of packages: Why are 65 npm packages installed just to get `elm`, `elm-format` and `elm-json` onto my computer?
 
 - `node_modules/` size: How can `elm-tooling` be so much smaller?
 
-  - Some of the 70 `npm` packages are pretty heavy. `elm-tooling` has no dependencies, and instead uses the `curl` (or `wget`) and `tar` that come with basically all operating systems (even Windows!) out of the box.
+  - Some of the 65 npm packages are pretty heavy. `elm-tooling` has no dependencies, and instead uses the `curl` (or `wget`) and `tar` that come with basically all operating systems (even Windows!) out of the box.
   - `elm-tooling` puts the executables in a central location (`~/.elm/elm-tooling`) instead of in the local `node_modules/` folder.
 
   (Measured on macOS; executables vary slightly in size between macOS, Linux and Windows (also disk block size).)
 
-- Installation time, re-installation time and processing: This of course depends on your Internet speed. `elm-tooling` is faster because:
-
-  - There’s just 1 npm package to install instead of 70.
-  - The executables are fetched in parallel (all at the same time) instead of sequential (one after the other). (`yarn` runs package postinstall scripts in parallel, but on the flip it also seems to unnecessarily trigger them more often.)
-  - For a re-installation (removed `node_modules/` folder, for example), `elm-tooling install` becomes basically a no-op. All executables already exist in `~/.elm/elm-tooling` so there’s not much to do.
-
-  9 seconds vs 2 seconds might not sound like much. 2 seconds feels near-instant, while 9 seconds is more of a “meh” experience. 0.5 seconds really feels instant, and is a god send if you ever switch between git branches with big changes to `package.json` between them.
+- Installation and re-installation time: This of course depends on your Internet speed, and also on npm cache. `npm` used to be much slower, but has stepped up their game. Either way, with `elm-tooling` you get the other benefits mentioned here (fewer dependencies and improved security) besides good performance. (Note that re-installation time for `elm-tooling` includes re-installing `elm-tooling` itself with `npm`. That’s where most time is spent, while `elm-tooling install` is basically a no-op when the executables already exist in `~/.elm/elm-tooling`.)
 
 - Download verification: Security. `elm-tooling` ships with SHA256 hashes for all tools it knows about and verifies that download files match. `elm-tooling` itself is hashed in your `package-lock.json` (which you commit). The `elm`, `elm-format` and `elm-json` npm packages on the other hand download stuff without verifying what they got.
 
 Finally, the `elm`, `elm-format` and `elm-json` npm packages are essentially hacks. The `elm` npm package for instance does not contain Elm at all. It just contains some code that _downloads_ Elm using a postinstall script (or at the first run).
-
-<details markdown="block">
-
-<summary>Terminal output comparison</summary>
-
-This is what a typical `npm install` looks like for an Elm project:
-
-```
-$ npm install
-
-> elm@0.19.1-3 install /Users/you/my-app/node_modules/elm
-> node install.js
-
---------------------------------------------------------------------------------
-
-Downloading Elm 0.19.1 from GitHub.
-
-NOTE: You can avoid npm entirely by downloading directly from:
-https://github.com/elm/compiler/releases/download/0.19.1/binary-for-mac-64-bit.gz
-All this package does is download that file and put it somewhere.
-
---------------------------------------------------------------------------------
-
-
-> elm-format@0.8.4 install /Users/you/my-app/node_modules/elm-format
-> binwrap-install
-
-
-> elm-json@0.2.8 install /Users/you/my-app/node_modules/elm-json
-> binwrap-install
-
-added 70 packages from 69 contributors and audited 70 packages in 9.122s
-```
-
-Compare that with an `npm install` using `elm-tooling install`:
-
-```
-$ npm install
-
-> my-app@ postinstall /Users/you/my-app
-> elm-tooling install
-
-/Users/you/my-app/elm-tooling.json
-100% elm 0.19.1
-100% elm-format 0.8.4
-100% elm-json 0.2.8
-elm 0.19.1 link created: node_modules/.bin/elm -> /Users/you/.elm/elm-tooling/elm/0.19.1/elm
-    To run: npx elm
-elm-format 0.8.4 link created: node_modules/.bin/elm-format -> /Users/you/.elm/elm-tooling/elm-format/0.8.4/elm-format
-    To run: npx elm-format
-elm-json 0.2.8 link created: node_modules/.bin/elm-json -> /Users/you/.elm/elm-tooling/elm-json/0.2.8/elm-json
-    To run: npx elm-json
-added 1 package from 1 contributor and audited 1 package in 2.186s
-```
-
-And a re-installation:
-
-```
-$ npm install
-
-> my-app@ postinstall /Users/you/my-app
-> elm-tooling install
-
-/Users/you/my-app/elm-tooling.json
-elm 0.19.1: all good
-elm-format 0.8.4: all good
-elm-json 0.2.8: all good
-audited 1 package in 0.487s
-```
-
-</details>
 
 ## When should I use `elm-tooling` to install tools?
 
@@ -194,17 +116,19 @@ The algorithm is roughly:
 
 2. For every tool/version pair in `"tools"`:
 
-   1. Look it up in the built-in list of known tools, to get the URL to download from and the expected SHA256 hash.
+   1. Look it up in the built-in list of known tools, to get the URL to download from and the expected number of bytes and SHA256 hash.
 
    2. Unless the executable already exists on disk in `~/.elm/`:
 
       1. Download the URL using `curl`, `wget` or Node.js’ `https` module.
 
-      2. Verify that the downloaded contents match the SHA256 hash.
+      2. Verify that the downloaded contents has the expected number of bytes.
 
-      3. Extract the executable using `tar` or Node.js’ `zlib` module (`gunzip`).
+      3. Verify that the downloaded contents has the expected SHA256 hash.
 
-      4. Make sure the extracted file is executable (`chmod +x`).
+      4. Extract the executable using `tar` or Node.js’ `zlib` module (`gunzip`).
+
+      5. Make sure the extracted file is executable (`chmod +x`).
 
    3. Create a link in `./node_modules/.bin/`. (The `node_modules/` folder is always located next to your `elm-tooling.json`.)
 
