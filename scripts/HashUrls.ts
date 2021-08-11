@@ -12,10 +12,12 @@ async function run(urls: Array<string>): Promise<string> {
   const assets: Array<[OSName, Asset]> = await Promise.all(
     urls.map((url, index): Promise<[OSName, Asset]> => {
       const hash = crypto.createHash("sha256");
+      let fileSize = 0;
       return new Promise((resolve, reject) => {
         downloadFile(process.env, url, {
           onData: (chunk) => {
             hash.update(chunk);
+            fileSize += chunk.byteLength;
           },
           onProgress: (percentage) => {
             progress[index] = percentage;
@@ -34,6 +36,7 @@ async function run(urls: Array<string>): Promise<string> {
             const asset: Asset = {
               hash: hash.digest("hex"),
               url,
+              fileSize,
               fileName: guessFileName(url, osName),
               type: guessAssetType(url),
             };
@@ -55,12 +58,12 @@ function guessFileName(url: string, osName: OSName): string {
 }
 
 function guessAssetType(url: string): AssetType {
-  return url.endsWith(".gz")
-    ? "gz"
-    : url.endsWith(".tgz")
+  return url.endsWith(".tgz")
     ? "tgz"
     : url.endsWith(".tar.gz")
     ? "tgz"
+    : url.endsWith(".gz")
+    ? "gz"
     : url.endsWith(".zip")
     ? "zip"
     : ("UNKNOWN" as AssetType);

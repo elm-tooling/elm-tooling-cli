@@ -365,21 +365,37 @@ async function downloadAndExtract(
       onSuccess: resolve,
     });
 
+    let fileSize = 0;
+
     const downloader = downloadFile(env, tool.asset.url, {
       onData: (chunk) => {
         hash.update(chunk);
         extractor.write(chunk);
+        fileSize += chunk.byteLength;
       },
       onProgress,
       onError: removeExtractedAndReject,
-      onSuccess: () => {
+      onSuccess: (usedCommand) => {
         const digest = hash.digest("hex");
-        if (digest === tool.asset.hash) {
-          extractor.end();
-        } else {
+        if (fileSize !== tool.asset.fileSize) {
           removeExtractedAndReject(
-            new Error(hashMismatch(digest, tool.asset.hash))
+            new Error(
+              mismatchError(
+                "number of bytes",
+                usedCommand,
+                fileSize,
+                tool.asset.fileSize
+              )
+            )
           );
+        } else if (digest !== tool.asset.hash) {
+          removeExtractedAndReject(
+            new Error(
+              mismatchError("SHA256 hash", usedCommand, digest, tool.asset.hash)
+            )
+          );
+        } else {
+          extractor.end();
         }
       },
     });
@@ -393,6 +409,7 @@ ${indent(
   `
 ${dim(`< ${tool.asset.url}`)}
 ${dim(`> ${tool.location.theToolPath.absolutePath}`)}
+
 ${error.message}
   `.trim()
 )}
@@ -408,12 +425,43 @@ ${error.message}
   `.trim();
 }
 
-function hashMismatch(actual: string, expected: string): string {
+function mismatchError(
+  expectedString: string,
+  usedCommand: Command,
+  actual: number | string,
+  expected: number | string
+): string {
+  const extra =
+    typeof usedCommand === "string"
+      ? ""
+      : `Do you have a config file or environment variables set for ${usedCommand.spawnfile}?`;
   return `
-The downloaded file does not have the expected hash!
+The downloaded file does not have the expected ${expectedString}!
 Expected: ${expected}
 Actual:   ${actual}
+
+- Probably, something in your environment messes with the download.
+- Worst case, someone has replaced the executable with something malicious!
+
+This happened when executing:
+${commandToString(usedCommand)}
+
+${extra}
   `.trim();
+}
+
+type SpawnCommand = {
+  spawnfile: string;
+  spawnargs: Array<string>;
+};
+
+type Command = SpawnCommand | string;
+
+function commandToString(command: Command): string {
+  // `spawnargs` actually contains `spawnfile` too.
+  return typeof command === "string"
+    ? command
+    : command.spawnargs.map((arg) => (arg === "" ? '""' : arg)).join(" ");
 }
 
 function spawn(
@@ -459,7 +507,7 @@ export function downloadFile(
     onData: (buffer: Buffer) => void;
     onProgress: (percentage: number) => void;
     onError: (error: Error & { code?: string }) => void;
-    onSuccess: () => void;
+    onSuccess: (usedCommand: Command) => void;
   }
 ): { kill: () => void } {
   let stderr = "";
@@ -479,12 +527,12 @@ export function downloadFile(
   };
 
   const onClose =
-    (commandName: string) =>
+    (command: SpawnCommand) =>
     (code: number | null, signal: NodeJS.Signals | null): void => {
-      if (errored.includes(commandName)) {
+      if (errored.includes(command.spawnfile)) {
         return;
       } else if (code === 0) {
-        onSuccess();
+        onSuccess(command);
       } else {
         const trimmed = stderr
           .trim()
@@ -492,7 +540,9 @@ export function downloadFile(
           .replace(/^[\s#O=-]+/g, "");
         onError(
           new Error(
-            `${commandName} exited with ${exitReason(code, signal)}:\n${
+            `${commandToString(
+              command
+            )}\nThe above command exited with ${exitReason(code, signal)}:\n${
               trimmed === "" ? EMPTY_STDERR : trimmed
             }`
           )
@@ -500,23 +550,26 @@ export function downloadFile(
       }
     };
 
-  const curl = spawn(env, "curl", ["-#fL", url]);
+  // `-w ""` overrides `-w "\n"` which people might have in their .curlrc due to this:
+  // https://stackoverflow.com/a/14614203/2010616
+  // Otherwise they’ll get a byte/hash mismatch due to the extra newline.
+  const curl = spawn(env, "curl", ["-#fLw", "", url]);
   let toKill: { kill: () => void } = curl;
   curl.stdout.on("data", onData);
   curl.stderr.on("data", onStderr);
-  curl.on("close", onClose("curl"));
+  curl.on("close", onClose(curl));
 
   curl.on("error", (curlError: Error & { code?: string }) => {
-    errored.push("curl");
+    errored.push(curl.spawnfile);
     if (curlError.code === "ENOENT") {
       const wget = spawn(env, "wget", ["-O", "-", url]);
       toKill = wget;
       wget.stdout.on("data", onData);
       wget.stderr.on("data", onStderr);
-      wget.on("close", onClose("wget"));
+      wget.on("close", onClose(wget));
 
       wget.on("error", (wgetError: Error & { code?: string }) => {
-        errored.push("wget");
+        errored.push(wget.spawnfile);
         if (wgetError.code === "ENOENT") {
           toKill = downloadFileNative(url, {
             onData,
@@ -553,7 +606,7 @@ function downloadFileNative(
     onData: (buffer: Buffer) => void;
     onProgress: (percentage: number) => void;
     onError: (error: Error & { code?: string }) => void;
-    onSuccess: () => void;
+    onSuccess: (usedCommand: Command) => void;
   },
   maxRedirects = 50 // This is curl’s default.
 ): { kill: () => void } {
@@ -563,14 +616,17 @@ function downloadFileNative(
     },
   };
 
+  const usedCommand = `require("https").get(${JSON.stringify(url)})`;
+  const errorPrefix = `${usedCommand}\nThe above call errored: `;
+
   const request = https.get(url, (response) => {
     switch (response.statusCode) {
       case 302: {
         const redirect = response.headers.location;
         if (redirect === undefined) {
-          onError(new Error(`Got 302 without location header.`));
+          onError(new Error(`${errorPrefix}Got 302 without location header.`));
         } else if (maxRedirects <= 0) {
-          onError(new Error(`Too many redirects.`));
+          onError(new Error(`${errorPrefix}Too many redirects.`));
         } else {
           toKill = downloadFileNative(
             redirect,
@@ -608,7 +664,9 @@ function downloadFileNative(
           }
         });
 
-        response.on("end", onSuccess);
+        response.on("end", () => {
+          onSuccess(usedCommand);
+        });
 
         break;
       }
@@ -616,7 +674,9 @@ function downloadFileNative(
       default:
         onError(
           new Error(
-            `Unexpected status code: ${response.statusCode ?? "unknown"}`
+            `${errorPrefix}Unexpected status code: ${
+              response.statusCode ?? "unknown"
+            }`
           )
         );
         break;
@@ -784,16 +844,22 @@ function extractTar({
       const trimmed = stderr.trim();
       onError(
         new Error(
-          `tar exited with ${exitReason(code, signal)}:\n${
-            trimmed === "" ? EMPTY_STDERR : trimmed
-          }`
+          `${commandToString(tar)}\nThe above command exited with ${exitReason(
+            code,
+            signal
+          )}:\n${trimmed === "" ? EMPTY_STDERR : trimmed}`
         )
       );
     }
   });
 
   return {
-    destroy: () => tar.kill(),
+    destroy: () => {
+      // Without destroying stdin, the program exits early with a cryptic EPIPE
+      // error – when using `downloadFileNative`.
+      tar.stdin.destroy();
+      return tar.kill();
+    },
     write: (chunk) => tar.stdin.write(chunk),
     end: () => {
       tar.stdin.end();
