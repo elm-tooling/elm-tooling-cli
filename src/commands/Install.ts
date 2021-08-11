@@ -441,7 +441,7 @@ Expected: ${expected}
 Actual:   ${actual}
 
 - Probably, something in your environment messes with the download.
-- Worst case, someone has replaced the binary with something malicious!
+- Worst case, someone has replaced the executable with something malicious!
 
 This happened when executing:
 ${commandToString(usedCommand)}
