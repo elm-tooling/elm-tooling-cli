@@ -55,19 +55,12 @@ This is only done by people with commit access.
 
 3. Run `npm test`. This is both to double-check that everything works, but also to trigger a build. The build also updates the documentation with the latest version number.
 
-4. Commit, tag and push. I use this script called `release`:
+4. Commit: `git commit -am 'elm-tooling-cli v1.2.3'`.
 
-   ```bash
-   #!/usr/bin/env bash
-   name="$(basename "$PWD")"
-   version="v$1"
-   message="$name $version"
-   git commit -am "$message" && git tag "$version" -am "$message"
-   ```
+5. Make a pull request, and merge it.
 
-   ```
-   release 1.2.3
-   git push && git push origin v1.2.3
-   ```
+6. Update `main` locally and tag: `git tag v1.2.3 -am 'elm-tooling-cli v1.2.3'`
 
-5. Publish to npm. `cd build && npm publish`.
+7. Push the tag: `git push origin v1.2.3`
+
+8. Publish to npm: `cd build && npm publish`
