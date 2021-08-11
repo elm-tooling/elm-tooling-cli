@@ -1,3 +1,55 @@
+### Version 1.4.0 (2021-08-11)
+
+- Fixed: Some people [configure `curl` to output an extra newline](https://stackoverflow.com/a/14614203/2010616). The way `elm-tooling` uses `curl`, that results in an extra newline added to downloaded executables. While an extra newline doesn’t seem to break executables, it fails `elm-tooling`’s SHA256 verification, causing `elm-tooling` to abort with an error message like this:
+
+  ```
+  elm 0.19.1
+    < https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
+    > /home/you/.elm/elm-tooling/elm/0.19.1/elm
+    The downloaded file does not have the expected hash!
+    Expected: e44af52bb27f725a973478e589d990a6428e115fe1bb14f03833134d6c0f155c
+    Actual:   e8b796172746fc7e2cd4edfd2e5a72d49ae38ddd89624caf16c6fa7226cb43c3
+  ```
+
+  It’s usually a good thing that the user’s `curl` config file (`~/.curlrc`) is respected, because it allows people to configure a proxy. But in this case it’s bad.
+
+  To solve this problem, `elm-tooling` now overrides the option (`-w`, `--write-out`) that lets you add a newline (or anything, really) to the output. Thanks to Zach Rose ([@windmountain](https://github.com/windmountain)) for reporting initially, and to Jakub Waszczuk ([@kawu](https://github.com/kawu)) and Tomáš Látal ([kraklin](https://github.com/kraklin)) for re-reporting and figuring out what the problem was!
+
+- Improved: If something like the above happens in the future, the error message is better:
+
+  ```
+  elm 0.19.1
+    < https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz
+    > /home/you/.elm/elm-tooling/elm/0.19.1/elm
+
+    The downloaded file does not have the expected number of bytes!
+    Expected: 6034617
+    Actual:   6034616
+
+    - Probably, something in your environment messes with the download.
+    - Worst case, someone has replaced the executable with something malicious!
+
+    This happened when executing:
+    curl -#fLw "" https://github.com/elm/compiler/releases/download/0.19.1/binary-for-mac-64-bit.gz
+
+    Do you have a config file or environment variables set for curl?
+  ```
+
+  There are a number of improvements here:
+
+  - `elm-tooling` now not only verifies the SHA256 hash, but first also _the number of bytes._ That’s much easier to debug than a hash mismatch. And potentially more secure: An attacker would not just need to find a hash collision, but a hash collision using this exact number of bytes.
+  - There’s some extra text trying to explain what a byte/hash mismatch means.
+  - The exact command ran is shown, which is great for troubleshooting.
+  - And there’s a hint about looking for old config files you’ve forgotten about.
+
+  `wget`, `tar` and Node.js native `https.get()` calls have been similarly improved.
+
+- Improved: The output of `elm-tooling install` is now less noisy in CI. Previously, if you downloaded `elm`, `elm-format` and `elm-json` at the same time, `elm-tooling` would print the progress of all three any time just one of them received some more bytes! That resulted in many duplicate lines. Now, only the tool that got an update is printed, resulting in a plain old log. As a bonus, this made the interactive output ever so slightly more efficient, too!
+
+- Improved: The npm package now contains just 3 JS files, instead of 12. This results in a slightly smaller and (in theory) faster package!
+
+- Improved: I’ve done some internal refactoring to make the code more type safe. Always a confidence boost!
+
 ### Version 1.3.0 (2021-02-28)
 
 - Added: elm-test-rs 1.0.0.
