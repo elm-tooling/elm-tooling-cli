@@ -10,6 +10,7 @@ import {
   isNonEmptyArray,
   isRecord,
   join,
+  Json,
   mapNonEmptyArray,
   NonEmptyArray,
   partitionMap,
@@ -57,7 +58,7 @@ export type ParseResult =
   | {
       tag: "Parsed";
       elmToolingJsonPath: ElmToolingJsonPath;
-      originalObject: Record<string, unknown>;
+      originalObject: Record<string, Json>;
       unknownFields: Array<string>;
       entrypoints?: FieldResult<NonEmptyArray<Entrypoint>>;
       tools?: FieldResult<Tools>;
@@ -112,14 +113,14 @@ export function findReadAndParseElmToolingJson(
     theElmToolingJsonPath: elmToolingJsonPathRaw,
   };
 
-  let json: unknown = undefined;
+  let json = undefined;
   try {
     json = JSON.parse(
       fs.readFileSync(
         elmToolingJsonPath.theElmToolingJsonPath.absolutePath,
         "utf-8"
       )
-    );
+    ) as Json;
   } catch (errorAny) {
     const error = errorAny as Error;
     return {

@@ -465,9 +465,7 @@ describe("tools", () => {
 
     expect(json).toMatchInlineSnapshot(`
       {
-          "entrypoints": [
-              "./src/Main.elm"
-          ]
+          "entrypoints": [ "./src/Main.elm" ]
       }
 
     `);

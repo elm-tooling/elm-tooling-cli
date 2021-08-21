@@ -22,8 +22,59 @@ export type WriteStream = Writable & {
   isTTY: boolean;
 };
 
-export function toJSON(json: unknown): string {
-  return `${JSON.stringify(json, null, 4)}\n`;
+export type Json =
+  | Array<Json>
+  | boolean
+  | number
+  | string
+  | { [key: string]: Json }
+  | null
+  | undefined;
+
+// Like `JSON.stringify(json, null, 4)` but:
+// - With a trailing newline.
+// - Arrays of primitives are printed in a single line if they fit.
+export function toJSON(json: Json): string {
+  return `${toJSONHelper(json, 0, "")}\n`;
+}
+
+const MAX_WIDTH = 80;
+const INDENT = 4;
+
+function toJSONHelper(json: Json, level: number, prefix: string): string {
+  const i = " ".repeat(INDENT * level);
+  const i2 = " ".repeat(INDENT * (level + 1));
+  if (Array.isArray(json)) {
+    if (json.length === 0) {
+      return "[]";
+    }
+    if (json.every((item) => typeof item !== "object" || item === null)) {
+      const string = `[ ${json
+        .map((item) => (item === undefined ? "null" : JSON.stringify(item)))
+        .join(", ")} ]`;
+      // -1 to account for commas.
+      if (string.length <= MAX_WIDTH - INDENT * level - prefix.length - 1) {
+        return string;
+      }
+    }
+    return `[\n${json
+      .map((item) => i2 + toJSONHelper(item, level + 1, ""))
+      .join(",\n")}\n${i}]`;
+  } else if (typeof json === "object" && json !== null) {
+    const keys = Object.keys(json);
+    if (keys.length === 0) {
+      return "{}";
+    }
+    return `{\n${Object.entries(json)
+      .filter(([, item]) => item !== undefined)
+      .map(([key, item]) => {
+        const start = `${JSON.stringify(key)}: `;
+        return `${i2}${start}${toJSONHelper(item, level + 1, start)}`;
+      })
+      .join(",\n")}\n${i}}`;
+  } else {
+    return json === undefined ? "null" : JSON.stringify(json);
+  }
 }
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
