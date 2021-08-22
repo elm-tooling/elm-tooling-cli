@@ -79,7 +79,10 @@ async function run(): Promise<void> {
           const isIndex = item.name === "index";
           const code = item.code
             .replace(/%VERSION%/g, PKG.version)
-            .replace(/^exports.default =/m, "module.exports =");
+            .replace(
+              /^exports(?:\.default|\['default'\]) =/m,
+              "module.exports ="
+            );
           const fullCode = isIndex ? `#!/usr/bin/env node\n${code}` : code;
           fs.writeFileSync(
             path.join(BUILD, item.fileName),
