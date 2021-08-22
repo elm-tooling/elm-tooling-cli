@@ -1,4 +1,10 @@
+### Version 1.4.1 (2021-08-22)
+
+- Fixed: The package build improvements in 1.4.0 accidentally broke the package exports. (`exports['default'] = elmToolingCli;` was shipped instead of the correct `module.exports = elmToolingCli;`.) This is fixed in 1.4.1, and I’ve added a regression test so it won’t happen again.
+
 ### Version 1.4.0 (2021-08-11)
+
+**🚨 Note:** The package exports of this version are broken, so this version is deprecated. Update to 1.4.1.
 
 - Fixed: Some people [configure `curl` to output an extra newline](https://stackoverflow.com/a/14614203/2010616). The way `elm-tooling` uses `curl`, that results in an extra newline added to downloaded executables. While an extra newline doesn’t seem to break executables, it fails `elm-tooling`’s SHA256 verification, causing `elm-tooling` to abort with an error message like this:
 
