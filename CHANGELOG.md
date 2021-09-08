@@ -1,3 +1,7 @@
+### Version 1.5.0 (2021-09-08)
+
+- Added: elm-test-rs 1.2.1.
+
 ### Version 1.4.1 (2021-08-22)
 
 - Fixed: The package build improvements in 1.4.0 accidentally broke the package exports. (`exports['default'] = elmToolingCli;` was shipped instead of the correct `module.exports = elmToolingCli;`.) This is fixed in 1.4.1, and I’ve added a regression test so it won’t happen again.
