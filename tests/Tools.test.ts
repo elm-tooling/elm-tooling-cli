@@ -109,6 +109,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -146,6 +147,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -189,6 +191,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -226,7 +229,8 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
 
       ⧙elm-test-rs⧘
-        ⧙[⧘▊⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘▊⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -263,6 +267,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -311,6 +316,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -356,6 +362,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -406,6 +413,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -454,6 +462,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -499,6 +508,7 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -597,6 +607,7 @@ describe("tools", () => {
 
         ⧙elm-test-rs⧘
           ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+          ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
 
         ⧙Up⧘/⧙Down⧘ to move
         ⧙Space⧘ to toggle

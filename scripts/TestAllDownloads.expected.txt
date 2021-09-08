@@ -33,12 +33,16 @@ TestAllDownloads/
       elm-json/
         0.2.10/
           elm-json
+      elm-test-rs/
+        1.2.1/
+          elm-test-rs
     elm-tooling.json
       {
         "tools": {
           "elm": "0.19.1",
           "elm-format": "0.8.2",
-          "elm-json": "0.2.10"
+          "elm-json": "0.2.10",
+          "elm-test-rs": "1.2.1"
         }
       }
   2/
