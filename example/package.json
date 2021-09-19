@@ -8,11 +8,11 @@
   },
   "devDependencies": {
     "elm-hot": "1.1.6",
-    "elm-review": "2.5.2",
+    "elm-review": "2.5.5",
     "elm-test": "0.19.1-revision7",
     "elm-tooling": "file:../build",
     "node-elm-compiler": "5.0.6",
     "parcel-bundler": "1.12.5",
-    "prettier": "2.3.1"
+    "prettier": "2.4.1"
   }
 }
