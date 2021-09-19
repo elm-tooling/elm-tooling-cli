@@ -110,6 +110,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -148,6 +149,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -192,6 +194,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -230,7 +233,8 @@ describe("tools", () => {
 
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
-        ⧙[⧘▊⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘▊⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -268,6 +272,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -317,6 +322,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -363,6 +369,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -414,6 +421,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -463,6 +471,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -509,6 +518,7 @@ describe("tools", () => {
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -608,6 +618,7 @@ describe("tools", () => {
         ⧙elm-test-rs⧘
           ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
           ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+          ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
 
         ⧙Up⧘/⧙Down⧘ to move
         ⧙Space⧘ to toggle

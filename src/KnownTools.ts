@@ -283,6 +283,29 @@ const knownTools = {
         type: "zip",
       },
     },
+    "1.2.2": {
+      linux: {
+        hash: "f9b972b9dcb71b9957baf23e5bca5674dfdea73b4b3706ad2c501f507933e489",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.2/elm-test-rs_linux.tar.gz",
+        fileSize: 3629469,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      mac: {
+        hash: "d3dc5f84a2b3c31a4a14a9da609c2f2e6824102d30249f883a97ea26c4eb9c35",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.2/elm-test-rs_macos.tar.gz",
+        fileSize: 2227354,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      windows: {
+        hash: "8469a05cdaf0be76e7cb7c9d8001a88df74a1db964a24d144554a925f8042600",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.2/elm-test-rs_windows.zip",
+        fileSize: 1891939,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
+      },
+    },
   },
 } as const;
 
