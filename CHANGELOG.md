@@ -1,3 +1,7 @@
+### Version 1.6.0 (2021-09-19)
+
+- Added: elm-test-rs 1.2.2.
+
 ### Version 1.5.0 (2021-09-08)
 
 - Added: elm-test-rs 1.2.1.
