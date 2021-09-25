@@ -7,8 +7,11 @@ import {
   HIDE_CURSOR,
   ReadStream,
   SHOW_CURSOR,
+  toError,
   WriteStream,
 } from "../src/Helpers";
+
+toError.jestWorkaround = (arg: unknown): NodeJS.ErrnoException => arg as Error;
 
 export const IS_WINDOWS = os.platform() === "win32";
 
