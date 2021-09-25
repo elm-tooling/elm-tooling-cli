@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import elmToolingCli from "../src";
-import type { ElmTooling } from "../src/Helpers";
+import { ElmTooling, toError } from "../src/Helpers";
 import {
   assertExitCode,
   clean,
@@ -21,8 +21,8 @@ async function initSuccessHelper(
   const elmToolingJsonPath = path.join(dir, "elm-tooling.json");
   try {
     fs.unlinkSync(elmToolingJsonPath);
-  } catch (errorAny) {
-    const error = errorAny as Error & { code?: string };
+  } catch (unknownError) {
+    const error = toError(unknownError);
     if (error.code !== "ENOENT") {
       throw error;
     }

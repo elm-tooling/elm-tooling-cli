@@ -3,6 +3,7 @@ import * as path from "path";
 import * as rimraf from "rimraf";
 
 import elmToolingCli from "../src";
+import { toError } from "../src/Helpers";
 
 export async function run(): Promise<void> {
   const dir = path.join(
@@ -26,8 +27,8 @@ export async function run(): Promise<void> {
       rimraf.sync(nodeModulesInstallPath);
     }
     fs.mkdirSync(nodeModulesInstallPath, { recursive: true });
-  } catch (errorAny) {
-    const error = errorAny as Error & { code?: string };
+  } catch (unknownError) {
+    const error = toError(unknownError);
     if (error.code !== "ENOENT") {
       throw error;
     }

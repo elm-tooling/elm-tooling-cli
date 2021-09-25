@@ -18,6 +18,7 @@ import {
   partitionMap,
   printNumErrors,
   removeColor,
+  toError,
 } from "../Helpers";
 import {
   AssetType,
@@ -157,8 +158,8 @@ async function installTools(
     fs.mkdirSync(nodeModulesBinPath.theNodeModulesBinPath.absolutePath, {
       recursive: true,
     });
-  } catch (errorAny) {
-    const error = errorAny as Error;
+  } catch (unknownError) {
+    const error = toError(unknownError);
     logger.error(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
     logger.error(
       `Failed to create ${nodeModulesBinPath.theNodeModulesBinPath.absolutePath}:\n${error.message}`
@@ -170,8 +171,8 @@ async function installTools(
     const dir = absoluteDirname(tool.location.theToolPath);
     try {
       fs.mkdirSync(dir.absolutePath, { recursive: true });
-    } catch (errorAny) {
-      const error = errorAny as Error;
+    } catch (unknownError) {
+      const error = toError(unknownError);
       logger.error(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
       logger.error(`Failed to create ${dir.absolutePath}:\n${error.message}`);
       return 1;
@@ -345,8 +346,8 @@ async function downloadAndExtract(
         downloader.kill();
         fs.unlinkSync(tool.location.theToolPath.absolutePath);
         reject(error);
-      } catch (removeErrorAny) {
-        const removeError = removeErrorAny as Error & { code?: string };
+      } catch (unknownRemoveError) {
+        const removeError = toError(unknownRemoveError);
         if (removeError.code === "ENOENT") {
           reject(error);
         } else {
@@ -747,8 +748,8 @@ function extractFile({
         try {
           fs.unlinkSync(temp);
           return undefined;
-        } catch (errorAny) {
-          const error = errorAny as Error & { code?: string };
+        } catch (unknownError) {
+          const error = toError(unknownError);
           return error.code === "ENOENT" ? undefined : error;
         }
       };
@@ -943,8 +944,8 @@ export async function getExecutable({
 
   try {
     await downloadAndExtract(env, tool, wrappedOnProgress);
-  } catch (errorAny) {
-    const error = errorAny as Error;
+  } catch (unknownError) {
+    const error = toError(unknownError);
     throw new Error(removeColor(downloadAndExtractSimpleError(tool, error)));
   }
 

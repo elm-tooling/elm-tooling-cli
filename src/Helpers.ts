@@ -169,3 +169,15 @@ export function mapNonEmptyArray<T, U>(
 export function join(array: Array<string>, separator: string): string {
   return array.join(separator);
 }
+
+export function toError(arg: unknown): NodeJS.ErrnoException {
+  return toError.jestWorkaround(arg);
+}
+
+// Workaround for https://github.com/facebook/jest/issues/2549
+// In the tests we set this to always return `arg as Error`.
+// istanbul ignore next
+toError.jestWorkaround = (arg: unknown): NodeJS.ErrnoException =>
+  arg instanceof Error
+    ? arg
+    : new Error(`Caught error not instanceof Error: ${String(arg)}`);
