@@ -565,15 +565,21 @@ function joinPath(errorPath: Array<number | string>): string {
 }
 
 const versionRangeRegex = /^([=~^])(\d+)\.(\d+)\.(\d+)([+-].+)?$/;
+const suffixStartRegex = /[+-]/;
 const prereleaseRegex = /-.+$/;
 const collator = new Intl.Collator("en", { numeric: true });
 
 function hasPrerelease(version: string): boolean {
-  return /[+-]/.exec(version)?.[0] === "-";
+  return suffixStartRegex.exec(version)?.[0] === "-";
 }
 
 function hasSameBase(a: string, b: string): boolean {
   return a.replace(prereleaseRegex, "") === b.replace(prereleaseRegex, "");
+}
+
+// This is used to sort `1.0.0-beta1` _before_ `1.0.0`.
+function ensureSuffix(version: string): string {
+  return suffixStartRegex.test(version) ? version : `${version}+`;
 }
 
 export function getToolThrowing({
@@ -581,11 +587,13 @@ export function getToolThrowing({
   version: versionRange,
   cwd,
   env,
+  preferVersionsOnDisk,
 }: {
   name: string;
   version: string;
   cwd: Cwd;
   env: Env;
+  preferVersionsOnDisk: boolean;
 }): Tool {
   const osName = getOSName();
 
@@ -602,10 +610,19 @@ export function getToolThrowing({
     );
   }
 
-  const matchingVersion = getLatestMatchingVersion(
-    versionRange,
-    Object.keys(versions).reverse()
-  );
+  const matchingVersionOnDisk = preferVersionsOnDisk
+    ? getLatestMatchingVersion(
+        versionRange,
+        // ENOENT should _not_ be an error here, and other errors are handled better later.
+        readdirSyncSilent(
+          absolutePathFromString(getElmToolingInstallPath(cwd, env), name)
+        ).filter((item) => Object.hasOwnProperty.call(versions, item))
+      )
+    : undefined;
+
+  const matchingVersion =
+    matchingVersionOnDisk ??
+    getLatestMatchingVersion(versionRange, Object.keys(versions));
 
   if (matchingVersion === undefined) {
     throw new Error(
@@ -625,7 +642,7 @@ export function getToolThrowing({
 
 export function getLatestMatchingVersion(
   versionRange: string,
-  sortedValidVersions: Array<string>
+  validVersions: Array<string>
 ): string | undefined {
   const match = versionRangeRegex.exec(versionRange);
 
@@ -643,6 +660,12 @@ export function getLatestMatchingVersion(
     major === 0 || sign === "~"
       ? `${major}.${minor + 1}.0`
       : `${major + 1}.0.0`;
+
+  const sortedValidVersions = validVersions.sort((a, b) =>
+    ensureSuffix(b).localeCompare(ensureSuffix(a), "en", {
+      numeric: true,
+    })
+  );
 
   return sign === "="
     ? sortedValidVersions.find((version) => version === lowerBoundInclusive)
@@ -689,4 +712,12 @@ export function getLatestVersionInRange(
       collator.compare(version, upperBoundExclusive) < 0
     );
   });
+}
+
+function readdirSyncSilent(dir: AbsolutePath): Array<string> {
+  try {
+    return fs.readdirSync(dir.absolutePath);
+  } catch (_error) {
+    return [];
+  }
 }

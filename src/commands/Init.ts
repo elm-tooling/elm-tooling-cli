@@ -271,6 +271,7 @@ function tryGuessToolsFromNodeModules(
           version: `^${version}`,
           cwd,
           env,
+          preferVersionsOnDisk: false,
         });
         return [[tool.name, tool.version]];
       } catch (_error) {

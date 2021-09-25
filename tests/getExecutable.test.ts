@@ -72,10 +72,10 @@ describe("getExecutable", () => {
   test("future prereleases should not match", () => {
     expect(
       getLatestMatchingVersion("^1.0.0-beta.1", [
-        "1.1.0-beta.1",
-        "1.0.1",
-        "1.0.0",
         "1.0.0-beta.1",
+        "1.0.0",
+        "1.0.1",
+        "1.1.0-beta.1",
       ])
     ).toBe("1.0.1");
   });
@@ -83,8 +83,8 @@ describe("getExecutable", () => {
   test("too old prerelease should not match", () => {
     expect(
       getLatestMatchingVersion("^1.0.0-beta.2", [
-        "1.1.0-beta.1",
         "1.0.0-beta.1",
+        "1.1.0-beta.1",
       ])
     ).toBeUndefined();
   });
@@ -92,9 +92,9 @@ describe("getExecutable", () => {
   test("newer non-prerelease should match", () => {
     expect(
       getLatestMatchingVersion("^0.19.1-rc1", [
-        "0.19.1",
-        "0.19.1-rc1",
         "0.19.0",
+        "0.19.1-rc1",
+        "0.19.1",
       ])
     ).toBe("0.19.1");
   });
@@ -102,10 +102,10 @@ describe("getExecutable", () => {
   test("latest prerelease with same base should match", () => {
     expect(
       getLatestMatchingVersion("^0.19.1-rc1", [
-        "0.19.1-rc3",
-        "0.19.1-rc2",
-        "0.19.1-rc1",
         "0.19.0",
+        "0.19.1-rc1",
+        "0.19.1-rc2",
+        "0.19.1-rc3",
       ])
     ).toBe("0.19.1-rc3");
   });
@@ -113,11 +113,11 @@ describe("getExecutable", () => {
   test("release candidate should win over alpha and beta base should match", () => {
     expect(
       getLatestMatchingVersion("^0.19.1-alpha1", [
-        "0.19.1-rc",
-        "0.19.1-beta2",
-        "0.19.1-beta1",
-        "0.19.1-alpha1",
         "0.19.0",
+        "0.19.1-alpha1",
+        "0.19.1-beta1",
+        "0.19.1-beta2",
+        "0.19.1-rc",
       ])
     ).toBe("0.19.1-rc");
   });
@@ -170,6 +170,17 @@ describe("getExecutable", () => {
         fixture: "already-downloaded",
         name: "elm-format",
         version: "=0.8.4",
+      })
+    ).resolves.toMatchInlineSnapshot(
+      `/Users/you/project/fixtures/getExecutable/already-downloaded/elm-tooling/elm-format/0.8.4/elm-format`
+    ));
+
+  test("prefers version on disk over latest version", () =>
+    expect(
+      getExecutableHelper({
+        fixture: "already-downloaded",
+        name: "elm-format",
+        version: "^0.8.0",
       })
     ).resolves.toMatchInlineSnapshot(
       `/Users/you/project/fixtures/getExecutable/already-downloaded/elm-tooling/elm-format/0.8.4/elm-format`

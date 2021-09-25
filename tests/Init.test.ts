@@ -33,7 +33,7 @@ async function initSuccessHelper(
 
   const exitCode = await elmToolingCli(["init"], {
     cwd: dir,
-    env: {},
+    env: { ELM_HOME: dir },
     stdin: new FailReadStream(),
     stdout,
     stderr,
@@ -193,6 +193,7 @@ describe("init", () => {
 
       `);
 
+      // Note: This should not pick 0.2.8 found in ELM_HOME.
       expect(json).toMatchInlineSnapshot(`
         {
             "entrypoints": [

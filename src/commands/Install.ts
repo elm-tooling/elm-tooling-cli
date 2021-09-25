@@ -912,7 +912,13 @@ export async function getExecutable({
       cwdString
     ),
   };
-  const tool = getToolThrowing({ name, version, cwd, env });
+  const tool = getToolThrowing({
+    name,
+    version,
+    cwd,
+    env,
+    preferVersionsOnDisk: true,
+  });
 
   const exists = validateFileExists(tool.location.theToolPath);
   switch (exists.tag) {
