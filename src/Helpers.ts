@@ -169,3 +169,9 @@ export function mapNonEmptyArray<T, U>(
 export function join(array: Array<string>, separator: string): string {
   return array.join(separator);
 }
+
+export function toError(arg: unknown): NodeJS.ErrnoException {
+  return arg instanceof Error
+    ? arg
+    : new Error(`Caught error not instanceof Error: ${String(arg)}`);
+}

@@ -15,6 +15,7 @@ import {
   partitionMap,
   partitionMapNonEmpty,
   printNumErrors,
+  toError,
 } from "./Helpers";
 import {
   Asset,
@@ -120,8 +121,8 @@ export function findReadAndParseElmToolingJson(
         "utf-8"
       )
     );
-  } catch (errorAny) {
-    const error = errorAny as Error;
+  } catch (unknownError) {
+    const error = toError(unknownError);
     return {
       tag: "ReadAsJsonObjectError",
       elmToolingJsonPath,
@@ -252,8 +253,8 @@ export function validateFileExists(fullPath: AbsolutePath): FileExists {
         message: `Exists but is not a file: ${fullPath.absolutePath}`,
       };
     }
-  } catch (errorAny) {
-    const error = errorAny as Error & { code?: string };
+  } catch (unknownError) {
+    const error = toError(unknownError);
     switch (error.code) {
       case "ENOENT":
         return {

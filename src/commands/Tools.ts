@@ -13,6 +13,7 @@ import {
   join,
   ReadStream,
   SHOW_CURSOR,
+  toError,
   toJSON,
   WriteStream,
 } from "../Helpers";
@@ -185,8 +186,8 @@ async function start(
           } else {
             try {
               save(state.tools);
-            } catch (errorAny) {
-              const error = errorAny as Error;
+            } catch (unknownError) {
+              const error = toError(unknownError);
               logger.error(`Failed to save: ${error.message}`);
               resolve(1);
               break;

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 
-import { bold, dim, indent, join, NonEmptyArray } from "./Helpers";
+import { bold, dim, indent, join, NonEmptyArray, toError } from "./Helpers";
 import { isWindows, Tool } from "./Parse";
 import {
   absolutePathFromString,
@@ -182,8 +182,8 @@ function symlink(tool: Tool, linkPath: LinkPath): LinkResult {
 
   try {
     fs.unlinkSync(linkPath.theLinkPath.absolutePath);
-  } catch (errorAny) {
-    const error = errorAny as Error & { code?: string };
+  } catch (unknownError) {
+    const error = toError(unknownError);
     if (error.code !== "ENOENT") {
       return new Error(
         `Failed to remove old link for ${tool.name} at ${linkPath.theLinkPath.absolutePath}:\n${error.message}`
@@ -196,8 +196,8 @@ function symlink(tool: Tool, linkPath: LinkPath): LinkResult {
       tool.location.theToolPath.absolutePath,
       linkPath.theLinkPath.absolutePath
     );
-  } catch (errorAny) /* istanbul ignore next */ {
-    const error = errorAny as Error;
+  } catch (unknownError) /* istanbul ignore next */ {
+    const error = toError(unknownError);
     return new Error(
       `Failed to create link for ${tool.name} at ${linkPath.theLinkPath.absolutePath}:\n${error.message}`
     );
@@ -215,8 +215,8 @@ function removeSymlink(tool: Tool, linkPath: LinkPath): UnlinkResult {
       fs.unlinkSync(linkPath.theLinkPath.absolutePath);
       return "Removed";
     }
-  } catch (errorAny) {
-    const error = errorAny as Error & { code?: string };
+  } catch (unknownError) {
+    const error = toError(unknownError);
     // If the path exists but is something else, let it be.
     // If the path does not exist there’s nothing to do.
     // istanbul ignore if
@@ -250,8 +250,8 @@ function symlinkShimWindows(
   for (const { shimPath } of items) {
     try {
       fs.unlinkSync(shimPath.theShimPath.absolutePath);
-    } catch (errorAny) {
-      const error = errorAny as Error & { code?: string };
+    } catch (unknownError) {
+      const error = toError(unknownError);
       if (error.code !== "ENOENT") {
         return new Error(
           `Failed to remove old shim for ${tool.name} at ${shimPath.theShimPath.absolutePath}:\n${error.message}`
@@ -263,8 +263,8 @@ function symlinkShimWindows(
   for (const { shimPath, code } of items) {
     try {
       fs.writeFileSync(shimPath.theShimPath.absolutePath, code);
-    } catch (errorAny) {
-      const error = errorAny as Error;
+    } catch (unknownError) {
+      const error = toError(unknownError);
       return new Error(
         `Failed to create shim for ${tool.name} at ${shimPath.theShimPath.absolutePath}:\n${error.message}`
       );
@@ -287,8 +287,8 @@ function removeSymlinkShimWindows(
         fs.unlinkSync(shimPath.theShimPath.absolutePath);
         didNothing = false;
       }
-    } catch (errorAny) {
-      const error = errorAny as Error & { code?: string };
+    } catch (unknownError) {
+      const error = toError(unknownError);
       // If the path exists but isn’t a file, let it be.
       // If the path does not exists there’s nothing to do.
       if (error.code !== "EISDIR" && error.code !== "ENOENT") {
