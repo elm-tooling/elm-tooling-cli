@@ -431,23 +431,22 @@ describe("tools", () => {
       ▊
     `);
 
-    // Other fields are preserved and the order is unchanged.
+    // "entrypoints" is preserved.
     expect(json).toMatchInlineSnapshot(`
       {
-          "before": 1,
           "tools": {
               "elm": "0.19.0"
           },
-          "after": 2
+          "entrypoints": []
       }
 
     `);
   });
 
-  test("removing last tool removes the entire field", async () => {
+  test("removing last tool should not be possible", async () => {
     const { stdout, json } = await toolsSuccessHelper("remove-last-tool", [
       "o",
-      "\r",
+      "test-exit",
     ]);
 
     expect(stdout).toMatchInlineSnapshot(`
@@ -455,6 +454,53 @@ describe("tools", () => {
 
       ⧙elm⧘
         ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
+        ⧙[⧘▊⧙]⧘ ⧙0.19.1⧘
+
+      ⧙elm-format⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.5⧘
+
+      ⧙elm-json⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
+
+      ⧙Up⧘/⧙Down⧘ to move
+      ⧙Space⧘ to toggle
+
+      ⧙You must choose at least one tool.⧘
+      
+    `);
+
+    // Should be unchanged.
+    expect(json).toMatchInlineSnapshot(`
+      {
+          "tools": {
+              "elm": "0.19.1"
+          }
+      }
+
+    `);
+  });
+
+  test("adding a tool to an empty object", async () => {
+    const { stdout, json } = await toolsSuccessHelper("empty-elm-tooling", [
+      "o",
+      "test-exit",
+    ]);
+
+    expect(stdout).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/tools/empty-elm-tooling/elm-tooling.json⧘
+
+      ⧙elm⧘
+        ⧙[⧘x⧙]⧘ ⧙0.19.0⧘
         ⧙[⧘ ⧙]⧘ ⧙0.19.1⧘
 
       ⧙elm-format⧘
@@ -477,17 +523,62 @@ describe("tools", () => {
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
 
-      Saved! To unlink: elm-tooling install
+      Saved! To install: elm-tooling install
       ▊
     `);
 
     expect(json).toMatchInlineSnapshot(`
       {
-          "entrypoints": [
-              "./src/Main.elm"
-          ]
+          "tools": {
+              "elm": "0.19.0"
+          }
       }
+    `);
+  });
 
+  test("adding a tool to an empty tools field", async () => {
+    const { stdout, json } = await toolsSuccessHelper("empty-tools-field", [
+      "o",
+      "test-exit",
+    ]);
+
+    expect(stdout).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/tools/empty-tools-field/elm-tooling.json⧘
+
+      ⧙elm⧘
+        ⧙[⧘x⧙]⧘ ⧙0.19.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.19.1⧘
+
+      ⧙elm-format⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.5⧘
+
+      ⧙elm-json⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
+
+      ⧙Up⧘/⧙Down⧘ to move
+      ⧙Space⧘ to toggle
+      ⧙Enter⧘ to save
+
+      Saved! To install: elm-tooling install
+      ▊
+    `);
+
+    expect(json).toMatchInlineSnapshot(`
+      {
+          "tools": {
+              "elm": "0.19.0"
+          }
+      }
     `);
   });
 

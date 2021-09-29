@@ -100,28 +100,6 @@ expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("install", () => {
   describe("nothing to do", () => {
-    test("empty object two levels up", async () => {
-      const { stdout, bin } = await installSuccessHelper(
-        "empty-object-two-levels-up/one/two"
-      );
-      expect(stdout).toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/install/empty-object-two-levels-up/elm-tooling.json⧘
-        The "tools" field is missing. To add tools: elm-tooling tools
-
-      `);
-      expect(bin).toMatchInlineSnapshot(`(does not exist)`);
-    });
-
-    test("empty tools field", async () => {
-      const { stdout, bin } = await installSuccessHelper("empty-tools-field");
-      expect(stdout).toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/install/empty-tools-field/elm-tooling.json⧘
-        The "tools" field is empty. To add tools: elm-tooling tools
-
-      `);
-      expect(bin).toMatchInlineSnapshot(`(does not exist)`);
-    });
-
     test("NO_ELM_TOOLING_INSTALL", async () => {
       const { stdout, bin } = await installSuccessHelper("would-download", {
         NO_ELM_TOOLING_INSTALL: "",
@@ -132,11 +110,30 @@ describe("install", () => {
   });
 
   describe("invalid", () => {
-    // TODO: Test other fields -> error
-    // But: entrypoints should be ignored
-    //     maybe cause a warning
-    test("wrong field type", async () => {
-      expect(await installFailHelper("wrong-field-types"))
+    test("unknown fields", async () => {
+      expect(await installFailHelper("unknown-fields")).toMatchInlineSnapshot();
+    });
+
+    test("empty object two levels up", async () => {
+      expect(await installFailHelper("empty-object-two-levels-up/one/two"))
+        .toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/install/empty-object-two-levels-up/elm-tooling.json⧘
+        The "tools" field is missing. To add tools: elm-tooling tools
+
+      `);
+    });
+
+    test("empty tools field", async () => {
+      expect(await installFailHelper("empty-tools-field"))
+        .toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/install/empty-tools-field/elm-tooling.json⧘
+        The "tools" field is empty. To add tools: elm-tooling tools
+
+      `);
+    });
+
+    test("wrong tools type", async () => {
+      expect(await installFailHelper("wrong-tools-type"))
         .toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/install/wrong-field-types/elm-tooling.json⧘
 
