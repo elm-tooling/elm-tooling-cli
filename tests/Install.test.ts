@@ -132,7 +132,10 @@ describe("install", () => {
   });
 
   describe("invalid", () => {
-    test("wrong field type (ignores errors for other fields)", async () => {
+    // TODO: Test other fields -> error
+    // But: entrypoints should be ignored
+    //     maybe cause a warning
+    test("wrong field type", async () => {
       expect(await installFailHelper("wrong-field-types"))
         .toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/install/wrong-field-types/elm-tooling.json⧘
