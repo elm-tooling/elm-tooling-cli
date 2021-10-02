@@ -11,9 +11,9 @@ nav_order: 7
 
 **This is no longer the case!**
 
-After more than one year of its existence, _no_ new shared fields at all were added. And for the two that existed – `"entrypoints"` and `"tools"` – only _one tool each_ used them.
+After more than one year since `elm-tooling.json` was created, _no_ new shared fields at all were added. And for the two existing fields – `"entrypoints"` and `"tools"` – only _one tool each_ used them.
 
-When the Elm Language Server stopped needing `"entrypoints"` it was time to change what `elm-tooling.json` is all about. Now, it’s the file where the `elm-tooling` CLI stores your Elm tool versions.
+When the Elm Language Server stopped needing `"entrypoints"` it was time to change what `elm-tooling.json` is all about. Now, it’s the file where the `elm-tooling` CLI stores your Elm tool versions. (But other tools are free to read it according to this spec, too!)
 
 If you want to add configuration to a tool you work on, I recommend:
 
@@ -73,6 +73,8 @@ Example:
 }
 ```
 
+For backwards compatibility, it’s ok to ignore the `"entrypoints"` field.
+
 The `"tools"` field is a mapping between Elm tool names and the version of the tool.
 
 By specifying versions _once\*_ in _one_ place…
@@ -84,17 +86,6 @@ By specifying versions _once\*_ in _one_ place…
 (…with the help of tools that read `elm-tooling.json`.)
 
 (\*) For Elm applications, you also need to specify the Elm version in `elm.json`. For Elm packages, you specify a _range_ of compatible Elm versions in `elm.json`. `elm-tooling.json` keeps things simple by always specifying the elm version itself. (This also supports the more uncommon case where you have an `elm-tooling.json` but no `elm.json`.)
-
-For example, the following means that the project uses elm 0.19.1 and elm-format 0.8.3:
-
-```json
-{
-  "tools": {
-    "elm": "0.19.1",
-    "elm-format": "0.8.3"
-  }
-}
-```
 
 The tools MUST be located in a standard location: Inside `elm-tooling/` inside “Elm Home.” The Elm compiler stores downloaded packages and REPL history in a directory that I call “Elm Home.” The default location on Linux and macOS is `~/.elm/`, and on Windows it is `%APPDATA%\elm`. You can customize the location by setting the `ELM_HOME` environment variable.
 
@@ -116,7 +107,7 @@ On a typical Windows setup (with a user called “John”), they would be:
 
 Note that on Windows the `.exe` file extension is used, while on Linux and macOS no file extension is used.
 
-An earlier version of this document stored all tools in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also supports tools with several executables per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
+An earlier version of this document stored all tools in the same directory with the version appended to the file name: `~/.elm/elm-tooling/elm0.19.1`. That works, but has the downside of `elm0.19.1` being printed in example commands in `elm --help`. The same issue also occurs with `elm-format`. The nested folder structure also theoretically supports tools with several executables per version, such as Elm 0.18 (which has `elm`, `elm-make`, `elm-package`, `elm-reactor` and `elm-repl`).
 
 Consumers of `elm-tooling.json` MUST use the specified tools and MUST NOT use fallbacks if they are missing. Missing tools MUST be an error, or (if appropriate, and with the user’s permission) cause a download of the tool. Downloads SHOULD have security in mind.
 
