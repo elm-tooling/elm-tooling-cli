@@ -101,8 +101,8 @@ export function indent(string: string): string {
   return string.replace(/^/gm, "    ");
 }
 
-export function printNumErrors(numErrors: number): string {
-  return `${bold(numErrors.toString())} error${numErrors === 1 ? "" : "s"}`;
+export function printNumErrors(numErrors: number): string | undefined {
+  return numErrors === 1 ? undefined : `${bold(numErrors.toString())} errors`;
 }
 
 // This can be replaced with `Array.prototype.flatMap` once Node.js is EOL

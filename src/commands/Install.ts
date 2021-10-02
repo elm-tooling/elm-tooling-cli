@@ -233,10 +233,13 @@ function printResults(
     logger.error("");
     logger.error(
       join(
-        [
-          printNumErrors(installErrors.length),
-          ...installErrors.map((error) => error.message),
-        ],
+        flatMap(
+          [
+            printNumErrors(installErrors.length),
+            ...installErrors.map((error) => error.message),
+          ],
+          (item) => (item === undefined ? [] : [item])
+        ),
         "\n\n"
       )
     );

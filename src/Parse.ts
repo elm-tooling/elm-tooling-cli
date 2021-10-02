@@ -5,6 +5,7 @@ import * as path from "path";
 import {
   bold,
   Env,
+  flatMap,
   getOwn,
   indent,
   isNonEmptyArray,
@@ -392,21 +393,24 @@ export function makeTool(
 
 export function printParseErrors(errors: NonEmptyArray<ParseError>): string {
   return join(
-    [
-      printNumErrors(errors.length),
-      ...errors.map((error) => {
-        switch (error.tag) {
-          case "Message":
-            return error.message;
+    flatMap(
+      [
+        printNumErrors(errors.length),
+        ...errors.map((error) => {
+          switch (error.tag) {
+            case "Message":
+              return error.message;
 
-          case "UnkownField":
-            return `${bold(error.field)}\n${indent("Unknown field")}`;
+            case "UnkownField":
+              return `${bold(error.field)}\n${indent("Unknown field")}`;
 
-          case "WithPath":
-            return `${bold(joinPath(error.path))}\n${indent(error.message)}`;
-        }
-      }),
-    ],
+            case "WithPath":
+              return `${bold(joinPath(error.path))}\n${indent(error.message)}`;
+          }
+        }),
+      ],
+      (item) => (item === undefined ? [] : [item])
+    ),
     "\n\n"
   );
 }
