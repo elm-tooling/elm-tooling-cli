@@ -1,6 +1,5 @@
 import * as fs from "fs";
 import * as path from "path";
-import * as readline from "readline";
 
 import {
   bold,
@@ -16,15 +15,8 @@ import {
 } from "../Helpers";
 import { getLastVersion, KNOWN_TOOLS, KnownToolNames } from "../KnownTools";
 import type { Logger } from "../Logger";
+import { getLatestVersionInRange, getOSName, getToolThrowing } from "../Parse";
 import {
-  getLatestVersionInRange,
-  getOSName,
-  getToolThrowing,
-  isWindows,
-} from "../Parse";
-import {
-  absoluteDirname,
-  AbsolutePath,
   absolutePathFromString,
   Cwd,
   ElmJsonPath,
@@ -39,15 +31,19 @@ const DEFAULT_TOOLS: NonEmptyArray<KnownToolNames> = [
 ];
 DEFAULT_TOOLS.sort((a, b) => a.localeCompare(b));
 
-export async function init(
-  cwd: Cwd,
-  env: Env,
-  logger: Logger
-): Promise<number> {
+export function init(cwd: Cwd, env: Env, logger: Logger): number {
   const elmToolingJsonPath: ElmToolingJsonPath = {
     tag: "ElmToolingJsonPath",
     theElmToolingJsonPath: absolutePathFromString(cwd.path, "elm-tooling.json"),
   };
+
+  const osName = getOSName();
+
+  // istanbul ignore if
+  if (osName instanceof Error) {
+    logger.error(osName.message);
+    return 1;
+  }
 
   if (fs.existsSync(elmToolingJsonPath.theElmToolingJsonPath.absolutePath)) {
     logger.error(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
@@ -55,34 +51,13 @@ export async function init(
     return 1;
   }
 
-  // For packages, skip entrypoints.
-  // For applications, try to find .elm files with `main =` directly inside one
-  // of the "source-directories".
-  // If all detection fails, use a good guess.
-  const entrypoints = await tryGuessEntrypoints(cwd).then(
-    (paths) =>
-      paths.map((file) => {
-        const relative = path.relative(
-          path.dirname(elmToolingJsonPath.theElmToolingJsonPath.absolutePath),
-          file.absolutePath
-        );
-        // istanbul ignore next
-        const normalized = isWindows ? relative.replace(/\\/g, "/") : relative;
-        return `./${normalized}`;
-      }),
-    () => ["./src/Main.elm"]
-  );
-
   const tools =
-    getOSName() instanceof Error
-      ? /* istanbul ignore next */ undefined
-      : tryGuessToolsFromNodeModules(cwd, env) ??
-        fromEntries(DEFAULT_TOOLS.map((name) => [name, getLastVersion(name)]));
+    tryGuessToolsFromNodeModules(cwd, env) ??
+    fromEntries(DEFAULT_TOOLS.map((name) => [name, getLastVersion(name)]));
 
   const elmVersionFromElmJson = getElmVersionFromElmJson(cwd);
 
   const json: ElmTooling = {
-    entrypoints: isNonEmptyArray(entrypoints) ? entrypoints : undefined,
     tools:
       elmVersionFromElmJson === undefined
         ? tools
@@ -97,44 +72,6 @@ export async function init(
   logger.log("Created! Open it in a text editor and have a look!");
   logger.log("To install tools: elm-tooling install");
   return 0;
-}
-
-async function tryGuessEntrypoints(cwd: Cwd): Promise<Array<AbsolutePath>> {
-  const sourceDirectories = tryGetSourceDirectories(cwd);
-  if (sourceDirectories.length === 0) {
-    return [];
-  }
-
-  const files = flatMap(sourceDirectories, (directory) =>
-    fs
-      .readdirSync(directory.absolutePath, {
-        encoding: "utf-8",
-        withFileTypes: true,
-      })
-      .filter((entry) => entry.isFile() && entry.name.endsWith(".elm"))
-      .map((entry) => absolutePathFromString(directory, entry.name))
-  );
-
-  const results = await Promise.all(
-    files.map((file) =>
-      isMainFile(file).then(
-        (isMain) =>
-          isMain ? file : new Error(`${file.absolutePath} is not a main file.`),
-        // istanbul ignore next
-        (error: Error) => error
-      )
-    )
-  );
-
-  const entrypoints = flatMap(results, (result) =>
-    result instanceof Error ? [] : result
-  ).sort((a, b) => a.absolutePath.localeCompare(b.absolutePath));
-
-  if (entrypoints.length === 0) {
-    throw new Error("Expected at least 1 entrypoint but got 0.");
-  }
-
-  return entrypoints;
 }
 
 function tryGetElmJson(cwd: Cwd): {
@@ -158,69 +95,6 @@ function tryGetElmJson(cwd: Cwd): {
   }
 
   return { elmJsonPath, elmJson };
-}
-
-function tryGetSourceDirectories(cwd: Cwd): Array<AbsolutePath> {
-  const { elmJsonPath, elmJson } = tryGetElmJson(cwd);
-
-  switch (elmJson.type) {
-    case "application": {
-      if (!Array.isArray(elmJson["source-directories"])) {
-        throw new Error(
-          `Expected "source-directories" to be an array but got: ${JSON.stringify(
-            elmJson["source-directories"]
-          )}`
-        );
-      }
-      const directories = flatMap(elmJson["source-directories"], (item) =>
-        typeof item === "string"
-          ? absolutePathFromString(
-              absoluteDirname(elmJsonPath.theElmJsonPath),
-              item
-            )
-          : []
-      );
-      if (!isNonEmptyArray(directories)) {
-        throw new Error(
-          `Expected "source-directories" to contain at least one string but got: ${JSON.stringify(
-            elmJson["source-directories"]
-          )}`
-        );
-      }
-      return directories;
-    }
-
-    case "package":
-      return [];
-
-    default:
-      throw new Error(
-        `Expected "type" to be "application" or "package" but got: ${JSON.stringify(
-          elmJson.type
-        )}`
-      );
-  }
-}
-
-async function isMainFile(file: AbsolutePath): Promise<boolean> {
-  return new Promise((resolve) => {
-    let found = false;
-    const rl = readline.createInterface({
-      input: fs.createReadStream(file.absolutePath),
-      crlfDelay: Infinity,
-    });
-
-    rl.on("line", (line) => {
-      if (/^main *=/.test(line)) {
-        found = true;
-        rl.close();
-      }
-    });
-
-    rl.once("close", () => {
-      resolve(found);
-    });
-  });
 }
 
 function tryGuessToolsFromNodeModules(
