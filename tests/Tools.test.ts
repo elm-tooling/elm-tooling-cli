@@ -451,35 +451,38 @@ describe("tools", () => {
 
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/tools/remove-last-tool/elm-tooling.json⧘
+
       ⧙elm⧘
         ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
         ⧙[⧘ ⧙]⧘ ⧙0.19.1⧘
+
       ⧙elm-format⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.5⧘
+
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
+
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
+
       Saved! To unlink: elm-tooling install
       ▊
     `);
 
     expect(json).toMatchInlineSnapshot(`
-      {
-          "entrypoints": [
-              "./src/Main.elm"
-          ]
-      }
+      {}
+
     `);
   });
 
@@ -493,8 +496,8 @@ describe("tools", () => {
       ⧙/Users/you/project/fixtures/tools/empty-elm-tooling/elm-tooling.json⧘
 
       ⧙elm⧘
-        ⧙[⧘x⧙]⧘ ⧙0.19.0⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.19.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
+        ⧙[⧘⧙☒⧘⧙]⧘ 0.19.1
 
       ⧙elm-format⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
@@ -515,17 +518,11 @@ describe("tools", () => {
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
-
-      Saved! To install: elm-tooling install
-      ▊
     `);
 
     expect(json).toMatchInlineSnapshot(`
-      {
-          "tools": {
-              "elm": "0.19.0"
-          }
-      }
+      {}
+
     `);
   });
 
@@ -539,8 +536,8 @@ describe("tools", () => {
       ⧙/Users/you/project/fixtures/tools/empty-tools-field/elm-tooling.json⧘
 
       ⧙elm⧘
-        ⧙[⧘x⧙]⧘ ⧙0.19.0⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.19.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
+        ⧙[⧘⧙☒⧘⧙]⧘ 0.19.1
 
       ⧙elm-format⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
@@ -561,17 +558,11 @@ describe("tools", () => {
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
-
-      Saved! To install: elm-tooling install
-      ▊
     `);
 
     expect(json).toMatchInlineSnapshot(`
-      {
-          "tools": {
-              "elm": "0.19.0"
-          }
-      }
+      {"tools": {}}
+
     `);
   });
 
@@ -635,6 +626,7 @@ describe("tools", () => {
     test("bad json", async () => {
       expect(await toolsFailHelper("bad-json")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/tools/bad-json/elm-tooling.json⧘
+
         Failed to read file as JSON:
         Unexpected end of JSON input
 
@@ -654,9 +646,6 @@ describe("tools", () => {
         ⧙tools["elm-format"]⧘
             Unknown version: 0.8
             Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4, 0.8.5
-
-        ⧙Specification:⧘
-            https://elm-tooling.github.io/elm-tooling-cli/spec
 
       `);
     });

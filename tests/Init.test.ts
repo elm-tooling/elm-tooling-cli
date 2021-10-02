@@ -114,15 +114,12 @@ describe("init", () => {
       `);
 
       expect(json).toMatchInlineSnapshot(`
-          {
-              "entrypoints": [
-                  "./src/Main.elm"
-              ],
-              "tools": {
-                  "elm": "0.19.1",
-                  "elm-format": "0.8.3"
-              }
-          }
+        {
+            "tools": {
+                "elm": "0.19.1",
+                "elm-format": "0.8.3"
+            }
+        }
 
       `);
     });
@@ -141,9 +138,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm-json": "0.2.10"
             }
@@ -166,9 +160,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1",
                 "elm-format": "0.8.5",
@@ -195,9 +186,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1",
                 "elm-format": "0.8.5",
@@ -246,9 +234,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1",
                 "elm-format": "0.8.5",
@@ -297,9 +282,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1",
                 "elm-format": "0.8.5",
@@ -324,9 +306,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1"
             }
