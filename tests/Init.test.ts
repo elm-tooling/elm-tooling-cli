@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import elmToolingCli from "../src";
-import { toError } from "../src/Helpers";
+import { ElmTooling, toError } from "../src/Helpers";
 import {
   assertExitCode,
   clean,
@@ -71,16 +71,19 @@ async function initFailHelper(fixture: string): Promise<string> {
 expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("init", () => {
-  // TODO: Are these tests needed?
   test.each([
     "bad-elm-json-type",
     "bad-elm-json",
     "no-elm-json",
     "not-an-object",
   ])("Uses fallback for %s", async (fixture) => {
-    const { stdout } = await initSuccessHelper(fixture);
+    const { stdout, json } = await initSuccessHelper(fixture);
 
     expect(stdout).not.toHaveLength(0);
+
+    expect(
+      Object.keys((JSON.parse(json) as ElmTooling).tools ?? [])
+    ).toStrictEqual(["elm", "elm-format", "elm-json"]);
   });
 
   test("already exists", async () => {

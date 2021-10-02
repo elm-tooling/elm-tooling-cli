@@ -3,7 +3,6 @@ import type { Readable, Writable } from "stream";
 export type NonEmptyArray<T> = [T, ...Array<T>];
 
 export type ElmTooling = {
-  entrypoints?: NonEmptyArray<string>;
   tools?: {
     [name: string]: string;
   };
