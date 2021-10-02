@@ -1,0 +1,8 @@
+{
+  "tols": {},
+  "entrypoints": null,
+  "tools": {
+    "elm": "0.19.1"
+  },
+  "other 2": []
+}

@@ -1,0 +1,3 @@
+{
+  "tools": ["elm", "elm-format"]
+}
