@@ -443,50 +443,43 @@ describe("tools", () => {
     `);
   });
 
-  test("removing last tool should not be possible", async () => {
+  test("removing last tool removes the entire field", async () => {
     const { stdout, json } = await toolsSuccessHelper("remove-last-tool", [
       "o",
-      "test-exit",
+      "\r",
     ]);
 
     expect(stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/tools/remove-last-tool/elm-tooling.json⧘
-
       ⧙elm⧘
         ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
-        ⧙[⧘▊⧙]⧘ ⧙0.19.1⧘
-
+        ⧙[⧘ ⧙]⧘ ⧙0.19.1⧘
       ⧙elm-format⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.5⧘
-
       ⧙elm-json⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
         ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
-
       ⧙elm-test-rs⧘
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
-
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
-
-      ⧙You must choose at least one tool.⧘
-      
+      ⧙Enter⧘ to save
+      Saved! To unlink: elm-tooling install
+      ▊
     `);
 
-    // Should be unchanged.
     expect(json).toMatchInlineSnapshot(`
       {
-          "tools": {
-              "elm": "0.19.1"
-          }
+          "entrypoints": [
+              "./src/Main.elm"
+          ]
       }
-
     `);
   });
 
