@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "elm-hot": "1.1.6",
-    "elm-review": "2.5.5",
+    "elm-review": "2.6.1",
     "elm-test": "0.19.1-revision7",
     "elm-tooling": "file:../build",
     "node-elm-compiler": "5.0.6",
