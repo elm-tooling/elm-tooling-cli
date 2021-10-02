@@ -214,6 +214,17 @@ describe("install", () => {
       `);
     });
 
+    test("version is not a string", async () => {
+      expect(await installFailHelper("version-is-not-string"))
+        .toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/install/version-is-not-string/elm-tooling.json⧘
+
+        ⧙tools["elm"]⧘
+            Expected a version as a string but got: 1
+
+      `);
+    });
+
     test("node_modules/.bin is a file", async () => {
       expect(await installFailHelper("node_modules-bin-is-a-file"))
         .toMatchInlineSnapshot(`
@@ -231,6 +242,17 @@ describe("install", () => {
         ⟫
         Failed to remove old link for elm at /Users/you/project/fixtures/install/executable-is-folder/node_modules/.bin/elm:
         EISDIR: fake error
+
+      `);
+    });
+
+    test("~/.elm/elm-tooling/elm/0.19.1/elm is a folder", async () => {
+      expect(await installFailHelper("executable-is-folder-in-elm-home"))
+        .toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/install/executable-is-folder-in-elm-home/elm-tooling.json⧘
+
+        ⧙tools["elm"]⧘
+            Exists but is not a file: /Users/you/project/fixtures/install/executable-is-folder-in-elm-home/elm-tooling/elm/0.19.1/elm
 
       `);
     });
