@@ -61,26 +61,6 @@ export function partitionMap<T, Left, Right>(
   return [left, right];
 }
 
-export function partitionMapNonEmpty<T, Left, Right>(
-  items: NonEmptyArray<T>,
-  f: (
-    item: T,
-    index: number,
-    leftSoFar: Array<Left>,
-    rightSoFar: Array<Right>
-  ) => Either<Left, Right>
-):
-  | { tag: "Both"; left: NonEmptyArray<Left>; right: NonEmptyArray<Right> }
-  | { tag: "OnlyLeft"; left: NonEmptyArray<Left> }
-  | { tag: "OnlyRight"; right: NonEmptyArray<Right> } {
-  const [left, right] = partitionMap(items, f);
-  return !isNonEmptyArray(left)
-    ? { tag: "OnlyRight", right: right as NonEmptyArray<Right> }
-    : !isNonEmptyArray(right)
-    ? { tag: "OnlyLeft", left }
-    : { tag: "Both", left, right };
-}
-
 export const HIDE_CURSOR = "\x1B[?25l";
 export const SHOW_CURSOR = "\x1B[?25h";
 export const RESET_COLOR = "\x1B[0m";
@@ -150,13 +130,6 @@ export function getOwn<T>(
 
 export function isNonEmptyArray<T>(array: Array<T>): array is NonEmptyArray<T> {
   return array.length >= 1;
-}
-
-export function mapNonEmptyArray<T, U>(
-  array: NonEmptyArray<T>,
-  f: (item: T, index: number) => U
-): NonEmptyArray<U> {
-  return array.map(f) as NonEmptyArray<U>;
 }
 
 /**
