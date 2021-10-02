@@ -80,7 +80,7 @@ async function run(): Promise<void> {
           const code = item.code
             .replace(/%VERSION%/g, PKG.version)
             .replace(
-              /^exports(?:\.default|\['default'\]) =/m,
+              /^exports(?:\.default|\[(['"])default\1\]) =/m,
               "module.exports ="
             );
           const fullCode = isIndex ? `#!/usr/bin/env node\n${code}` : code;
