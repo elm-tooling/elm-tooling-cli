@@ -28,7 +28,7 @@ const FILES_TO_COPY: Array<FileToCopy> = [
   { src: "src/index.d.ts", dest: "index.d.ts" },
   { src: "src/getExecutable.d.ts", dest: "getExecutable.d.ts" },
   { src: "package-real.json", dest: "package.json" },
-  { src: "README-npm.md", dest: "README.md" },
+  { src: "README.md" },
 ];
 
 function modifyFile(

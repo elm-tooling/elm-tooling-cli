@@ -2,7 +2,6 @@ import { help } from "./commands/Help";
 import { init } from "./commands/Init";
 import { install } from "./commands/Install";
 import { toolsCommand } from "./commands/Tools";
-import { validate } from "./commands/Validate";
 import { Env, join, ReadStream, WriteStream } from "./Helpers";
 import { makeLogger } from "./Logger";
 import { absolutePathFromString, Cwd } from "./PathHelpers";
@@ -62,7 +61,10 @@ export default async function elmToolingCli(
       return init(cwd, env, logger);
 
     case "validate":
-      return validate(cwd, env, logger);
+      logger.log("The `validate` command no longer exists.");
+      logger.log('If you have "entrypoints" you can remove that field.');
+      logger.log('To validate "tools": elm-tooling install');
+      return 0;
 
     case "install":
       return install(cwd, env, logger);

@@ -19,10 +19,6 @@ Note: None of the commands take any arguments.
 
 Create a sample `elm-tooling.json` in the current directory. It tries to guess some values based on your project to help you get started.
 
-## elm-tooling validate
-
-Validate the closest `elm-tooling.json`. If you’re having trouble with some program not reading your `elm-tooling.json` correctly, try `elm-tooling validate` to check if you’ve made any mistakes.
-
 ## elm-tooling tools
 
 Interactively add, remove and update tools in your `elm-tooling.json`. This is an alternative to editing the `"tools"` field by hand.

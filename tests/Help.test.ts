@@ -37,9 +37,6 @@ describe("help", () => {
       ⧙elm-tooling init⧘
           Create a sample elm-tooling.json in the current directory
 
-      ⧙elm-tooling validate⧘
-          Validate the closest elm-tooling.json
-
       ⧙elm-tooling tools⧘
           Add, remove and update tools
 
@@ -89,9 +86,6 @@ describe("help", () => {
       .toMatchInlineSnapshot(`
       elm-tooling init
           Create a sample elm-tooling.json in the current directory
-
-      elm-tooling validate
-          Validate the closest elm-tooling.json
 
       elm-tooling tools
           Add, remove and update tools

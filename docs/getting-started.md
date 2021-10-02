@@ -54,19 +54,13 @@ Want more details? See below.
 
 4. Create an `elm-tooling.json`: `npx elm-tooling init`
 
-5. Edit `elm-tooling.json`:
-
-   - `elm-tooling init` tries to guess which tools you already depend on via `npm` by looking inside the closest `node_modules/` folder and `elm.json` file (if any). Check if `elm-tooling init` got it right, and then remove tools (such as `elm` and `elm-format`) from your `package.json`.
-
-   - `elm-tooling init` also tries to detect your entrypoints, but might fail. Have a look at `"entrypoints"` and make sure that they match your project.
+5. Edit `elm-tooling.json`. `elm-tooling init` tries to guess which tools you already depend on via `npm` by looking inside the closest `node_modules/` folder and `elm.json` file (if any). Check if `elm-tooling init` got it right, and then remove tools (such as `elm` and `elm-format`) from your `package.json`.
 
 6. Install the tools in `elm-tooling.json`: `npx elm-tooling install`
 
 7. Add `"postinstall": "elm-tooling install"` to your `package.json` scripts. This means `elm-tooling install` is automatically run after `npm install`.
 
-8. Check if there are any issues with your `elm-tooling.json`: `npx elm-tooling validate`
-
-9. Run through your CI and build system and see if everything works or something needs to be tweaked. See [CI setup](../ci) for more information.
+8. Run through your CI and build system and see if everything works or something needs to be tweaked. See [CI setup](../ci) for more information.
 
 With the above steps, you might end up with changes like this:
 

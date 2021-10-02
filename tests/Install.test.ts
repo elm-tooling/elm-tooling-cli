@@ -132,18 +132,28 @@ describe("install", () => {
   });
 
   describe("invalid", () => {
-    test("wrong field type (ignores errors for other fields)", async () => {
-      expect(await installFailHelper("wrong-field-types"))
-        .toMatchInlineSnapshot(`
-        ⧙/Users/you/project/fixtures/install/wrong-field-types/elm-tooling.json⧘
+    test("unknown fields", async () => {
+      expect(await installFailHelper("unknown-fields")).toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/install/unknown-fields/elm-tooling.json⧘
 
-        ⧙1⧘ error
+        ⧙2⧘ errors
+
+        ⧙tols⧘
+            Unknown field
+
+        ⧙other 2⧘
+            Unknown field
+
+      `);
+    });
+
+    test("wrong tools type", async () => {
+      expect(await installFailHelper("wrong-tools-type"))
+        .toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/install/wrong-tools-type/elm-tooling.json⧘
 
         ⧙tools⧘
             Expected an object but got: ["elm","elm-format"]
-
-        ⧙Specification:⧘
-            https://elm-tooling.github.io/elm-tooling-cli/spec
 
       `);
     });
@@ -162,9 +172,6 @@ describe("install", () => {
             Unknown version: 0.8
             Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4, 0.8.5
 
-        ⧙Specification:⧘
-            https://elm-tooling.github.io/elm-tooling-cli/spec
-
       `);
     });
   });
@@ -181,6 +188,7 @@ describe("install", () => {
     test("elm-tooling.json is folder", async () => {
       expect(await installFailHelper("is-folder")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/install/is-folder/elm-tooling.json⧘
+
         Failed to read file as JSON:
         EISDIR: fake error
 
@@ -190,6 +198,7 @@ describe("install", () => {
     test("bad json", async () => {
       expect(await installFailHelper("bad-json")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/install/bad-json/elm-tooling.json⧘
+
         Failed to read file as JSON:
         Unexpected end of JSON input
 
@@ -199,7 +208,19 @@ describe("install", () => {
     test("not an object", async () => {
       expect(await installFailHelper("not-an-object")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/install/not-an-object/elm-tooling.json⧘
+
         Expected an object but got: ["tools",{"elm":"0.19.1"}]
+
+      `);
+    });
+
+    test("version is not a string", async () => {
+      expect(await installFailHelper("version-is-not-string"))
+        .toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/install/version-is-not-string/elm-tooling.json⧘
+
+        ⧙tools["elm"]⧘
+            Expected a version as a string but got: 1
 
       `);
     });
@@ -219,10 +240,19 @@ describe("install", () => {
         .toMatchInlineSnapshot(`
         ⟪⧙/Users/you/project/fixtures/install/executable-is-folder/elm-tooling.json⧘
         ⟫
-        ⧙1⧘ error
-
         Failed to remove old link for elm at /Users/you/project/fixtures/install/executable-is-folder/node_modules/.bin/elm:
         EISDIR: fake error
+
+      `);
+    });
+
+    test("~/.elm/elm-tooling/elm/0.19.1/elm is a folder", async () => {
+      expect(await installFailHelper("executable-is-folder-in-elm-home"))
+        .toMatchInlineSnapshot(`
+        ⧙/Users/you/project/fixtures/install/executable-is-folder-in-elm-home/elm-tooling.json⧘
+
+        ⧙tools["elm"]⧘
+            Exists but is not a file: /Users/you/project/fixtures/install/executable-is-folder-in-elm-home/elm-tooling/elm/0.19.1/elm
 
       `);
     });

@@ -431,14 +431,13 @@ describe("tools", () => {
       ▊
     `);
 
-    // Other fields are preserved and the order is unchanged.
+    // "entrypoints" is preserved.
     expect(json).toMatchInlineSnapshot(`
       {
-          "before": 1,
           "tools": {
               "elm": "0.19.0"
           },
-          "after": 2
+          "entrypoints": []
       }
 
     `);
@@ -482,13 +481,60 @@ describe("tools", () => {
     `);
 
     expect(json).toMatchInlineSnapshot(`
+      {}
+
+    `);
+  });
+
+  test("adding a tool to an empty object or empty tools field", async () => {
+    const result1 = await toolsSuccessHelper("empty-elm-tooling", ["o", "\r"]);
+
+    expect(result1.stdout).toMatchInlineSnapshot(`
+      ⧙/Users/you/project/fixtures/tools/empty-elm-tooling/elm-tooling.json⧘
+
+      ⧙elm⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
+        ⧙[⧘⧙x⧘⧙]⧘ 0.19.1
+
+      ⧙elm-format⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.8.5⧘
+
+      ⧙elm-json⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
+        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
+
+      ⧙elm-test-rs⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
+        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
+
+      ⧙Up⧘/⧙Down⧘ to move
+      ⧙Space⧘ to toggle
+      ⧙Enter⧘ to save
+
+      Saved! To install: elm-tooling install
+      ▊
+    `);
+
+    expect(result1.json).toMatchInlineSnapshot(`
       {
-          "entrypoints": [
-              "./src/Main.elm"
-          ]
+          "tools": {
+              "elm": "0.19.1"
+          }
       }
 
     `);
+
+    const result2 = await toolsSuccessHelper("empty-tools-field", ["o", "\r"]);
+
+    expect(
+      result2.stdout.replace("empty-tools-field", "empty-elm-tooling")
+    ).toEqual(result1.stdout);
+    expect(result2.json).toEqual(result1.json);
   });
 
   test("pressing some other key does nothing", async () => {
@@ -551,6 +597,7 @@ describe("tools", () => {
     test("bad json", async () => {
       expect(await toolsFailHelper("bad-json")).toMatchInlineSnapshot(`
         ⧙/Users/you/project/fixtures/tools/bad-json/elm-tooling.json⧘
+
         Failed to read file as JSON:
         Unexpected end of JSON input
 
@@ -570,9 +617,6 @@ describe("tools", () => {
         ⧙tools["elm-format"]⧘
             Unknown version: 0.8
             Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4, 0.8.5
-
-        ⧙Specification:⧘
-            https://elm-tooling.github.io/elm-tooling-cli/spec
 
       `);
     });

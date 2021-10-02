@@ -5,15 +5,14 @@ import * as path from "path";
 import {
   bold,
   Env,
+  flatMap,
   getOwn,
   indent,
   isNonEmptyArray,
   isRecord,
   join,
-  mapNonEmptyArray,
   NonEmptyArray,
   partitionMap,
-  partitionMapNonEmpty,
   printNumErrors,
   toError,
 } from "./Helpers";
@@ -58,35 +57,35 @@ export type ParseResult =
   | {
       tag: "Parsed";
       elmToolingJsonPath: ElmToolingJsonPath;
+      // Preserved for legacy reasons:
       originalObject: Record<string, unknown>;
-      unknownFields: Array<string>;
-      entrypoints?: FieldResult<NonEmptyArray<Entrypoint>>;
-      tools?: FieldResult<Tools>;
+      tools?: Tools;
+      osName: OSName;
     }
   | {
       tag: "ReadAsJsonObjectError";
       elmToolingJsonPath: ElmToolingJsonPath;
-      message: string;
+      errors: NonEmptyArray<ParseError>;
     };
 
-export type FieldResult<T> =
-  | { tag: "Error"; errors: NonEmptyArray<FieldError> }
-  | { tag: "Parsed"; parsed: T };
-
-export type FieldError = {
-  path: Array<number | string>;
-  message: string;
-};
-
-export type Entrypoint = {
-  relativePath: string;
-  absolutePath: AbsolutePath;
-};
+export type ParseError =
+  | {
+      tag: "Message";
+      message: string;
+    }
+  | {
+      tag: "UnkownField";
+      field: string;
+    }
+  | {
+      tag: "WithPath";
+      path: ["tools", ...Array<string>];
+      message: string;
+    };
 
 export type Tools = {
   existing: Array<Tool>;
   missing: Array<Tool>;
-  osName: OSName;
 };
 
 export type Tool = {
@@ -126,7 +125,12 @@ export function findReadAndParseElmToolingJson(
     return {
       tag: "ReadAsJsonObjectError",
       elmToolingJsonPath,
-      message: `Failed to read file as JSON:\n${error.message}`,
+      errors: [
+        {
+          tag: "Message",
+          message: `Failed to read file as JSON:\n${error.message}`,
+        },
+      ],
     };
   }
 
@@ -134,40 +138,68 @@ export function findReadAndParseElmToolingJson(
     return {
       tag: "ReadAsJsonObjectError",
       elmToolingJsonPath,
-      message: `Expected an object but got: ${JSON.stringify(json)}`,
+      errors: [
+        {
+          tag: "Message",
+          message: `Expected an object but got: ${JSON.stringify(json)}`,
+        },
+      ],
+    };
+  }
+
+  const osName = getOSName();
+
+  // istanbul ignore if
+  if (osName instanceof Error) {
+    return {
+      tag: "ReadAsJsonObjectError",
+      elmToolingJsonPath,
+      errors: [
+        {
+          tag: "Message",
+          message: osName.message,
+        },
+      ],
     };
   }
 
   const result: ParseResult = {
     tag: "Parsed",
-    originalObject: json,
     elmToolingJsonPath,
-    unknownFields: [],
+    originalObject: json,
+    osName,
   };
+
+  const errors: Array<ParseError> = [];
 
   for (const [field, value] of Object.entries(json)) {
     switch (field) {
+      // Ignored for legacy reasons.
       case "entrypoints":
-        result.entrypoints = prefixFieldResult(
-          "entrypoints",
-          parseEntrypoints(elmToolingJsonPath, value)
-        );
         break;
 
       case "tools": {
-        result.tools = prefixFieldResult(
-          "tools",
-          flatMapFieldResult(getOSNameAsFieldResult(), (osName) =>
-            parseTools(cwd, env, osName, value)
-          )
-        );
+        const toolsResult = parseTools(cwd, env, osName, value);
+        if (Array.isArray(toolsResult)) {
+          errors.push(...toolsResult);
+        } else {
+          result.tools = toolsResult;
+        }
         break;
       }
 
       default:
-        result.unknownFields.push(field);
+        errors.push({ tag: "UnkownField", field });
         break;
     }
+  }
+
+  if (isNonEmptyArray(errors)) {
+    return {
+      tag: "ReadAsJsonObjectError",
+      elmToolingJsonPath,
+      errors,
+    };
   }
 
   return result;
@@ -186,56 +218,6 @@ export function getOSName(): Error | OSName {
       return new Error(
         `Sorry, your platform (${os.platform()}) is not supported yet :(`
       );
-  }
-}
-
-export function getOSNameAsFieldResult(): FieldResult<OSName> {
-  const osName = getOSName();
-  return osName instanceof Error
-    ? // istanbul ignore next
-      {
-        tag: "Error" as const,
-        errors: [{ path: [], message: osName.message }],
-      }
-    : {
-        tag: "Parsed",
-        parsed: osName,
-      };
-}
-
-function flatMapFieldResult<T, U>(
-  fieldResult: FieldResult<T>,
-  f: (parsed: T) => FieldResult<U>
-): FieldResult<U> {
-  switch (fieldResult.tag) {
-    // istanbul ignore next
-    case "Error":
-      return fieldResult;
-
-    case "Parsed":
-      return f(fieldResult.parsed);
-  }
-}
-
-export function prefixFieldResult<T>(
-  prefix: string,
-  fieldResult: FieldResult<T>
-): FieldResult<T> {
-  switch (fieldResult.tag) {
-    case "Error":
-      return {
-        tag: "Error",
-        errors: mapNonEmptyArray(
-          fieldResult.errors,
-          ({ path: fieldPath, message }) => ({
-            path: [prefix, ...fieldPath],
-            message,
-          })
-        ),
-      };
-
-    case "Parsed":
-      return fieldResult;
   }
 }
 
@@ -279,166 +261,33 @@ export function validateFileExists(fullPath: AbsolutePath): FileExists {
   return { tag: "Exists" };
 }
 
-function parseEntrypoints(
-  elmToolingJsonPath: ElmToolingJsonPath,
-  json: unknown
-): FieldResult<NonEmptyArray<Entrypoint>> {
-  if (!Array.isArray(json)) {
-    return {
-      tag: "Error",
-      errors: [
-        {
-          path: [],
-          message: `Expected an array but got: ${JSON.stringify(json)}`,
-        },
-      ],
-    };
-  }
-
-  if (!isNonEmptyArray(json)) {
-    return {
-      tag: "Error",
-      errors: [
-        {
-          path: [],
-          message: `Expected at least one entrypoint but got 0.`,
-        },
-      ],
-    };
-  }
-
-  const partitioned = partitionMapNonEmpty<unknown, FieldError, Entrypoint>(
-    json,
-    (entrypoint, index, _, entrypointsSoFar) => {
-      if (typeof entrypoint !== "string") {
-        return {
-          tag: "Left",
-          value: {
-            path: [index],
-            message: `Expected a string but got: ${JSON.stringify(entrypoint)}`,
-          },
-        };
-      }
-
-      if (entrypoint.includes("\\")) {
-        return {
-          tag: "Left",
-          value: {
-            path: [index],
-            message: `Expected the string to use only "/" as path delimiter but found "\\": ${JSON.stringify(
-              entrypoint
-            )}`,
-          },
-        };
-      }
-
-      if (!entrypoint.startsWith("./")) {
-        return {
-          tag: "Left",
-          value: {
-            path: [index],
-            message: `Expected the string to start with "./" (to indicate that it is a relative path) but got: ${JSON.stringify(
-              entrypoint
-            )}`,
-          },
-        };
-      }
-
-      if (!entrypoint.endsWith(".elm")) {
-        return {
-          tag: "Left",
-          value: {
-            path: [index],
-            message: `Expected the string to end with ".elm" but got: ${JSON.stringify(
-              entrypoint
-            )}`,
-          },
-        };
-      }
-
-      const entrypointPath = absolutePathFromString(
-        absoluteDirname(elmToolingJsonPath.theElmToolingJsonPath),
-        entrypoint
-      );
-
-      const exists = validateFileExists(entrypointPath);
-      if (exists.tag !== "Exists") {
-        return {
-          tag: "Left",
-          value: { path: [index], message: exists.message },
-        };
-      }
-
-      if (
-        entrypointsSoFar.some(
-          (otherEntrypoint) =>
-            otherEntrypoint.absolutePath.absolutePath ===
-            entrypointPath.absolutePath
-        )
-      ) {
-        return {
-          tag: "Left",
-          value: {
-            path: [index],
-            message: `Duplicate entrypoint: ${entrypointPath.absolutePath}`,
-          },
-        };
-      }
-
-      return {
-        tag: "Right",
-        value: {
-          relativePath: entrypoint,
-          absolutePath: entrypointPath,
-        },
-      };
-    }
-  );
-
-  switch (partitioned.tag) {
-    case "OnlyLeft":
-    case "Both":
-      return {
-        tag: "Error",
-        errors: partitioned.left,
-      };
-
-    case "OnlyRight":
-      return {
-        tag: "Parsed",
-        parsed: partitioned.right,
-      };
-  }
-}
-
 function parseTools(
   cwd: Cwd,
   env: Env,
   osName: OSName,
   json: unknown
-): FieldResult<Tools> {
+): NonEmptyArray<ParseError> | Tools {
   if (!isRecord(json)) {
-    return {
-      tag: "Error",
-      errors: [
-        {
-          path: [],
-          message: `Expected an object but got: ${JSON.stringify(json)}`,
-        },
-      ],
-    };
+    return [
+      {
+        tag: "WithPath",
+        path: ["tools"],
+        message: `Expected an object but got: ${JSON.stringify(json)}`,
+      },
+    ];
   }
 
   const [errors, tools] = partitionMap<
     [string, unknown],
-    FieldError,
+    ParseError,
     { exists: boolean; tool: Tool }
   >(Object.entries(json), ([name, version]) => {
     if (typeof version !== "string") {
       return {
         tag: "Left",
         value: {
-          path: [name],
+          tag: "WithPath",
+          path: ["tools", name],
           message: `Expected a version as a string but got: ${JSON.stringify(
             version
           )}`,
@@ -452,7 +301,8 @@ function parseTools(
       return {
         tag: "Left",
         value: {
-          path: [name],
+          tag: "WithPath",
+          path: ["tools", name],
           message: `Unknown tool\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`,
         },
       };
@@ -464,7 +314,8 @@ function parseTools(
       return {
         tag: "Left",
         value: {
-          path: [name],
+          tag: "WithPath",
+          path: ["tools", name],
           message: `Unknown version: ${version}\nKnown versions: ${join(
             Object.keys(versions),
             ", "
@@ -495,16 +346,17 @@ function parseTools(
       case "Error":
         return {
           tag: "Left",
-          value: { path: [name], message: exists.message },
+          value: {
+            tag: "WithPath",
+            path: ["tools", name],
+            message: exists.message,
+          },
         };
     }
   });
 
   if (isNonEmptyArray(errors)) {
-    return {
-      tag: "Error",
-      errors,
-    };
+    return errors;
   }
 
   const [existing, missing] = partitionMap<
@@ -515,10 +367,7 @@ function parseTools(
     exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
   );
 
-  return {
-    tag: "Parsed",
-    parsed: { existing, missing, osName },
-  };
+  return { existing, missing };
 }
 
 export function makeTool(
@@ -542,14 +391,26 @@ export function makeTool(
   };
 }
 
-export function printFieldErrors(errors: NonEmptyArray<FieldError>): string {
+export function printParseErrors(errors: NonEmptyArray<ParseError>): string {
   return join(
-    [
-      printNumErrors(errors.length),
-      ...errors.map(
-        (error) => `${bold(joinPath(error.path))}\n${indent(error.message)}`
-      ),
-    ],
+    flatMap(
+      [
+        printNumErrors(errors.length),
+        ...errors.map((error) => {
+          switch (error.tag) {
+            case "Message":
+              return error.message;
+
+            case "UnkownField":
+              return `${bold(error.field)}\n${indent("Unknown field")}`;
+
+            case "WithPath":
+              return `${bold(joinPath(error.path))}\n${indent(error.message)}`;
+          }
+        }),
+      ],
+      (item) => (item === undefined ? [] : [item])
+    ),
     "\n\n"
   );
 }

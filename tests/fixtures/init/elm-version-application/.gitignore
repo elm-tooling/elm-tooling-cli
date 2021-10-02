@@ -1,2 +1,4 @@
 elm-tooling.json
+elm-tooling
 !node_modules
+node_modules/.bin

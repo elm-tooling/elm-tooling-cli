@@ -71,70 +71,19 @@ async function initFailHelper(fixture: string): Promise<string> {
 expect.addSnapshotSerializer(stringSnapshotSerializer);
 
 describe("init", () => {
-  test("packages don’t get entrypoints", async () => {
-    const { stdout, json } = await initSuccessHelper("package");
-
-    expect(stdout).toMatchInlineSnapshot(`
-      ⧙/Users/you/project/fixtures/init/package/elm-tooling.json⧘
-      Created! Open it in a text editor and have a look!
-      To install tools: elm-tooling install
-
-    `);
-
-    expect(json).toMatchInlineSnapshot(`
-      {
-          "tools": {
-              "elm": "0.19.1",
-              "elm-format": "0.8.5",
-              "elm-json": "0.2.10"
-          }
-      }
-
-    `);
-  });
-
-  test("application entrypoints are detected", async () => {
-    const { stdout, json } = await initSuccessHelper("application");
-
-    expect(stdout).toMatchInlineSnapshot(`
-      ⧙/Users/you/project/fixtures/init/application/elm-tooling.json⧘
-      Created! Open it in a text editor and have a look!
-      To install tools: elm-tooling install
-
-    `);
-
-    expect(json).toMatchInlineSnapshot(`
-      {
-          "entrypoints": [
-              "./legacy/elm/Main.elm",
-              "./src/App.elm"
-          ],
-          "tools": {
-              "elm": "0.19.1",
-              "elm-format": "0.8.5",
-              "elm-json": "0.2.10"
-          }
-      }
-
-    `);
-  });
-
   test.each([
-    "bad-elm-json-source-directories",
     "bad-elm-json-type",
     "bad-elm-json",
-    "empty-elm-json-source-directories",
     "no-elm-json",
-    "no-files-with-main",
     "not-an-object",
   ])("Uses fallback for %s", async (fixture) => {
     const { stdout, json } = await initSuccessHelper(fixture);
 
     expect(stdout).not.toHaveLength(0);
 
-    expect((JSON.parse(json) as ElmTooling).entrypoints).toStrictEqual([
-      "./src/Main.elm",
-    ]);
+    expect(
+      Object.keys((JSON.parse(json) as ElmTooling).tools ?? [])
+    ).toStrictEqual(["elm", "elm-format", "elm-json"]);
   });
 
   test("already exists", async () => {
@@ -168,15 +117,12 @@ describe("init", () => {
       `);
 
       expect(json).toMatchInlineSnapshot(`
-          {
-              "entrypoints": [
-                  "./src/Main.elm"
-              ],
-              "tools": {
-                  "elm": "0.19.1",
-                  "elm-format": "0.8.3"
-              }
-          }
+        {
+            "tools": {
+                "elm": "0.19.1",
+                "elm-format": "0.8.3"
+            }
+        }
 
       `);
     });
@@ -195,9 +141,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm-json": "0.2.10"
             }
@@ -220,9 +163,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1",
                 "elm-format": "0.8.5",
@@ -249,9 +189,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1",
                 "elm-format": "0.8.5",
@@ -300,9 +237,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1",
                 "elm-format": "0.8.5",
@@ -351,9 +285,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1",
                 "elm-format": "0.8.5",
@@ -378,9 +309,6 @@ describe("init", () => {
 
       expect(json).toMatchInlineSnapshot(`
         {
-            "entrypoints": [
-                "./src/Main.elm"
-            ],
             "tools": {
                 "elm": "0.19.1"
             }

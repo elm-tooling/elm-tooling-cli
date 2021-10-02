@@ -3,13 +3,10 @@ import type { Readable, Writable } from "stream";
 export type NonEmptyArray<T> = [T, ...Array<T>];
 
 export type ElmTooling = {
-  entrypoints?: NonEmptyArray<string>;
   tools?: {
     [name: string]: string;
   };
 };
-
-export const KNOWN_FIELDS: Array<keyof ElmTooling> = ["entrypoints", "tools"];
 
 export type Env = Record<string, string | undefined>;
 
@@ -61,26 +58,6 @@ export function partitionMap<T, Left, Right>(
   return [left, right];
 }
 
-export function partitionMapNonEmpty<T, Left, Right>(
-  items: NonEmptyArray<T>,
-  f: (
-    item: T,
-    index: number,
-    leftSoFar: Array<Left>,
-    rightSoFar: Array<Right>
-  ) => Either<Left, Right>
-):
-  | { tag: "Both"; left: NonEmptyArray<Left>; right: NonEmptyArray<Right> }
-  | { tag: "OnlyLeft"; left: NonEmptyArray<Left> }
-  | { tag: "OnlyRight"; right: NonEmptyArray<Right> } {
-  const [left, right] = partitionMap(items, f);
-  return !isNonEmptyArray(left)
-    ? { tag: "OnlyRight", right: right as NonEmptyArray<Right> }
-    : !isNonEmptyArray(right)
-    ? { tag: "OnlyLeft", left }
-    : { tag: "Both", left, right };
-}
-
 export const HIDE_CURSOR = "\x1B[?25l";
 export const SHOW_CURSOR = "\x1B[?25h";
 export const RESET_COLOR = "\x1B[0m";
@@ -101,12 +78,8 @@ export function indent(string: string): string {
   return string.replace(/^/gm, "    ");
 }
 
-export const elmToolingJsonDocumentationLink = `${dim(
-  "Specification:"
-)}\n${indent("https://elm-tooling.github.io/elm-tooling-cli/spec")}`;
-
-export function printNumErrors(numErrors: number): string {
-  return `${bold(numErrors.toString())} error${numErrors === 1 ? "" : "s"}`;
+export function printNumErrors(numErrors: number): string | undefined {
+  return numErrors === 1 ? undefined : `${bold(numErrors.toString())} errors`;
 }
 
 // This can be replaced with `Array.prototype.flatMap` once Node.js is EOL
@@ -154,13 +127,6 @@ export function getOwn<T>(
 
 export function isNonEmptyArray<T>(array: Array<T>): array is NonEmptyArray<T> {
   return array.length >= 1;
-}
-
-export function mapNonEmptyArray<T, U>(
-  array: NonEmptyArray<T>,
-  f: (item: T, index: number) => U
-): NonEmptyArray<U> {
-  return array.map(f) as NonEmptyArray<U>;
 }
 
 /**

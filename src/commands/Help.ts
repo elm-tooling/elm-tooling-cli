@@ -7,9 +7,6 @@ export function help(cwd: Cwd, env: Env): string {
 ${bold("elm-tooling init")}
     Create a sample elm-tooling.json in the current directory
 
-${bold("elm-tooling validate")}
-    Validate the closest elm-tooling.json
-
 ${bold("elm-tooling tools")}
     Add, remove and update tools
 
