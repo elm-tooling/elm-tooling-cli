@@ -60,9 +60,7 @@ Want more details? See below.
 
 7. Add `"postinstall": "elm-tooling install"` to your `package.json` scripts. This means `elm-tooling install` is automatically run after `npm install`.
 
-8. Check if there are any issues with your `elm-tooling.json`: `npx elm-tooling validate`
-
-9. Run through your CI and build system and see if everything works or something needs to be tweaked. See [CI setup](../ci) for more information.
+8. Run through your CI and build system and see if everything works or something needs to be tweaked. See [CI setup](../ci) for more information.
 
 With the above steps, you might end up with changes like this:
 
