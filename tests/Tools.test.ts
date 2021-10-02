@@ -486,18 +486,15 @@ describe("tools", () => {
     `);
   });
 
-  test("adding a tool to an empty object", async () => {
-    const { stdout, json } = await toolsSuccessHelper("empty-elm-tooling", [
-      "o",
-      "test-exit",
-    ]);
+  test("adding a tool to an empty object or empty tools field", async () => {
+    const result1 = await toolsSuccessHelper("empty-elm-tooling", ["o", "\r"]);
 
-    expect(stdout).toMatchInlineSnapshot(`
+    expect(result1.stdout).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/tools/empty-elm-tooling/elm-tooling.json⧘
 
       ⧙elm⧘
         ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
-        ⧙[⧘⧙☒⧘⧙]⧘ 0.19.1
+        ⧙[⧘⧙x⧘⧙]⧘ 0.19.1
 
       ⧙elm-format⧘
         ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
@@ -518,52 +515,26 @@ describe("tools", () => {
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
       ⧙Enter⧘ to save
+
+      Saved! To install: elm-tooling install
+      ▊
     `);
 
-    expect(json).toMatchInlineSnapshot(`
-      {}
+    expect(result1.json).toMatchInlineSnapshot(`
+      {
+          "tools": {
+              "elm": "0.19.1"
+          }
+      }
 
     `);
-  });
 
-  test("adding a tool to an empty tools field", async () => {
-    const { stdout, json } = await toolsSuccessHelper("empty-tools-field", [
-      "o",
-      "test-exit",
-    ]);
+    const result2 = await toolsSuccessHelper("empty-tools-field", ["o", "\r"]);
 
-    expect(stdout).toMatchInlineSnapshot(`
-      ⧙/Users/you/project/fixtures/tools/empty-tools-field/elm-tooling.json⧘
-
-      ⧙elm⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.19.0⧘
-        ⧙[⧘⧙☒⧘⧙]⧘ 0.19.1
-
-      ⧙elm-format⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.8.1⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.8.2⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.8.3⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.8.4⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.8.5⧘
-
-      ⧙elm-json⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.2.8⧘
-        ⧙[⧘ ⧙]⧘ ⧙0.2.10⧘
-
-      ⧙elm-test-rs⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
-        ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
-
-      ⧙Up⧘/⧙Down⧘ to move
-      ⧙Space⧘ to toggle
-      ⧙Enter⧘ to save
-    `);
-
-    expect(json).toMatchInlineSnapshot(`
-      {"tools": {}}
-
-    `);
+    expect(
+      result2.stdout.replace("empty-tools-field", "empty-elm-tooling")
+    ).toEqual(result1.stdout);
+    expect(result2.json).toEqual(result1.json);
   });
 
   test("pressing some other key does nothing", async () => {
