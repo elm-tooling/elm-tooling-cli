@@ -9,8 +9,6 @@ export type ElmTooling = {
   };
 };
 
-export const KNOWN_FIELDS: Array<keyof ElmTooling> = ["entrypoints", "tools"];
-
 export type Env = Record<string, string | undefined>;
 
 export type ReadStream = Readable & {
