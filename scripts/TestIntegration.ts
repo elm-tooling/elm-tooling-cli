@@ -11,22 +11,21 @@ export async function run(): Promise<void> {
     "tests",
     "fixtures",
     "init",
-    "application"
+    "elm-version-application"
   );
 
   const elmToolingJsonPath = path.join(dir, "elm-tooling.json");
   const elmToolingInstallPath = path.join(dir, "elm-tooling");
-  const nodeModulesInstallPath = path.join(dir, "node_modules");
+  const nodeModulesBinPath = path.join(dir, "node_modules", ".bin");
 
   try {
     fs.unlinkSync(elmToolingJsonPath);
     if (fs.existsSync(elmToolingInstallPath)) {
       rimraf.sync(elmToolingInstallPath);
     }
-    if (fs.existsSync(nodeModulesInstallPath)) {
-      rimraf.sync(nodeModulesInstallPath);
+    if (fs.existsSync(nodeModulesBinPath)) {
+      rimraf.sync(nodeModulesBinPath);
     }
-    fs.mkdirSync(nodeModulesInstallPath, { recursive: true });
   } catch (unknownError) {
     const error = toError(unknownError);
     if (error.code !== "ENOENT") {
@@ -69,17 +68,11 @@ export async function run(): Promise<void> {
   // elm-tooling.json already exists.
   await runCli("init", false);
 
-  // Tools are missing so far:
-  await runCli("validate", false);
-
   // Install tools.
   await runCli("install", true);
 
   // Running again is ok.
   await runCli("install", true);
-
-  // elm-tooling.json should be valid now.
-  await runCli("validate", true);
 }
 
 if (require.main === module) {
