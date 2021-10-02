@@ -4,7 +4,6 @@ import * as readline from "readline";
 import {
   bold,
   dim,
-  elmToolingJsonDocumentationLink,
   Env,
   flatMap,
   fromEntries,
@@ -26,7 +25,7 @@ import {
 import type { Logger } from "../Logger";
 import {
   findReadAndParseElmToolingJson,
-  printFieldErrors,
+  printParseErrors,
   Tool,
 } from "../Parse";
 import type { Cwd, ElmToolingJsonPath } from "../PathHelpers";
@@ -54,7 +53,8 @@ export async function toolsCommand(
       logger.error(
         bold(parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath)
       );
-      logger.error(parseResult.message);
+      logger.error("");
+      logger.error(printParseErrors(parseResult.errors));
       return 1;
 
     case "Parsed": {
@@ -66,45 +66,18 @@ export async function toolsCommand(
         );
       };
 
-      switch (parseResult.tools?.tag) {
-        case "Error":
-          logger.error(
-            bold(
-              parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
-            )
-          );
-          logger.error("");
-          logger.error(printFieldErrors(parseResult.tools.errors));
-          logger.error("");
-          logger.error(elmToolingJsonDocumentationLink);
-          return 1;
+      const allTools =
+        parseResult.tools === undefined
+          ? []
+          : sortTools(
+              parseResult.tools.existing.concat(parseResult.tools.missing)
+            );
 
-        case undefined:
-          logger.log(
-            bold(
-              parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
-            )
-          );
-          return start(logger, stdin, stdout, [], save);
+      logger.log(
+        bold(parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath)
+      );
 
-        case "Parsed":
-          logger.log(
-            bold(
-              parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
-            )
-          );
-          return start(
-            logger,
-            stdin,
-            stdout,
-            sortTools(
-              parseResult.tools.parsed.existing.concat(
-                parseResult.tools.parsed.missing
-              )
-            ),
-            save
-          );
-      }
+      return start(logger, stdin, stdout, allTools, save);
     }
   }
 }

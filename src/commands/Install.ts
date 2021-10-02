@@ -9,7 +9,6 @@ import * as zlib from "zlib";
 import {
   bold,
   dim,
-  elmToolingJsonDocumentationLink,
   Env,
   flatMap,
   indent,
@@ -31,12 +30,10 @@ import { linkTool, unlinkTool } from "../Link";
 import type { Logger } from "../Logger";
 import {
   findReadAndParseElmToolingJson,
-  getOSNameAsFieldResult,
   getToolThrowing,
   isWindows,
   makeTool,
-  prefixFieldResult,
-  printFieldErrors,
+  printParseErrors,
   Tool,
   Tools,
   validateFileExists,
@@ -73,74 +70,43 @@ export async function install(
       logger.error(
         bold(parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath)
       );
-      logger.error(parseResult.message);
+      logger.error("");
+      logger.error(printParseErrors(parseResult.errors));
       return 1;
 
     case "Parsed": {
-      switch (parseResult.tools?.tag) {
-        case undefined: {
-          const osResult = prefixFieldResult("tools", getOSNameAsFieldResult());
-
-          switch (osResult.tag) {
-            case "Error":
-              logger.error(
-                bold(
-                  parseResult.elmToolingJsonPath.theElmToolingJsonPath
-                    .absolutePath
-                )
-              );
-              logger.error("");
-              logger.error(printFieldErrors(osResult.errors));
-              // The spec documentation link does not help here.
-              return 1;
-
-            case "Parsed":
-              return removeAllTools(
-                cwd,
-                env,
-                logger,
-                osResult.parsed,
-                parseResult.elmToolingJsonPath,
-                "missing"
-              );
-          }
-        }
-
-        case "Error":
-          logger.error(
-            bold(
-              parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath
-            )
-          );
-          logger.error("");
-          logger.error(printFieldErrors(parseResult.tools.errors));
-          logger.error("");
-          logger.error(elmToolingJsonDocumentationLink);
-          return 1;
-
-        case "Parsed": {
-          const tools = parseResult.tools.parsed;
-
-          if (tools.existing.length === 0 && tools.missing.length === 0) {
-            return removeAllTools(
-              cwd,
-              env,
-              logger,
-              tools.osName,
-              parseResult.elmToolingJsonPath,
-              "empty"
-            );
-          }
-
-          return installTools(
-            cwd,
-            env,
-            logger,
-            parseResult.elmToolingJsonPath,
-            tools
-          );
-        }
+      if (parseResult.tools === undefined) {
+        return removeAllTools(
+          cwd,
+          env,
+          logger,
+          parseResult.osName,
+          parseResult.elmToolingJsonPath,
+          "missing"
+        );
       }
+
+      const { tools } = parseResult;
+
+      if (tools.existing.length === 0 && tools.missing.length === 0) {
+        return removeAllTools(
+          cwd,
+          env,
+          logger,
+          parseResult.osName,
+          parseResult.elmToolingJsonPath,
+          "empty"
+        );
+      }
+
+      return installTools(
+        cwd,
+        env,
+        logger,
+        parseResult.elmToolingJsonPath,
+        parseResult.osName,
+        tools
+      );
     }
   }
 }
@@ -150,6 +116,7 @@ async function installTools(
   env: Env,
   logger: Logger,
   elmToolingJsonPath: ElmToolingJsonPath,
+  osName: OSName,
   tools: Tools
 ): Promise<number> {
   const nodeModulesBinPath = getNodeModulesBinPath(elmToolingJsonPath);
@@ -240,7 +207,7 @@ async function installTools(
 
     ...tools.existing.map((tool) => linkTool(cwd, nodeModulesBinPath, tool)),
 
-    ...removeTools(cwd, env, tools.osName, nodeModulesBinPath, toolsToRemove),
+    ...removeTools(cwd, env, osName, nodeModulesBinPath, toolsToRemove),
   ];
 
   return printResults(logger, results);
