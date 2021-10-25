@@ -22,20 +22,20 @@ It’s much easier to work on this project if your editor can run these tools fo
    There’s a script that can help you do it.
 
    ```
-   npx ts-node scripts/HashUrls.ts LINUX_URL MAC_URL WINDOWS_URL
+   npx ts-eager scripts/HashUrls.ts LINUX_URL MAC_URL WINDOWS_URL
    ```
 
    Example:
 
    ```
-   npx ts-node scripts/HashUrls.ts https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_{linux.tar.gz,macos.tar.gz,windows.zip}
+   npx ts-eager scripts/HashUrls.ts https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_{linux.tar.gz,macos.tar.gz,windows.zip}
    ```
 
    The above example assumes your shell has brace expansion. Either way, it expects 3 URLs: One for linux, one for mac and one for windows (in that order). It downloads the files to memory (verifying that they exist) and hashes them. When done, it prints some JSON that you can paste into the code. Run Prettier afterwards.
 
 2. Run `npx jest -u` to update snapshots and look them through quickly to see if they seem legit.
 
-3. Run `npx ts-node scripts/TestAllDownloads.ts update` to update one more snapshot.
+3. Run `npx ts-eager scripts/TestAllDownloads.ts update` to update one more snapshot.
 
 4. Run `npm test` to check that everything looks good.
 

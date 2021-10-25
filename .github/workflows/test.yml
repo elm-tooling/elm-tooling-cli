@@ -37,10 +37,10 @@ jobs:
         run: npx --no-install jest --coverage
 
       - name: TestAllDownloads.ts
-        run: npx --no-install ts-node scripts/TestAllDownloads.ts
+        run: npx --no-install ts-eager scripts/TestAllDownloads.ts
 
       - name: TestIntegration.ts
-        run: npx --no-install ts-node scripts/TestIntegration.ts
+        run: npx --no-install ts-eager scripts/TestIntegration.ts
 
       - name: TestGetExecutable.ts
-        run: npx --no-install ts-node scripts/TestGetExecutable.ts
+        run: npx --no-install ts-eager scripts/TestGetExecutable.ts
