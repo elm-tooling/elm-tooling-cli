@@ -3,9 +3,9 @@
   "type": "commonjs",
   "scripts": {
     "pretest": "prettier --check . && eslint . --report-unused-disable-directives",
-    "test": "jest --coverage && ts-eager scripts/TestAllDownloads.ts && ts-eager scripts/TestIntegration.ts && ts-eager scripts/TestGetExecutable.ts && ts-eager scripts/HashUrls.ts https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_linux.tar.gz https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_macos.tar.gz https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_windows.zip",
+    "test": "jest --coverage && ts-node scripts/TestAllDownloads.ts && ts-node scripts/TestIntegration.ts && ts-node scripts/TestGetExecutable.ts && ts-node scripts/HashUrls.ts https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_linux.tar.gz https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_macos.tar.gz https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_windows.zip",
     "posttest": "npm run build",
-    "build": "ts-eager scripts/Build.ts"
+    "build": "ts-node scripts/Build.ts"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "8.2.5",
@@ -21,8 +21,8 @@
     "prettier": "2.4.1",
     "rimraf": "3.0.2",
     "rollup": "2.58.0",
-    "ts-eager": "2.0.2",
     "ts-jest": "27.0.5",
+    "ts-node": "10.2.1",
     "typescript": "4.4.3"
   }
 }
