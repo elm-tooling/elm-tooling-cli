@@ -1,3 +1,9 @@
+### Version 1.7.0 (2021-12-02)
+
+- Added: elm-test-rs 2.0.0.
+- Removed: `elm-tooling init` no longer creates `"entrypoints"` in elm-tooling.json. The Elm Language Server no longer needs it, and that was the only tool using it. `"entrypoints"` has also been removed from the spec.
+- Removed: the `elm-tooling validate` command. Since `"entrypoints"` was removed, the only remaining field is `"tools"`. If `elm-tooling install` succeeds your elm-tooling.json is valid, so there’s no need for the `elm-tooling validate` command anymore. The spec [explains why it won’t be needed in the future either](https://github.com/elm-tooling/elm-tooling-cli/blob/0e7ad8341b0dbf495b0185b04621646cdb9a7e51/docs/spec.md). Note: To avoid a breaking change, `elm-tooling validate` is now a hidden command that always exits with code 0, keeping the same API as before. (The human readable output is different – it’s now just a message saying that the `validate` command no longer exists.)
+
 ### Version 1.6.0 (2021-09-19)
 
 - Added: elm-test-rs 1.2.2.

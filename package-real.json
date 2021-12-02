@@ -1,6 +1,6 @@
 {
   "name": "elm-tooling",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "author": "Simon Lydell",
   "license": "MIT",
   "description": "Manage elm-tooling.json. Install Elm tools.",
@@ -11,5 +11,5 @@
     "./getExecutable": "./getExecutable.js"
   },
   "bin": "./index.js",
-  "keywords": ["elm", "elm-format", "elm-json", "elm-tooling", "elm-tooling.json"]
+  "keywords": ["elm", "elm-format", "elm-json", "elm-test-rs", "elm-tooling", "elm-tooling.json"]
 }
