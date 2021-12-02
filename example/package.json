@@ -13,6 +13,6 @@
     "elm-tooling": "file:../build",
     "node-elm-compiler": "5.0.6",
     "parcel-bundler": "1.12.5",
-    "prettier": "2.4.1"
+    "prettier": "2.5.0"
   }
 }
