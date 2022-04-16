@@ -153,8 +153,8 @@ async function runTool({
 }): Promise<number> {
   const stdout = new MemoryWriteStream();
   const prefix = `\nSpawn ${name} ${version}`;
-  return spawnPromise(name, cwd, stdout).then(
-    (exitCode) => {
+  return spawnPromise(name, cwd, stdout)
+    .then((exitCode) => {
       if (exitCode !== 0) {
         stderr.write(`${prefix}: Non-zero exit code: ${exitCode}\n`);
         return exitCode;
@@ -172,12 +172,11 @@ async function runTool({
         return 21;
       }
       return 0;
-    },
-    (error: Error) => {
+    })
+    .catch((error: Error) => {
       stderr.write(`${prefix}: Error: ${error.message}\n`);
       return 22;
-    }
-  );
+    });
 }
 
 export async function run({
@@ -291,16 +290,15 @@ if (require.main === module) {
   switch (first) {
     case undefined:
     case "update":
-      run({ update: first !== undefined }).then(
-        () => {
+      run({ update: first !== undefined })
+        .then(() => {
           process.stdout.write("\nSuccess!\n");
           process.exit(0);
-        },
-        (error: Error) => {
+        })
+        .catch((error: Error) => {
           process.stderr.write(`\n${error.stack ?? error.message}\n`);
           process.exit(1);
-        }
-      );
+        });
       break;
     default:
       process.stderr.write(

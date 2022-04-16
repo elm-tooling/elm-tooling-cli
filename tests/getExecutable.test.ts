@@ -25,9 +25,9 @@ async function getExecutableHelper({
     onProgress: () => {
       throw new Error("Expected onProgress not to be called");
     },
-  }).then(clean, (error: Error) =>
-    Promise.reject(new Error(clean(error.message)))
-  );
+  })
+    .then(clean)
+    .catch((error: Error) => Promise.reject(new Error(clean(error.message))));
 }
 
 expect.addSnapshotSerializer(stringSnapshotSerializer);

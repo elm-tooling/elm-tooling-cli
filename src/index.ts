@@ -80,15 +80,14 @@ export default async function elmToolingCli(
 
 // istanbul ignore if
 if (require.main === module) {
-  elmToolingCli(process.argv.slice(2)).then(
-    (exitCode) => {
+  elmToolingCli(process.argv.slice(2))
+    .then((exitCode) => {
       process.exitCode = exitCode;
-    },
-    (error: Error) => {
+    })
+    .catch((error: Error) => {
       process.stderr.write(
         `Unexpected error:\n${error.stack ?? error.message}\n`
       );
       process.exitCode = 1;
-    }
-  );
+    });
 }

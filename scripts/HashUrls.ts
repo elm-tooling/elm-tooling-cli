@@ -79,14 +79,13 @@ if (require.main === module) {
     );
     process.exit(1);
   }
-  run(urls).then(
-    (json) => {
+  run(urls)
+    .then((json) => {
       process.stdout.write(`\n${json}\n`);
       process.exit(0);
-    },
-    (error: Error) => {
+    })
+    .catch((error: Error) => {
       process.stderr.write(`\n${error.stack ?? error.message}\n`);
       process.exit(1);
-    }
-  );
+    });
 }
