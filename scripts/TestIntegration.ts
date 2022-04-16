@@ -81,14 +81,13 @@ if (require.main === module) {
     process.stderr.write(`Expected 0 arguments but got ${argv.length}.\n`);
     process.exit(1);
   }
-  run().then(
-    () => {
+  run()
+    .then(() => {
       process.stdout.write("\nSuccess!\n");
       process.exit(0);
-    },
-    (error: Error) => {
+    })
+    .catch((error: Error) => {
       process.stderr.write(`\n${error.stack ?? error.message}\n`);
       process.exit(1);
-    }
-  );
+    });
 }

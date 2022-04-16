@@ -192,16 +192,15 @@ async function installTools(
       tools.missing.map((tool, index) =>
         downloadAndExtract(env, tool, (percentage) => {
           updateStatusLine(tool, percentage, index);
-        }).then(
-          () => {
+        })
+          .then(() => {
             updateStatusLine(tool, 1, index);
             return linkTool(cwd, nodeModulesBinPath, tool);
-          },
-          (error: Error) => {
+          })
+          .catch((error: Error) => {
             updateStatusLine(tool, "ERR!", index);
             return new Error(downloadAndExtractError(tool, error));
-          }
-        )
+          })
       )
     )),
 
