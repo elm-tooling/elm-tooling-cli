@@ -112,6 +112,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -152,6 +153,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -198,6 +200,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -238,7 +241,8 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.0.0⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
-        ⧙[⧘▊⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘▊⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -278,6 +282,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -329,6 +334,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -377,6 +383,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -430,6 +437,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -480,6 +488,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -521,6 +530,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -576,6 +586,7 @@ describe("tools", () => {
         ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
         ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
         ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+        ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
       ⧙Up⧘/⧙Down⧘ to move
       ⧙Space⧘ to toggle
@@ -675,6 +686,7 @@ describe("tools", () => {
           ⧙[⧘ ⧙]⧘ ⧙1.2.1⧘
           ⧙[⧘ ⧙]⧘ ⧙1.2.2⧘
           ⧙[⧘ ⧙]⧘ ⧙2.0.0⧘
+          ⧙[⧘ ⧙]⧘ ⧙2.0.1⧘
 
         ⧙Up⧘/⧙Down⧘ to move
         ⧙Space⧘ to toggle
