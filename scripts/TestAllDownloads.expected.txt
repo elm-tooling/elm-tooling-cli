@@ -80,9 +80,13 @@ TestAllDownloads/
       elm-format/
         0.8.5/
           elm-format
+      elm-test-rs/
+        2.0.1/
+          elm-test-rs
     elm-tooling.json
       {
         "tools": {
-          "elm-format": "0.8.5"
+          "elm-format": "0.8.5",
+          "elm-test-rs": "2.0.1"
         }
       }
