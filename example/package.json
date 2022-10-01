@@ -1,18 +1,16 @@
 {
   "private": true,
-  "name": "example-app",
   "scripts": {
     "postinstall": "elm-tooling install",
-    "build": "parcel build index.html",
-    "start": "parcel watch index.html"
+    "build": "vite build",
+    "start": "vite"
   },
   "devDependencies": {
-    "elm-hot": "1.1.6",
-    "elm-review": "2.7.1",
-    "elm-test": "0.19.1-revision7",
+    "elm-review": "2.7.5",
+    "elm-test": "0.19.1-revision9",
     "elm-tooling": "file:../build",
-    "node-elm-compiler": "5.0.6",
-    "parcel-bundler": "1.12.5",
-    "prettier": "2.6.2"
+    "prettier": "2.7.1",
+    "vite": "3.1.4",
+    "vite-plugin-elm": "2.7.2"
   }
 }

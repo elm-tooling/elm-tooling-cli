@@ -17,20 +17,20 @@ jobs:
         working-directory: example
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           # Choose your Node.js version here:
-          node-version: 15.x
+          node-version: 18.x
 
       # IGNORE START: This is just internal stuff specific for this repo.
       - name: Internal cache node_modules
         id: internal-cache-node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
-          key: internal-node_modules-ubuntu-latest-15.x-${{ hashFiles('package.json', 'package-lock.json') }}
+          key: internal-node_modules-ubuntu-latest-18.x-${{ hashFiles('package.json', 'package-lock.json') }}
       - name: Internal npm ci
         if: steps.internal-cache-node_modules.outputs.cache-hit != 'true'
         run: npm ci
@@ -43,7 +43,7 @@ jobs:
       # Re-use node_modules between runs until package.json or package-lock.json changes.
       - name: Cache node_modules
         id: cache-node_modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: example/node_modules
           key: node_modules-${{ hashFiles('example/package.json', 'example/package-lock.json') }}
@@ -52,7 +52,7 @@ jobs:
       # review/elm.json changes. The Elm compiler saves downloaded Elm packages
       # to ~/.elm, and elm-tooling saves downloaded tool executables there.
       - name: Cache ~/.elm
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.elm
           key: elm-${{ hashFiles('example/elm.json', 'example/elm-tooling.json', 'example/review/elm.json') }}
@@ -83,24 +83,24 @@ jobs:
       # install` runs very fast when there’s nothing new to download so
       # skipping the step doesn’t save much time.
       - name: elm-tooling install
-        run: npx --no-install elm-tooling install
+        run: npx elm-tooling install
 
       # Finally, run whatever you want. For example:
 
       - name: elm make
-        run: npx --no-install elm make src/Main.elm --output=/dev/null
+        run: npx elm make src/Main.elm --output=/dev/null
 
       - name: elm-test
-        run: npx --no-install elm-test
+        run: npx elm-test
 
       - name: elm-review
-        run: npx --no-install elm-review
+        run: npx elm-review
 
       - name: elm-format
-        run: npx --no-install elm-format --validate src tests
+        run: npx elm-format --validate .
 
       - name: prettier
-        run: npx --no-install prettier --check .
+        run: npx prettier --check .
 
       - name: build
         run: npm run build

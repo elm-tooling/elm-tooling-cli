@@ -176,7 +176,7 @@ function symlink(tool: Tool, linkPath: LinkPath): LinkResult {
     ) {
       return "AllGood";
     }
-  } catch (_error) {
+  } catch {
     // Continue below.
   }
 
@@ -243,7 +243,7 @@ function symlinkShimWindows(
     ) {
       return "AllGood";
     }
-  } catch (_error) {
+  } catch {
     // Continue below.
   }
 

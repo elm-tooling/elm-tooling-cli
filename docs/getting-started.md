@@ -43,7 +43,6 @@ Want more details? See below.
    ```json
    {
      "private": true,
-     "name": "my-app",
      "scripts": {
        "postinstall": "elm-tooling install"
      }
@@ -68,7 +67,6 @@ With the above steps, you might end up with changes like this:
 
 ```diff
  {
-   "name": "my-app",
    "devDependencies": {
 -    "elm": "0.19.1",
 -    "elm-format": "0.8.3"
@@ -100,7 +98,6 @@ With the above steps, you might end up with changes like this:
    ```json
    {
      "private": true,
-     "name": "my-app",
      "scripts": {
        "postinstall": "elm-tooling install"
      }

@@ -147,7 +147,7 @@ function tryGuessToolsFromNodeModules(
           env,
         });
         return [[tool.name, tool.version]];
-      } catch (_error) {
+      } catch {
         return [];
       }
     }
@@ -159,7 +159,7 @@ function tryGuessToolsFromNodeModules(
 function getElmVersionFromElmJson(cwd: Cwd): string | undefined {
   try {
     return getElmVersionFromElmJsonHelper(cwd);
-  } catch (_error) {
+  } catch {
     return undefined;
   }
 }
