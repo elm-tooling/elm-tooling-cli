@@ -90,3 +90,14 @@ TestAllDownloads/
           "elm-test-rs": "2.0.1"
         }
       }
+  5/
+    elm-tooling/
+      elm-test-rs/
+        3.0.0/
+          elm-test-rs
+    elm-tooling.json
+      {
+        "tools": {
+          "elm-test-rs": "3.0.0"
+        }
+      }
