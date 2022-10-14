@@ -50,6 +50,9 @@ TestAllDownloads/
       elm-format/
         0.8.3/
           elm-format
+      elm-json/
+        0.2.13/
+          elm-json
       elm-test-rs/
         1.2.2/
           elm-test-rs
@@ -57,6 +60,7 @@ TestAllDownloads/
       {
         "tools": {
           "elm-format": "0.8.3",
+          "elm-json": "0.2.13",
           "elm-test-rs": "1.2.2"
         }
       }

@@ -235,6 +235,29 @@ const knownTools = {
         type: "tgz",
       },
     },
+    "0.2.13": {
+      linux: {
+        hash: "83cbab79f6c237d3f96b69baf519bdd7634d0e0373a390594d37591c0295f965",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.13/elm-json-v0.2.13-x86_64-unknown-linux-musl.tar.gz",
+        fileSize: 2294914,
+        fileName: "elm-json",
+        type: "tgz",
+      },
+      mac: {
+        hash: "868d82cc5496ddc5e17303e85b198b29fe7a30c8ac8b22aa9607e23cc07a1884",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.13/elm-json-v0.2.13-x86_64-apple-darwin.tar.gz",
+        fileSize: 888281,
+        fileName: "elm-json",
+        type: "tgz",
+      },
+      windows: {
+        hash: "0494f0d813244bf43e3c6cad1d0428919e7e0a5430d21a4d8a65697af0c14527",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.13/elm-json-v0.2.13-x86_64-pc-windows-msvc.tar.gz",
+        fileSize: 1239097,
+        fileName: "elm-json.exe",
+        type: "tgz",
+      },
+    },
   },
   "elm-test-rs": {
     "1.0.0": {
