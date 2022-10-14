@@ -1,3 +1,7 @@
+### Version 1.10.0 (2022-10-14)
+
+- Added: elm-json 0.2.13.
+
 ### Version 1.9.0 (2022-10-11)
 
 - Added: elm-test-rs 3.0.0.
