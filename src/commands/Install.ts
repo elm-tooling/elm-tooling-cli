@@ -86,7 +86,11 @@ export async function install(
 
       const { tools } = parseResult;
 
-      if (tools.existing.length === 0 && tools.missing.length === 0) {
+      if (
+        tools.existing.length === 0 &&
+        tools.missing.length === 0 &&
+        tools.unsupported.length === 0
+      ) {
         return removeAllTools(
           cwd,
           env,
@@ -206,6 +210,8 @@ async function installTools(
 
     ...tools.existing.map((tool) => linkTool(cwd, nodeModulesBinPath, tool)),
 
+    ...removeTools(cwd, env, platform, nodeModulesBinPath, toolsToRemove),
+
     ...tools.unsupported.map(
       (tool) =>
         `${bold(
@@ -214,8 +220,6 @@ async function installTools(
           `Supported platforms: ${join(tool.supportedPlatforms, ", ")}`
         )}`
     ),
-
-    ...removeTools(cwd, env, platform, nodeModulesBinPath, toolsToRemove),
   ];
 
   return printResults(logger, results);
