@@ -46,7 +46,11 @@ async function run(urls: Array<string>): Promise<string> {
   );
 
   process.stderr.write("\r100%");
-  return JSON.stringify(fromEntries(assets), null, 2);
+  return JSON.stringify(
+    fromEntries(assets.sort(([a], [b]) => a.localeCompare(b))),
+    null,
+    2
+  );
 }
 
 function guessPlatform(url: string): string {
