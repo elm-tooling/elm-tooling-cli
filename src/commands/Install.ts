@@ -14,7 +14,6 @@ import {
   indent,
   isNonEmptyArray,
   join,
-  partitionMap,
   printNumErrors,
   removeColor,
   toError,
@@ -468,13 +467,15 @@ function spawn(
 // for _all_ spawns, so that we _always_ use Windows’ own `curl` instead of Git
 // Bash’s `curl`.
 function adjustPathForWindows(pathString: string): string {
-  const [system32, rest] = partitionMap(
-    pathString.split(path.delimiter),
-    (part) =>
-      part.toLowerCase().includes("system32")
-        ? { tag: "Left", value: part }
-        : { tag: "Right", value: part }
-  );
+  const system32 = [];
+  const rest = [];
+  for (const part of pathString.split(path.delimiter)) {
+    if (part.toLowerCase().includes("system32")) {
+      system32.push(part);
+    } else {
+      rest.push(part);
+    }
+  }
   return join([...system32, ...rest], path.delimiter);
 }
 

@@ -12,7 +12,6 @@ import {
   isRecord,
   join,
   NonEmptyArray,
-  partitionMap,
   printNumErrors,
   toError,
 } from "./Helpers";
@@ -257,65 +256,61 @@ function parseTools(
     ];
   }
 
-  const [errors, tools] = partitionMap<
-    [string, unknown],
-    ParseError,
-    UnsupportedTool | { exists: boolean; tool: Tool }
-  >(Object.entries(json), ([name, version]) => {
+  const errors: Array<ParseError> = [];
+
+  const tools: Tools = {
+    existing: [],
+    missing: [],
+    unsupported: [],
+  };
+
+  for (const [name, version] of Object.entries(json)) {
     if (typeof version !== "string") {
-      return {
-        tag: "Left",
-        value: {
-          tag: "WithPath",
-          path: ["tools", name],
-          message: `Expected a version as a string but got: ${JSON.stringify(
-            version
-          )}`,
-        },
-      };
+      errors.push({
+        tag: "WithPath",
+        path: ["tools", name],
+        message: `Expected a version as a string but got: ${JSON.stringify(
+          version
+        )}`,
+      });
+      continue;
     }
 
     const versions = getOwn(KNOWN_TOOLS, name);
 
     if (versions === undefined) {
-      return {
-        tag: "Left",
-        value: {
-          tag: "WithPath",
-          path: ["tools", name],
-          message: `Unknown tool\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`,
-        },
-      };
+      errors.push({
+        tag: "WithPath",
+        path: ["tools", name],
+        message: `Unknown tool\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`,
+      });
+      continue;
     }
 
     const platformAssets = getOwn(versions, version);
 
     if (platformAssets === undefined) {
-      return {
-        tag: "Left",
-        value: {
-          tag: "WithPath",
-          path: ["tools", name],
-          message: `Unknown version: ${version}\nKnown versions: ${join(
-            Object.keys(versions),
-            ", "
-          )}`,
-        },
-      };
+      errors.push({
+        tag: "WithPath",
+        path: ["tools", name],
+        message: `Unknown version: ${version}\nKnown versions: ${join(
+          Object.keys(versions),
+          ", "
+        )}`,
+      });
+      continue;
     }
 
     const asset = platformAssets[platform];
 
     // istanbul ignore if
     if (asset === undefined) {
-      return {
-        tag: "Right",
-        value: {
-          name,
-          version,
-          supportedPlatforms: Object.keys(platformAssets),
-        },
-      };
+      tools.unsupported.push({
+        name,
+        version,
+        supportedPlatforms: Object.keys(platformAssets),
+      });
+      continue;
     }
 
     const tool = makeTool(cwd, env, name, version, asset);
@@ -324,52 +319,24 @@ function parseTools(
 
     switch (exists.tag) {
       case "Exists":
-        return {
-          tag: "Right",
-          value: { exists: true, tool },
-        };
+        tools.existing.push(tool);
+        break;
 
       case "DoesNotExist":
-        return {
-          tag: "Right",
-          value: { exists: false, tool },
-        };
+        tools.missing.push(tool);
+        break;
 
       case "Error":
-        return {
-          tag: "Left",
-          value: {
-            tag: "WithPath",
-            path: ["tools", name],
-            message: exists.message,
-          },
-        };
+        errors.push({
+          tag: "WithPath",
+          path: ["tools", name],
+          message: exists.message,
+        });
+        break;
     }
-  });
-
-  if (isNonEmptyArray(errors)) {
-    return errors;
   }
 
-  const [supported, unsupported] = partitionMap<
-    UnsupportedTool | { exists: boolean; tool: Tool },
-    { exists: boolean; tool: Tool },
-    UnsupportedTool
-  >(tools, (entry) =>
-    "exists" in entry
-      ? { tag: "Left", value: entry }
-      : /* istanbul ignore next */ { tag: "Right", value: entry }
-  );
-
-  const [existing, missing] = partitionMap<
-    { exists: boolean; tool: Tool },
-    Tool,
-    Tool
-  >(supported, ({ exists, tool }) =>
-    exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
-  );
-
-  return { existing, missing, unsupported };
+  return isNonEmptyArray(errors) ? errors : tools;
 }
 
 export function makeTool(

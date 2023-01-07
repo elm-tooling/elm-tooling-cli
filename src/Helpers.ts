@@ -27,37 +27,6 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export type Either<Left, Right> =
-  | { tag: "Left"; value: Left }
-  | { tag: "Right"; value: Right };
-
-export function partitionMap<T, Left, Right>(
-  items: Array<T>,
-  f: (
-    item: T,
-    index: number,
-    leftSoFar: Array<Left>,
-    rightSoFar: Array<Right>
-  ) => Either<Left, Right>
-): [Array<Left>, Array<Right>] {
-  const left: Array<Left> = [];
-  const right: Array<Right> = [];
-
-  for (const [index, item] of items.entries()) {
-    const either = f(item, index, left, right);
-    switch (either.tag) {
-      case "Left":
-        left.push(either.value);
-        break;
-      case "Right":
-        right.push(either.value);
-        break;
-    }
-  }
-
-  return [left, right];
-}
-
 export const HIDE_CURSOR = "\x1B[?25l";
 export const SHOW_CURSOR = "\x1B[?25h";
 export const RESET_COLOR = "\x1B[0m";
