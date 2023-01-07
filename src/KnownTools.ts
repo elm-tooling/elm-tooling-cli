@@ -19,6 +19,14 @@ export type AssetType = "gz" | "tgz" | "zip";
 const knownTools = {
   elm: {
     "0.19.0": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "f1fa4dd9021e94c5a58b2be8843e3329095232ee3bd21a23524721a40eaabd35",
+        url: "https://github.com/elm/compiler/releases/download/0.19.0/binary-for-mac-64-bit.gz",
+        fileSize: 6051435,
+        fileName: "elm",
+        type: "gz",
+      },
       "darwin-x64": {
         hash: "f1fa4dd9021e94c5a58b2be8843e3329095232ee3bd21a23524721a40eaabd35",
         url: "https://github.com/elm/compiler/releases/download/0.19.0/binary-for-mac-64-bit.gz",
@@ -42,10 +50,24 @@ const knownTools = {
       },
     },
     "0.19.1": {
+      "darwin-arm64": {
+        hash: "c7d5322e39c938f5ba35c8a09c9f85387100d495bd0bd5011fc63c6c550b00d8",
+        url: "https://github.com/lydell/compiler/releases/download/0.19.1/binary-for-mac-arm-64-bit.gz",
+        fileSize: 14054287,
+        fileName: "elm",
+        type: "gz",
+      },
       "darwin-x64": {
         hash: "05289f0e3d4f30033487c05e689964c3bb17c0c48012510dbef1df43868545d1",
         url: "https://github.com/elm/compiler/releases/download/0.19.1/binary-for-mac-64-bit.gz",
         fileSize: 6034616,
+        fileName: "elm",
+        type: "gz",
+      },
+      "linux-arm64": {
+        hash: "a9123b40db040fc431ec8c2d275fa04ce260bc8d5eab5050ff5869477253605d",
+        url: "https://github.com/lydell/compiler/releases/download/0.19.1/binary-for-linux-arm-64-bit.gz",
+        fileSize: 4997442,
         fileName: "elm",
         type: "gz",
       },
@@ -67,6 +89,14 @@ const knownTools = {
   },
   "elm-format": {
     "0.8.1": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "e1beba5d3090968cbbd879384617506f4c71a3ea3b01ce94d298e4893e82a640",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.1/elm-format-0.8.1-mac-x64.tgz",
+        fileSize: 1325147,
+        fileName: "elm-format",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "e1beba5d3090968cbbd879384617506f4c71a3ea3b01ce94d298e4893e82a640",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.1/elm-format-0.8.1-mac-x64.tgz",
@@ -90,6 +120,14 @@ const knownTools = {
       },
     },
     "0.8.2": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "1f6cc8663922e546645c0536fc9bf7a49351d0b2963d26fc8fcb43e5bc92d733",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.2/elm-format-0.8.2-mac-x64.tgz",
+        fileSize: 1298447,
+        fileName: "elm-format",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "1f6cc8663922e546645c0536fc9bf7a49351d0b2963d26fc8fcb43e5bc92d733",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.2/elm-format-0.8.2-mac-x64.tgz",
@@ -113,6 +151,14 @@ const knownTools = {
       },
     },
     "0.8.3": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "66c9d4c2fcc7e435726f25ca44509cdf2caff5000dd215b5a086db514576efc7",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.3/elm-format-0.8.3-mac-x64.tgz",
+        fileSize: 1308986,
+        fileName: "elm-format",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "66c9d4c2fcc7e435726f25ca44509cdf2caff5000dd215b5a086db514576efc7",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.3/elm-format-0.8.3-mac-x64.tgz",
@@ -136,6 +182,14 @@ const knownTools = {
       },
     },
     "0.8.4": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "df2a85da6870e8c8f7b052c9b81279fd9cbbab2bc738c2e14adf95ef777edd21",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.4/elm-format-0.8.4-mac-x64.tgz",
+        fileSize: 1283871,
+        fileName: "elm-format",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "df2a85da6870e8c8f7b052c9b81279fd9cbbab2bc738c2e14adf95ef777edd21",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.4/elm-format-0.8.4-mac-x64.tgz",
@@ -159,6 +213,14 @@ const knownTools = {
       },
     },
     "0.8.5": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "380c5f36b1fdeb2f1cda7c208dc788cb676675b3d5d43d907efc3f0821c010d6",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.5/elm-format-0.8.5-mac-x64.tgz",
+        fileSize: 1334367,
+        fileName: "elm-format",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "380c5f36b1fdeb2f1cda7c208dc788cb676675b3d5d43d907efc3f0821c010d6",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.5/elm-format-0.8.5-mac-x64.tgz",
@@ -184,10 +246,25 @@ const knownTools = {
   },
   "elm-json": {
     "0.2.8": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "1ca3cde58730e87f2b73afb2432d5d8c88787ee3745bc81769ec0eef962ceaf6",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.8/elm-json-v0.2.8-x86_64-apple-darwin.tar.gz",
+        fileSize: 838159,
+        fileName: "elm-json",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "1ca3cde58730e87f2b73afb2432d5d8c88787ee3745bc81769ec0eef962ceaf6",
         url: "https://github.com/zwilias/elm-json/releases/download/v0.2.8/elm-json-v0.2.8-x86_64-apple-darwin.tar.gz",
         fileSize: 838159,
+        fileName: "elm-json",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "973405b81577889db391b7718d7bf7358e46be5cbecd4a7e72214f6388d2468e",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.8/elm-json-v0.2.8-armv7-unknown-linux-musleabihf.tar.gz",
+        fileSize: 2086957,
         fileName: "elm-json",
         type: "tgz",
       },
@@ -207,10 +284,25 @@ const knownTools = {
       },
     },
     "0.2.10": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "fcd39c7c014d95df033499d8a39720b38c9f93d0e3b7ecb821cfe3dbfd1affc1",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.10/elm-json-v0.2.10-x86_64-apple-darwin.tar.gz",
+        fileSize: 899328,
+        fileName: "elm-json",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "fcd39c7c014d95df033499d8a39720b38c9f93d0e3b7ecb821cfe3dbfd1affc1",
         url: "https://github.com/zwilias/elm-json/releases/download/v0.2.10/elm-json-v0.2.10-x86_64-apple-darwin.tar.gz",
         fileSize: 899328,
+        fileName: "elm-json",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "4075fb5a486760d87615d5d78c1a4022669f673eb306dd9ff467ca3129ae6bec",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.10/elm-json-v0.2.10-armv7-unknown-linux-musleabihf.tar.gz",
+        fileSize: 2168765,
         fileName: "elm-json",
         type: "tgz",
       },
@@ -230,10 +322,24 @@ const knownTools = {
       },
     },
     "0.2.13": {
+      "darwin-arm64": {
+        hash: "4d917f21e40badc6d8f0f61e4cc0690e56b62c8c4280f379ead8da8e18de1760",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.13/elm-json-v0.2.13-aarch64-apple-darwin.tar.gz",
+        fileSize: 841664,
+        fileName: "elm-json",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "868d82cc5496ddc5e17303e85b198b29fe7a30c8ac8b22aa9607e23cc07a1884",
         url: "https://github.com/zwilias/elm-json/releases/download/v0.2.13/elm-json-v0.2.13-x86_64-apple-darwin.tar.gz",
         fileSize: 888281,
+        fileName: "elm-json",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "acc093b8a5037f141c7870ec6d8bb1140b37031ccf4e99cea0280864d7f4831e",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.13/elm-json-v0.2.13-armv7-unknown-linux-musleabihf.tar.gz",
+        fileSize: 1978987,
         fileName: "elm-json",
         type: "tgz",
       },
@@ -255,6 +361,14 @@ const knownTools = {
   },
   "elm-test-rs": {
     "1.0.0": {
+      // Rosetta.
+      "darwin-arm64": {
+        hash: "5f296888b7ba32c47830f00f6d38c56fc86f49d8c0c8998054b0842009a1173f",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_macos.tar.gz",
+        fileSize: 2230430,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "5f296888b7ba32c47830f00f6d38c56fc86f49d8c0c8998054b0842009a1173f",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_macos.tar.gz",
@@ -278,10 +392,31 @@ const knownTools = {
       },
     },
     "1.2.1": {
+      "darwin-arm64": {
+        hash: "605dbe1976cd345a9a5cc3c77620cc268fef2a8ef701c5ac49157c4ac2c592eb",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.1/elm-test-rs_macos-arm.tar.gz",
+        fileSize: 2098339,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "890c45a7eda24fd13169d349af9c835ee3ed04974eec36953baba5aefc3628a8",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.1/elm-test-rs_macos.tar.gz",
         fileSize: 2221267,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm": {
+        hash: "cc5a24f955a2e8f368374f725db25f3383ea6a008248117efd3393d5de915c5a",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.1/elm-test-rs_linux-arm-32.tar.gz",
+        fileSize: 3490881,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "f2a476c075122321e627cb1603b23f76521810255182d2b18c035c96de718020",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.1/elm-test-rs_linux-arm-64.tar.gz",
+        fileSize: 3298234,
         fileName: "elm-test-rs",
         type: "tgz",
       },
@@ -301,10 +436,31 @@ const knownTools = {
       },
     },
     "1.2.2": {
+      "darwin-arm64": {
+        hash: "72df0a762a5b3da3f647992abde067d6c6764d408501a19ab8a7b4ee7698cfda",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.2/elm-test-rs_macos-arm.tar.gz",
+        fileSize: 2098589,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "d3dc5f84a2b3c31a4a14a9da609c2f2e6824102d30249f883a97ea26c4eb9c35",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.2/elm-test-rs_macos.tar.gz",
         fileSize: 2227354,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm": {
+        hash: "57e6b6e2714dfd954914f095e74dc0f4d42e4f986c4771713841b055552c4a93",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.2/elm-test-rs_linux-arm-32.tar.gz",
+        fileSize: 3494810,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "f51562da44d1aff85eaa108a5c3de9fd6c5e66b9c5cd2f120367b940c258ed30",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.2/elm-test-rs_linux-arm-64.tar.gz",
+        fileSize: 3295097,
         fileName: "elm-test-rs",
         type: "tgz",
       },
@@ -324,10 +480,31 @@ const knownTools = {
       },
     },
     "2.0.0": {
+      "darwin-arm64": {
+        hash: "04f7f0c338b6084f6208070edc548f8f012eb87462b714064236422522165714",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0/elm-test-rs_macos-arm.tar.gz",
+        fileSize: 2089766,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "b8a5c487d7fc60c3bbb40bf8616b4da726ce0ad867ea6295a07a4726f9fe105a",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0/elm-test-rs_macos.tar.gz",
         fileSize: 2233532,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm": {
+        hash: "80687724f9f3901ba21b14e3abda8d80f6d0e7c444576b242cefa449a0e1f640",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0/elm-test-rs_linux-arm-32.tar.gz",
+        fileSize: 3478726,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "06d2885fc37aad084b3d8a8fca3032909b9a8a7716569587f207ba90590668cf",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0/elm-test-rs_linux-arm-64.tar.gz",
+        fileSize: 3363670,
         fileName: "elm-test-rs",
         type: "tgz",
       },
@@ -347,10 +524,31 @@ const knownTools = {
       },
     },
     "2.0.1": {
+      "darwin-arm64": {
+        hash: "9c3b87d118f8829924c80c00887cc8f4ce21dd1d94fd63a0a3deb9221f031af5",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0.1/elm-test-rs_macos-arm.tar.gz",
+        fileSize: 2109877,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "fc377b78dfe748417d0aea8619f77e255fd62e980cce387582496c8e0d10d24e",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0.1/elm-test-rs_macos.tar.gz",
         fileSize: 2211725,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm": {
+        hash: "1c9f3701960d27179fa0a2ecd7eb9ec856e1f300c2c3c3d23814a83e2497d2c3",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0.1/elm-test-rs_linux-arm-32.tar.gz",
+        fileSize: 3466376,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "77defc11264bd5392dbdfe0169f812a8ea085b112ae7011b9fd39c3f7e255bda",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0.1/elm-test-rs_linux-arm-64.tar.gz",
+        fileSize: 3408581,
         fileName: "elm-test-rs",
         type: "tgz",
       },
@@ -370,10 +568,31 @@ const knownTools = {
       },
     },
     "3.0.0": {
+      "darwin-arm64": {
+        hash: "8701bf104b315446d64ae4d1689aa6a3bad1a85e1b31a9c9907ac911837b5fd1",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.0/elm-test-rs_macos-arm.tar.gz",
+        fileSize: 2179607,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
       "darwin-x64": {
         hash: "41e2be1d77fb587ac1336f4b8822feb3b914eff7364715f6cac0bc4a90c0948a",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.0/elm-test-rs_macos.tar.gz",
         fileSize: 2271033,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm": {
+        hash: "9dd57a2ff2d869b2aec976841f37e5840b8085dd967294246b9adea2c7e658d5",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.0/elm-test-rs_linux-arm-32.tar.gz",
+        fileSize: 3584214,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "bf468f39f9a9700f7ca0ed29719f9c9051e4b3796976ae0752a5186fdb8f0449",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.0/elm-test-rs_linux-arm-64.tar.gz",
+        fileSize: 3523530,
         fileName: "elm-test-rs",
         type: "tgz",
       },
