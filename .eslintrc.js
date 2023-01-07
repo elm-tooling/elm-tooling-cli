@@ -150,6 +150,7 @@ module.exports = {
         "@typescript-eslint/no-unsafe-argument": error,
         "@typescript-eslint/no-unsafe-assignment": error,
         "@typescript-eslint/no-unsafe-call": error,
+        "@typescript-eslint/no-unsafe-declaration-merging": error,
         "@typescript-eslint/no-unsafe-member-access": error,
         "@typescript-eslint/no-unsafe-return": error,
         "@typescript-eslint/no-unused-expressions": error,
@@ -176,6 +177,7 @@ module.exports = {
         "@typescript-eslint/restrict-plus-operands": error,
         "@typescript-eslint/restrict-template-expressions": error,
         "@typescript-eslint/return-await": error,
+        "@typescript-eslint/sort-type-constituents": warn,
         "@typescript-eslint/sort-type-union-intersection-members": warn,
         "@typescript-eslint/strict-boolean-expressions": [
           error,
