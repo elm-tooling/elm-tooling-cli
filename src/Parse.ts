@@ -299,6 +299,7 @@ function parseTools(
 
     const asset = platformAssets[platform];
 
+    // istanbul ignore if
     if (asset === undefined) {
       return {
         tag: "Left",
@@ -465,6 +466,7 @@ export function getToolThrowing({
   const platformAssets = versions[matchingVersion] as PlatformAssets;
   const asset = platformAssets[platform];
 
+  // istanbul ignore if
   if (asset === undefined) {
     throw new Error(
       `${name} ${matchingVersion} does not support your platform ${platform}\nSupported platforms: ${join(
