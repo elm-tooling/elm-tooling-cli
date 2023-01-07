@@ -20,8 +20,7 @@ import {
   Asset,
   KNOWN_TOOL_NAMES,
   KNOWN_TOOLS,
-  OSAssets,
-  OSName,
+  PlatformAssets,
 } from "./KnownTools";
 import {
   absoluteDirname,
@@ -60,7 +59,7 @@ export type ParseResult =
       // Preserved for legacy reasons:
       originalObject: Record<string, unknown>;
       tools?: Tools;
-      osName: OSName;
+      platform: string;
     }
   | {
       tag: "ReadAsJsonObjectError";
@@ -74,7 +73,7 @@ export type ParseError =
       message: string;
     }
   | {
-      tag: "UnkownField";
+      tag: "UnknownField";
       field: string;
     }
   | {
@@ -147,27 +146,13 @@ export function findReadAndParseElmToolingJson(
     };
   }
 
-  const osName = getOSName();
-
-  // istanbul ignore if
-  if (osName instanceof Error) {
-    return {
-      tag: "ReadAsJsonObjectError",
-      elmToolingJsonPath,
-      errors: [
-        {
-          tag: "Message",
-          message: osName.message,
-        },
-      ],
-    };
-  }
+  const platform = getPlatform();
 
   const result: ParseResult = {
     tag: "Parsed",
     elmToolingJsonPath,
     originalObject: json,
-    osName,
+    platform,
   };
 
   const errors: Array<ParseError> = [];
@@ -179,7 +164,7 @@ export function findReadAndParseElmToolingJson(
         break;
 
       case "tools": {
-        const toolsResult = parseTools(cwd, env, osName, value);
+        const toolsResult = parseTools(cwd, env, platform, value);
         if (Array.isArray(toolsResult)) {
           errors.push(...toolsResult);
         } else {
@@ -189,7 +174,7 @@ export function findReadAndParseElmToolingJson(
       }
 
       default:
-        errors.push({ tag: "UnkownField", field });
+        errors.push({ tag: "UnknownField", field });
         break;
     }
   }
@@ -205,20 +190,8 @@ export function findReadAndParseElmToolingJson(
   return result;
 }
 
-export function getOSName(): Error | OSName {
-  // istanbul ignore next
-  switch (os.platform()) {
-    case "linux":
-      return "linux";
-    case "darwin":
-      return "mac";
-    case "win32":
-      return "windows";
-    default:
-      return new Error(
-        `Sorry, your platform (${os.platform()}) is not supported yet :(`
-      );
-  }
+function getPlatform(): string {
+  return `${os.platform()}-${os.arch()}`;
 }
 
 export type FileExists =
@@ -264,7 +237,7 @@ export function validateFileExists(fullPath: AbsolutePath): FileExists {
 function parseTools(
   cwd: Cwd,
   env: Env,
-  osName: OSName,
+  platform: string,
   json: unknown
 ): NonEmptyArray<ParseError> | Tools {
   if (!isRecord(json)) {
@@ -308,9 +281,9 @@ function parseTools(
       };
     }
 
-    const osAssets = getOwn(versions, version);
+    const platformAssets = getOwn(versions, version);
 
-    if (osAssets === undefined) {
+    if (platformAssets === undefined) {
       return {
         tag: "Left",
         value: {
@@ -324,7 +297,21 @@ function parseTools(
       };
     }
 
-    const asset = osAssets[osName];
+    const asset = platformAssets[platform];
+
+    if (asset === undefined) {
+      return {
+        tag: "Left",
+        value: {
+          tag: "WithPath",
+          path: ["tools", name],
+          message: `${name} ${version} does not support your platform ${platform}\nSupported platforms: ${join(
+            Object.keys(platformAssets),
+            ", "
+          )}`,
+        },
+      };
+    }
 
     const tool = makeTool(cwd, env, name, version, asset);
 
@@ -401,7 +388,7 @@ export function printParseErrors(errors: NonEmptyArray<ParseError>): string {
             case "Message":
               return error.message;
 
-            case "UnkownField":
+            case "UnknownField":
               return `${bold(error.field)}\n${indent("Unknown field")}`;
 
             case "WithPath":
@@ -449,12 +436,7 @@ export function getToolThrowing({
   cwd: Cwd;
   env: Env;
 }): Tool {
-  const osName = getOSName();
-
-  // istanbul ignore if
-  if (osName instanceof Error) {
-    throw osName;
-  }
+  const platform = getPlatform();
 
   const versions = getOwn(KNOWN_TOOLS, name);
 
@@ -480,7 +462,17 @@ export function getToolThrowing({
 
   // `matchingVersion` is derived from `Object.keys` above, so it’s safe to use
   // as index.
-  const asset = (versions[matchingVersion] as OSAssets)[osName];
+  const platformAssets = versions[matchingVersion] as PlatformAssets;
+  const asset = platformAssets[platform];
+
+  if (asset === undefined) {
+    throw new Error(
+      `${name} ${matchingVersion} does not support your platform ${platform}\nSupported platforms: ${join(
+        Object.keys(platformAssets),
+        ", "
+      )}`
+    );
+  }
 
   return makeTool(cwd, env, name, matchingVersion, asset);
 }

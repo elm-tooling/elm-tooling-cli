@@ -15,7 +15,7 @@ import {
 } from "../Helpers";
 import { getLastVersion, KNOWN_TOOLS, KnownToolNames } from "../KnownTools";
 import type { Logger } from "../Logger";
-import { getLatestVersionInRange, getOSName, getToolThrowing } from "../Parse";
+import { getLatestVersionInRange, getToolThrowing } from "../Parse";
 import {
   absolutePathFromString,
   Cwd,
@@ -36,14 +36,6 @@ export function init(cwd: Cwd, env: Env, logger: Logger): number {
     tag: "ElmToolingJsonPath",
     theElmToolingJsonPath: absolutePathFromString(cwd.path, "elm-tooling.json"),
   };
-
-  const osName = getOSName();
-
-  // istanbul ignore if
-  if (osName instanceof Error) {
-    logger.error(osName.message);
-    return 1;
-  }
 
   if (fs.existsSync(elmToolingJsonPath.theElmToolingJsonPath.absolutePath)) {
     logger.error(bold(elmToolingJsonPath.theElmToolingJsonPath.absolutePath));
