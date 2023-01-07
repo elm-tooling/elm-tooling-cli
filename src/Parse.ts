@@ -85,6 +85,7 @@ export type ParseError =
 export type Tools = {
   existing: Array<Tool>;
   missing: Array<Tool>;
+  unsupported: Array<UnsupportedTool>;
 };
 
 export type Tool = {
@@ -92,6 +93,12 @@ export type Tool = {
   version: string;
   location: ToolPath;
   asset: Asset;
+};
+
+export type UnsupportedTool = {
+  name: string;
+  version: string;
+  supportedPlatforms: Array<string>;
 };
 
 export function findReadAndParseElmToolingJson(
@@ -253,7 +260,7 @@ function parseTools(
   const [errors, tools] = partitionMap<
     [string, unknown],
     ParseError,
-    { exists: boolean; tool: Tool }
+    UnsupportedTool | { exists: boolean; tool: Tool }
   >(Object.entries(json), ([name, version]) => {
     if (typeof version !== "string") {
       return {
@@ -302,14 +309,11 @@ function parseTools(
     // istanbul ignore if
     if (asset === undefined) {
       return {
-        tag: "Left",
+        tag: "Right",
         value: {
-          tag: "WithPath",
-          path: ["tools", name],
-          message: `${name} ${version} does not support your platform ${platform}\nSupported platforms: ${join(
-            Object.keys(platformAssets),
-            ", "
-          )}`,
+          name,
+          version,
+          supportedPlatforms: Object.keys(platformAssets),
         },
       };
     }
@@ -347,15 +351,25 @@ function parseTools(
     return errors;
   }
 
+  const [supported, unsupported] = partitionMap<
+    UnsupportedTool | { exists: boolean; tool: Tool },
+    { exists: boolean; tool: Tool },
+    UnsupportedTool
+  >(tools, (entry) =>
+    "exists" in entry
+      ? { tag: "Left", value: entry }
+      : /* istanbul ignore next */ { tag: "Right", value: entry }
+  );
+
   const [existing, missing] = partitionMap<
     { exists: boolean; tool: Tool },
     Tool,
     Tool
-  >(tools, ({ exists, tool }) =>
+  >(supported, ({ exists, tool }) =>
     exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
   );
 
-  return { existing, missing };
+  return { existing, missing, unsupported };
 }
 
 export function makeTool(
@@ -469,7 +483,7 @@ export function getToolThrowing({
   // istanbul ignore if
   if (asset === undefined) {
     throw new Error(
-      `${name} ${matchingVersion} does not support your platform ${platform}\nSupported platforms: ${join(
+      `${name} ${matchingVersion} does not support your platform, ${platform}\nSupported platforms: ${join(
         Object.keys(platformAssets),
         ", "
       )}`

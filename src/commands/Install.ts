@@ -179,9 +179,11 @@ async function installTools(
     updateStatusLine(tool, 0, index);
   }
 
-  const presentNames = tools.missing
-    .concat(tools.existing)
-    .map(({ name }) => name);
+  const presentNames = [
+    ...tools.missing,
+    ...tools.existing,
+    ...tools.unsupported,
+  ].map(({ name }) => name);
   const toolsToRemove = KNOWN_TOOL_NAMES.filter(
     (name) => !presentNames.includes(name)
   );
@@ -204,6 +206,15 @@ async function installTools(
     )),
 
     ...tools.existing.map((tool) => linkTool(cwd, nodeModulesBinPath, tool)),
+
+    ...tools.unsupported.map(
+      (tool) =>
+        `${bold(
+          `${tool.name} ${tool.version}`
+        )}: Skipped because not supported on your platform, ${platform}\n${indent(
+          `Supported platforms: ${join(tool.supportedPlatforms, ", ")}`
+        )}`
+    ),
 
     ...removeTools(cwd, env, platform, nodeModulesBinPath, toolsToRemove),
   ];

@@ -23,11 +23,7 @@ import {
   KnownToolNames,
 } from "../KnownTools";
 import type { Logger } from "../Logger";
-import {
-  findReadAndParseElmToolingJson,
-  printParseErrors,
-  Tool,
-} from "../Parse";
+import { findReadAndParseElmToolingJson, printParseErrors } from "../Parse";
 import type { Cwd, ElmToolingJsonPath } from "../PathHelpers";
 
 export async function toolsCommand(
@@ -66,12 +62,14 @@ export async function toolsCommand(
         );
       };
 
-      const allTools =
+      const allTools: Array<ToolChoice> =
         parseResult.tools === undefined
           ? []
-          : sortTools(
-              parseResult.tools.existing.concat(parseResult.tools.missing)
-            );
+          : sortTools([
+              ...parseResult.tools.existing,
+              ...parseResult.tools.missing,
+              ...parseResult.tools.unsupported,
+            ]);
 
       logger.log(
         bold(parseResult.elmToolingJsonPath.theElmToolingJsonPath.absolutePath)
@@ -95,7 +93,7 @@ async function start(
   logger: Logger,
   stdin: ReadStream,
   stdout: WriteStream,
-  tools: Array<Tool>,
+  tools: Array<ToolChoice>,
   save: (tools: Array<ToolChoice>) => void
 ): Promise<number> {
   return new Promise<number>((resolve) => {
