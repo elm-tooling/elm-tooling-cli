@@ -13,45 +13,69 @@ nav_order: 3
 
 <!-- prettier-ignore-end -->
 
-## Why install Elm tools using `elm-tooling` instead of `npm`?
+## Comparison with the `elm` and `@lydell/elm` npm packages
 
-Installing `elm`, `elm-format` and `elm-json` using `npm` (version 7) and `elm-tooling`:
+> 👉 [Pull request for switching to the `@lydell/elm` approach officially](https://github.com/elm/compiler/pull/2287)
 
-| Metric                | npm    | elm-tooling |
-| --------------------- | ------ | ----------- |
-| Number of packages    | 65     | 1           |
-| `node_modules/` size  | 40 MiB | 116 KiB     |
-| Installation time     | 8 s    | 2.5 s       |
-| Re-installation time  | 1.6 s  | 1.5 s       |
-| Download verification | None   | SHA256      |
+| Metric | `elm` npm package | [@lydell/elm](https://github.com/lydell/compiler/tree/zero-deps-arm-lydell/installers/npm) npm package | `elm-tooling` |
+| --- | --- | --- | --- |
+| Number of packages | 48 | 2 | 1 |
+| extra npm package metadata requests | 47 (one for every dependency) | 7 (one for every supported platform) | 0 (no dependencies) |
+| npm deprecation warnings | 3 | 0 | 0 |
+| `node_modules/` size, not counting binaries | 5.2 MiB | 32 KiB | 124 KiB |
+| Installation time | 3 s | 3 s | 2 s |
+| Re-installation time | 0.5 s | 0.5 s | 0.3 s |
+| Download verification | None | SHA512 | SHA256 |
+| Supports macOS ARM | Via Rosetta | Yes | Yes |
+| Supports Linux ARM | No | Yes | Yes |
+| Binary location, npm | Every `node_modules/` | Every `node_modules/` | Once in `~/.elm/elm-tooling/` |
+| Binary location, [pnpm](https://pnpm.io/) | Once in a shared location | Once in a shared location | Once in `~/.elm/elm-tooling/` |
+
+In other words:
+
+- Compared to the official `elm` npm package, `elm-tooling` offers:
+  - No third party dependencies.
+  - No deprecation warnings.
+  - Security (SHA256 verification).
+  - More binaries.
+  - No duplication of the binary in every project.
+- Compared to the unofficial `@lydell/elm` npm package, `elm-tooling` offers:
+  - Faster installation in theory, but in practice no difference.
+  - No duplication of the binary in every project. But that’s up to which package manager you use. [pnpm](https://pnpm.io/) gives the same effect.
+  - Faster execution on Windows. npm packages _have_ to use a Node.js wrapper around binaries on Windows, which adds ~100 ms startup time. `elm-tooling` uses a `.cmd` file which executes instantly.
+  - Faster execution when using [Yarn 2+ (Berry)](https://yarnpkg.com/). Yarn 2+ _requires_ a Node.js wrapper around binaries, which adds ~100 ms startup time. `elm-tooling` uses a symlink or `.cmd` file which executes instantly.
+  - So in summary: Not much. `elm-tooling` even has a potential downside: There are mirrors for npmjs.com, while `elm-tooling` always downloads from github.com.
 
 Comments:
 
-- Number of packages: Why are 65 npm packages installed just to get `elm`, `elm-format` and `elm-json` onto my computer?
+- Number of packages: Why are 48 npm packages installed just to get `elm`, `elm-format` and `elm-json` onto my computer?
 
-- `node_modules/` size: How can `elm-tooling` be so much smaller?
+- `node_modules/` size: How can `elm-tooling` be so much smaller? Some of the 48 npm packages are pretty heavy. `elm-tooling` has no dependencies, and instead uses the `curl` (or `wget`) and `tar` that come with basically all operating systems (even Windows!) out of the box. `@lydell/elm` wins, though, since it lets `npm` handle downloading and unpacking.
 
-  - Some of the 65 npm packages are pretty heavy. `elm-tooling` has no dependencies, and instead uses the `curl` (or `wget`) and `tar` that come with basically all operating systems (even Windows!) out of the box.
-  - `elm-tooling` puts the executables in a central location (`~/.elm/elm-tooling`) instead of in the local `node_modules/` folder.
+- Installation time: This of course depends on your Internet speed, and also on npm cache. `npm` used to be much slower, but has stepped up their game.
 
-  (Measured on macOS; executables vary slightly in size between macOS, Linux and Windows (also disk block size).)
+- Re-installation time: Note that re-installation time for `elm-tooling` includes re-installing `elm-tooling` itself with `npm`. That’s where most time is spent, while `elm-tooling install` is basically a no-op when the executables already exist in `~/.elm/elm-tooling`.
 
-- Installation and re-installation time: This of course depends on your Internet speed, and also on npm cache. `npm` used to be much slower, but has stepped up their game. Either way, with `elm-tooling` you get the other benefits mentioned here (fewer dependencies and improved security) besides good performance. (Note that re-installation time for `elm-tooling` includes re-installing `elm-tooling` itself with `npm`. That’s where most time is spent, while `elm-tooling install` is basically a no-op when the executables already exist in `~/.elm/elm-tooling`.)
+- Download verification: `elm-tooling` ships with SHA256 hashes for all tools it knows about and verifies that download files match. `elm-tooling` itself is hashed in your `package-lock.json` (which you commit). The `elm` npm package on the other hand downloads stuff without verifying what it got. With the `@lydell/elm` package, the hashes in `package-lock.json` provides the same security as `elm-tooling`.
 
-- Download verification: Security. `elm-tooling` ships with SHA256 hashes for all tools it knows about and verifies that download files match. `elm-tooling` itself is hashed in your `package-lock.json` (which you commit). The `elm`, `elm-format` and `elm-json` npm packages on the other hand download stuff without verifying what they got.
+- The `elm` npm package is essentially a hack – it does not contain Elm at all. It just contains some code that _downloads_ Elm using a postinstall script (or at the first run).
 
-Finally, the `elm`, `elm-format` and `elm-json` npm packages are essentially hacks. The `elm` npm package for instance does not contain Elm at all. It just contains some code that _downloads_ Elm using a postinstall script (or at the first run).
+## Comparison with the `elm-format`, `elm-json` and `elm-test-rs` npm packages
 
-## When should I use `elm-tooling` to install tools?
+- elm-format: Similar to `elm`, but more dependencies (65, 6.4 MiB). 👉 [Pull request for switching to the `@lydell/elm` approach](https://github.com/avh4/elm-format/pull/781)
+- elm-json: Same as `elm-format`. 👉 [Pull request for switching to the `@lydell/elm` approach](https://github.com/zwilias/elm-json/pull/51)
+- elm-test-rs: Already uses the `@lydell/elm` approach! 🎉
+
+## Why should I use `elm-tooling` to install tools?
 
 In short: For the same reasons you’d install tools using `npm`.
 
-If you’re just starting out, don’t forget to check out the official documentation as well:
+If you’re just getting started, install Elm whatever way you think is the easiest so you can get started coding. Installing Elm globally using the official installer can be a great way. But if you’re already familiar with installing stuff with `npm` it might be just as easy to start with `elm-tooling`. It doesn’t really matter. You can always change the installation method later.
+
+Don’t forget to check out the official documentation as well:
 
 - [Guide: Install](https://guide.elm-lang.org/install/elm.html)
 - [npm installer](https://github.com/elm/compiler/tree/master/installers/npm)
-
-If you’re just getting started, install Elm whatever way you think is the easiest so you can get started coding. Installing Elm globally using the installer can be a great way. But if you’re already familiar with installing stuff with `npm` it might be just as easy to start with `elm-tooling`. It doesn’t really matter. You can always change the installation method later.
 
 ### For Elm applications
 
@@ -132,15 +156,9 @@ The algorithm is roughly:
 
    3. Create a link in `./node_modules/.bin/`. (The `node_modules/` folder is always located next to your `elm-tooling.json`.)
 
-## Who uses `elm-tooling`?
-
-[elm-test](https://github.com/rtfeldman/node-test-runner) and [elm-review](https://github.com/jfmengels/node-elm-review) both use `elm-tooling` to install [elm-json](https://github.com/zwilias/elm-json).
-
-The [elm-pages-starter](https://github.com/dillonkearns/elm-pages-starter) template uses `elm-tooling.json` and `elm-tooling` to install `elm` and `elm-format`.
-
 ## Is `elm-tooling` stable?
 
-Yes! It’s tested on macOS, Linux and Windows, and has great test coverage. It’s written in strict TypeScript, and focuses on handling errors at all points. There are no planned features, other than adding support for new tools and versions as they come, and adding validation for new fields in `elm-tooling.json` as they are invented.
+Yes! It’s tested on macOS, Linux and Windows, and has great test coverage. It’s written in strict TypeScript, and focuses on handling errors at all points.
 
 ## Can I install the tools globally?
 
@@ -148,7 +166,7 @@ There’s no global `elm-tooling.json`. Only local, per-project ones.
 
 As long as you define the needed tools in every project, you don’t really need global installations. Use `npx elm` and `npx elm-format` etc. A benefit of _not_ having global installations is that you can never run the global version instead of the project version by mistake.
 
-If you want a global `elm` command you could try the [official installer](https://guide.elm-lang.org/install/elm.html).
+If you want a global `elm` command you could try the [official installer](https://guide.elm-lang.org/install/elm.html), the [unofficial npm package](https://github.com/lydell/compiler/tree/zero-deps-arm-lydell/installers/npm) or [brew](https://formulae.brew.sh/formula/elm#default).
 
 On macOS and Linux, you could alternatively add symlinks in your `$PATH`. For example, on macOS:
 
@@ -208,7 +226,7 @@ On Windows, `npm` creates three shell scripts (cmd, PowerShell and sh) per execu
 
 ## Is running stuff with `npx` slow?
 
-`npx` is written in Node.js. All Node.js tools have a ~200 ms startup cost. Other than that there’s no difference.
+`npx` is written in Node.js. All Node.js tools have at least ~100 ms startup cost. Other than that there’s no difference.
 
 ## Is `elm-tooling` forever locked into the npm ecosystem?
 
@@ -222,7 +240,7 @@ IDE:s and editors would have to support `elm-tooling.json` somehow, too, though,
 
 ## What’s the point of having `elm-json` in `elm-tooling.json`?
 
-[elm-test](https://github.com/rtfeldman/node-test-runner) and [elm-review](https://github.com/jfmengels/node-elm-review) both use `elm-tooling` to install [elm-json](https://github.com/zwilias/elm-json).
+[elm-review](https://github.com/jfmengels/node-elm-review) uses `elm-tooling` to install [elm-json](https://github.com/zwilias/elm-json).
 
 By having `elm-json` in `elm-tooling.json` you can download _all_ executables in parallel in one go.
 
