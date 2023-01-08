@@ -217,7 +217,19 @@ async function installTools(
         `${bold(
           `${tool.name} ${tool.version}`
         )}: Skipped because not supported on your platform, ${platform}\n${indent(
-          `Supported platforms: ${join(tool.supportedPlatforms, ", ")}`
+          `${dim(
+            `Supported platforms: ${join(tool.supportedPlatforms, ", ")}`
+          )}${
+            isNonEmptyArray(tool.supportedVersions)
+              ? tool.supportedVersions.length === 1
+                ? `\nThis version supports your platform, though: ${bold(
+                    tool.supportedVersions[0]
+                  )}`
+                : `\nThese versions support your platform, though: ${bold(
+                    join(tool.supportedVersions, ", ")
+                  )}`
+              : ""
+          }`
         )}`
     ),
   ];

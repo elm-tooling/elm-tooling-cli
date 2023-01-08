@@ -98,6 +98,7 @@ export type UnsupportedTool = {
   name: string;
   version: string;
   supportedPlatforms: Array<string>;
+  supportedVersions: Array<string>;
 };
 
 export function findReadAndParseElmToolingJson(
@@ -309,6 +310,9 @@ function parseTools(
         name,
         version,
         supportedPlatforms: Object.keys(platformAssets),
+        supportedVersions: Object.entries(versions)
+          .filter(([, assets]) => Object.hasOwnProperty.call(assets, platform))
+          .map(([supportedVersion]) => supportedVersion),
       });
       continue;
     }
