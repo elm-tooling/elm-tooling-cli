@@ -1,3 +1,29 @@
+### Version 1.11.0 (2023-01-08)
+
+> ℹ️ If you use macOS ARM (Apple Silicon) and have used `elm-tooling` before, you need to clear previously downloaded binaries in order to get macOS ARM binaries. Otherwise you’ll keep using Rosetta.
+>
+> ```bash
+> # Remove downloaded binaries:
+> rm -R ~/.elm/elm-tooling/
+> # Install new binaries:
+> cd your-project
+> npx elm-tooling install
+> ```
+>
+> Similarly, if you have tried `elm-tooling` on Linux ARM before, you also need to clear previously downloaded, non-working x86_64 binaries.
+
+- Added: macOS ARM (Apple Silicon) binary for elm 0.19.1. Thanks to Mario Rogic for compiling it!
+- Added: Linux ARM 64-bit binary for elm 0.19.1. Thanks to Mario Rogic for compiling it!
+- Added: Linux ARM 32-bit binary (Raspberry Pi) for elm 0.19.1. Thanks to dmy for compiling it!
+- Added: Linux ARM 32-bit binary (Raspberry Pi) for elm-format 0.8.2. Thanks to dmy for compiling it!
+- Added: Linux ARM binaries for all elm-json versions, that work on both 64-bit and 32-bit platforms.
+- Added: macOS ARM (Apple Silicon) binaries for elm-json 0.2.10 and 0.2.13.
+- Added: macOS ARM (Apple Silicon) binaries for all elm-test-rs versions.
+- Added: Linux ARM 64-bit binaries for all elm-test-rs versions except 1.0.0.
+- Added: Linux ARM 32-bit binaries for all elm-test-rs versions except 1.0.0.
+- Changed: `elm-tooling` can now be run on any platform. (Previously it exited early on unsupported platforms.)
+- Changed: `elm-tooling install` prints a message for tools that have no binary for the current platform. (It does _not_ fail the command.)
+
 ### Version 1.10.0 (2022-10-14)
 
 - Added: elm-json 0.2.13.
