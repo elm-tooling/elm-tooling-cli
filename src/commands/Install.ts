@@ -14,7 +14,6 @@ import {
   indent,
   isNonEmptyArray,
   join,
-  partitionMap,
   printNumErrors,
   removeColor,
   toError,
@@ -24,7 +23,6 @@ import {
   KNOWN_TOOL_NAMES,
   KNOWN_TOOLS,
   KnownToolNames,
-  OSName,
 } from "../KnownTools";
 import { linkTool, unlinkTool } from "../Link";
 import type { Logger } from "../Logger";
@@ -80,7 +78,7 @@ export async function install(
           cwd,
           env,
           logger,
-          parseResult.osName,
+          parseResult.platform,
           parseResult.elmToolingJsonPath,
           "missing"
         );
@@ -88,12 +86,16 @@ export async function install(
 
       const { tools } = parseResult;
 
-      if (tools.existing.length === 0 && tools.missing.length === 0) {
+      if (
+        tools.existing.length === 0 &&
+        tools.missing.length === 0 &&
+        tools.unsupported.length === 0
+      ) {
         return removeAllTools(
           cwd,
           env,
           logger,
-          parseResult.osName,
+          parseResult.platform,
           parseResult.elmToolingJsonPath,
           "empty"
         );
@@ -104,7 +106,7 @@ export async function install(
         env,
         logger,
         parseResult.elmToolingJsonPath,
-        parseResult.osName,
+        parseResult.platform,
         tools
       );
     }
@@ -116,7 +118,7 @@ async function installTools(
   env: Env,
   logger: Logger,
   elmToolingJsonPath: ElmToolingJsonPath,
-  osName: OSName,
+  platform: string,
   tools: Tools
 ): Promise<number> {
   const nodeModulesBinPath = getNodeModulesBinPath(elmToolingJsonPath);
@@ -180,9 +182,11 @@ async function installTools(
     updateStatusLine(tool, 0, index);
   }
 
-  const presentNames = tools.missing
-    .concat(tools.existing)
-    .map(({ name }) => name);
+  const presentNames = [
+    ...tools.missing,
+    ...tools.existing,
+    ...tools.unsupported,
+  ].map(({ name }) => name);
   const toolsToRemove = KNOWN_TOOL_NAMES.filter(
     (name) => !presentNames.includes(name)
   );
@@ -206,7 +210,28 @@ async function installTools(
 
     ...tools.existing.map((tool) => linkTool(cwd, nodeModulesBinPath, tool)),
 
-    ...removeTools(cwd, env, osName, nodeModulesBinPath, toolsToRemove),
+    ...removeTools(cwd, env, platform, nodeModulesBinPath, toolsToRemove),
+
+    ...tools.unsupported.map(
+      (tool) =>
+        `${bold(
+          `${tool.name} ${tool.version}`
+        )}: Skipped because not supported on your platform, ${platform}\n${indent(
+          `${dim(
+            `Supported platforms: ${join(tool.supportedPlatforms, ", ")}`
+          )}${
+            isNonEmptyArray(tool.supportedVersions)
+              ? tool.supportedVersions.length === 1
+                ? `\nThis version supports your platform, though: ${bold(
+                    tool.supportedVersions[0]
+                  )}`
+                : `\nThese versions support your platform, though: ${bold(
+                    join(tool.supportedVersions, ", ")
+                  )}`
+              : ""
+          }`
+        )}`
+    ),
   ];
 
   return printResults(logger, results);
@@ -260,7 +285,7 @@ function removeAllTools(
   cwd: Cwd,
   env: Env,
   logger: Logger,
-  osName: OSName,
+  platform: string,
   elmToolingJsonPath: ElmToolingJsonPath,
   what: string
 ): number {
@@ -272,7 +297,7 @@ function removeAllTools(
   const results = removeTools(
     cwd,
     env,
-    osName,
+    platform,
     nodeModulesBinPath,
     KNOWN_TOOL_NAMES
   );
@@ -288,14 +313,17 @@ function removeAllTools(
 function removeTools(
   cwd: Cwd,
   env: Env,
-  osName: OSName,
+  platform: string,
   nodeModulesBinPath: NodeModulesBinPath,
   names: Array<KnownToolNames>
 ): Array<Error | string | undefined> {
   return flatMap(names, (name) => {
     const versions = KNOWN_TOOLS[name];
-    return Object.entries(versions).map(([version, foo]) => {
-      const asset = foo[osName];
+    return Object.entries(versions).map(([version, platformAssets]) => {
+      const asset = platformAssets[platform];
+      if (asset === undefined) {
+        return undefined;
+      }
       const tool = makeTool(cwd, env, name, version, asset);
       return unlinkTool(cwd, nodeModulesBinPath, tool);
     });
@@ -455,13 +483,15 @@ function spawn(
 // for _all_ spawns, so that we _always_ use Windows’ own `curl` instead of Git
 // Bash’s `curl`.
 function adjustPathForWindows(pathString: string): string {
-  const [system32, rest] = partitionMap(
-    pathString.split(path.delimiter),
-    (part) =>
-      part.toLowerCase().includes("system32")
-        ? { tag: "Left", value: part }
-        : { tag: "Right", value: part }
-  );
+  const system32 = [];
+  const rest = [];
+  for (const part of pathString.split(path.delimiter)) {
+    if (part.toLowerCase().includes("system32")) {
+      system32.push(part);
+    } else {
+      rest.push(part);
+    }
+  }
   return join([...system32, ...rest], path.delimiter);
 }
 

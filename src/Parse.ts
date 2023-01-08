@@ -12,7 +12,6 @@ import {
   isRecord,
   join,
   NonEmptyArray,
-  partitionMap,
   printNumErrors,
   toError,
 } from "./Helpers";
@@ -20,8 +19,7 @@ import {
   Asset,
   KNOWN_TOOL_NAMES,
   KNOWN_TOOLS,
-  OSAssets,
-  OSName,
+  PlatformAssets,
 } from "./KnownTools";
 import {
   absoluteDirname,
@@ -60,7 +58,7 @@ export type ParseResult =
       // Preserved for legacy reasons:
       originalObject: Record<string, unknown>;
       tools?: Tools;
-      osName: OSName;
+      platform: string;
     }
   | {
       tag: "ReadAsJsonObjectError";
@@ -74,7 +72,7 @@ export type ParseError =
       message: string;
     }
   | {
-      tag: "UnkownField";
+      tag: "UnknownField";
       field: string;
     }
   | {
@@ -86,6 +84,7 @@ export type ParseError =
 export type Tools = {
   existing: Array<Tool>;
   missing: Array<Tool>;
+  unsupported: Array<UnsupportedTool>;
 };
 
 export type Tool = {
@@ -93,6 +92,13 @@ export type Tool = {
   version: string;
   location: ToolPath;
   asset: Asset;
+};
+
+export type UnsupportedTool = {
+  name: string;
+  version: string;
+  supportedPlatforms: Array<string>;
+  supportedVersions: Array<string>;
 };
 
 export function findReadAndParseElmToolingJson(
@@ -147,27 +153,13 @@ export function findReadAndParseElmToolingJson(
     };
   }
 
-  const osName = getOSName();
-
-  // istanbul ignore if
-  if (osName instanceof Error) {
-    return {
-      tag: "ReadAsJsonObjectError",
-      elmToolingJsonPath,
-      errors: [
-        {
-          tag: "Message",
-          message: osName.message,
-        },
-      ],
-    };
-  }
+  const platform = getPlatform();
 
   const result: ParseResult = {
     tag: "Parsed",
     elmToolingJsonPath,
     originalObject: json,
-    osName,
+    platform,
   };
 
   const errors: Array<ParseError> = [];
@@ -179,7 +171,7 @@ export function findReadAndParseElmToolingJson(
         break;
 
       case "tools": {
-        const toolsResult = parseTools(cwd, env, osName, value);
+        const toolsResult = parseTools(cwd, env, platform, value);
         if (Array.isArray(toolsResult)) {
           errors.push(...toolsResult);
         } else {
@@ -189,7 +181,7 @@ export function findReadAndParseElmToolingJson(
       }
 
       default:
-        errors.push({ tag: "UnkownField", field });
+        errors.push({ tag: "UnknownField", field });
         break;
     }
   }
@@ -205,20 +197,8 @@ export function findReadAndParseElmToolingJson(
   return result;
 }
 
-export function getOSName(): Error | OSName {
-  // istanbul ignore next
-  switch (os.platform()) {
-    case "linux":
-      return "linux";
-    case "darwin":
-      return "mac";
-    case "win32":
-      return "windows";
-    default:
-      return new Error(
-        `Sorry, your platform (${os.platform()}) is not supported yet :(`
-      );
-  }
+function getPlatform(): string {
+  return `${os.platform()}-${os.arch()}`;
 }
 
 export type FileExists =
@@ -264,7 +244,7 @@ export function validateFileExists(fullPath: AbsolutePath): FileExists {
 function parseTools(
   cwd: Cwd,
   env: Env,
-  osName: OSName,
+  platform: string,
   json: unknown
 ): NonEmptyArray<ParseError> | Tools {
   if (!isRecord(json)) {
@@ -277,54 +257,65 @@ function parseTools(
     ];
   }
 
-  const [errors, tools] = partitionMap<
-    [string, unknown],
-    ParseError,
-    { exists: boolean; tool: Tool }
-  >(Object.entries(json), ([name, version]) => {
+  const errors: Array<ParseError> = [];
+
+  const tools: Tools = {
+    existing: [],
+    missing: [],
+    unsupported: [],
+  };
+
+  for (const [name, version] of Object.entries(json)) {
     if (typeof version !== "string") {
-      return {
-        tag: "Left",
-        value: {
-          tag: "WithPath",
-          path: ["tools", name],
-          message: `Expected a version as a string but got: ${JSON.stringify(
-            version
-          )}`,
-        },
-      };
+      errors.push({
+        tag: "WithPath",
+        path: ["tools", name],
+        message: `Expected a version as a string but got: ${JSON.stringify(
+          version
+        )}`,
+      });
+      continue;
     }
 
     const versions = getOwn(KNOWN_TOOLS, name);
 
     if (versions === undefined) {
-      return {
-        tag: "Left",
-        value: {
-          tag: "WithPath",
-          path: ["tools", name],
-          message: `Unknown tool\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`,
-        },
-      };
+      errors.push({
+        tag: "WithPath",
+        path: ["tools", name],
+        message: `Unknown tool\nKnown tools: ${join(KNOWN_TOOL_NAMES, ", ")}`,
+      });
+      continue;
     }
 
-    const osAssets = getOwn(versions, version);
+    const platformAssets = getOwn(versions, version);
 
-    if (osAssets === undefined) {
-      return {
-        tag: "Left",
-        value: {
-          tag: "WithPath",
-          path: ["tools", name],
-          message: `Unknown version: ${version}\nKnown versions: ${join(
-            Object.keys(versions),
-            ", "
-          )}`,
-        },
-      };
+    if (platformAssets === undefined) {
+      errors.push({
+        tag: "WithPath",
+        path: ["tools", name],
+        message: `Unknown version: ${version}\nKnown versions: ${join(
+          Object.keys(versions),
+          ", "
+        )}`,
+      });
+      continue;
     }
 
-    const asset = osAssets[osName];
+    const asset = platformAssets[platform];
+
+    // istanbul ignore if
+    if (asset === undefined) {
+      tools.unsupported.push({
+        name,
+        version,
+        supportedPlatforms: Object.keys(platformAssets),
+        supportedVersions: Object.entries(versions)
+          .filter(([, assets]) => Object.hasOwnProperty.call(assets, platform))
+          .map(([supportedVersion]) => supportedVersion),
+      });
+      continue;
+    }
 
     const tool = makeTool(cwd, env, name, version, asset);
 
@@ -332,42 +323,24 @@ function parseTools(
 
     switch (exists.tag) {
       case "Exists":
-        return {
-          tag: "Right",
-          value: { exists: true, tool },
-        };
+        tools.existing.push(tool);
+        break;
 
       case "DoesNotExist":
-        return {
-          tag: "Right",
-          value: { exists: false, tool },
-        };
+        tools.missing.push(tool);
+        break;
 
       case "Error":
-        return {
-          tag: "Left",
-          value: {
-            tag: "WithPath",
-            path: ["tools", name],
-            message: exists.message,
-          },
-        };
+        errors.push({
+          tag: "WithPath",
+          path: ["tools", name],
+          message: exists.message,
+        });
+        break;
     }
-  });
-
-  if (isNonEmptyArray(errors)) {
-    return errors;
   }
 
-  const [existing, missing] = partitionMap<
-    { exists: boolean; tool: Tool },
-    Tool,
-    Tool
-  >(tools, ({ exists, tool }) =>
-    exists ? { tag: "Left", value: tool } : { tag: "Right", value: tool }
-  );
-
-  return { existing, missing };
+  return isNonEmptyArray(errors) ? errors : tools;
 }
 
 export function makeTool(
@@ -401,7 +374,7 @@ export function printParseErrors(errors: NonEmptyArray<ParseError>): string {
             case "Message":
               return error.message;
 
-            case "UnkownField":
+            case "UnknownField":
               return `${bold(error.field)}\n${indent("Unknown field")}`;
 
             case "WithPath":
@@ -449,12 +422,7 @@ export function getToolThrowing({
   cwd: Cwd;
   env: Env;
 }): Tool {
-  const osName = getOSName();
-
-  // istanbul ignore if
-  if (osName instanceof Error) {
-    throw osName;
-  }
+  const platform = getPlatform();
 
   const versions = getOwn(KNOWN_TOOLS, name);
 
@@ -480,7 +448,18 @@ export function getToolThrowing({
 
   // `matchingVersion` is derived from `Object.keys` above, so it’s safe to use
   // as index.
-  const asset = (versions[matchingVersion] as OSAssets)[osName];
+  const platformAssets = versions[matchingVersion] as PlatformAssets;
+  const asset = platformAssets[platform];
+
+  // istanbul ignore if
+  if (asset === undefined) {
+    throw new Error(
+      `${name} ${matchingVersion} does not support your platform, ${platform}\nSupported platforms: ${join(
+        Object.keys(platformAssets),
+        ", "
+      )}`
+    );
+  }
 
   return makeTool(cwd, env, name, matchingVersion, asset);
 }

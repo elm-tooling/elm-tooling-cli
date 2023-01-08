@@ -2,15 +2,13 @@ import * as crypto from "crypto";
 
 import { downloadFile } from "../src/commands/Install";
 import { fromEntries } from "../src/Helpers";
-import type { Asset, AssetType, OSName } from "../src/KnownTools";
-
-const OS_LIST: Array<OSName> = ["linux", "mac", "windows"];
+import type { Asset, AssetType } from "../src/KnownTools";
 
 async function run(urls: Array<string>): Promise<string> {
   const progress: Array<number> = urls.map(() => 0);
 
-  const assets: Array<[OSName, Asset]> = await Promise.all(
-    urls.map((url, index): Promise<[OSName, Asset]> => {
+  const assets: Array<[string, Asset]> = await Promise.all(
+    urls.map((url, index): Promise<[string, Asset]> => {
       const hash = crypto.createHash("sha256");
       let fileSize = 0;
       return new Promise((resolve, reject) => {
@@ -32,15 +30,15 @@ async function run(urls: Array<string>): Promise<string> {
           },
           onSuccess: () => {
             progress[index] = 1;
-            const osName = OS_LIST[index] ?? ("UNKNOWN" as OSName);
+            const platform = guessPlatform(url);
             const asset: Asset = {
               hash: hash.digest("hex"),
               url,
               fileSize,
-              fileName: guessFileName(url, osName),
+              fileName: guessFileName(url, platform),
               type: guessAssetType(url),
             };
-            resolve([osName, asset]);
+            resolve([platform, asset]);
           },
         });
       });
@@ -48,19 +46,45 @@ async function run(urls: Array<string>): Promise<string> {
   );
 
   process.stderr.write("\r100%");
-  return JSON.stringify(fromEntries(assets), null, 2);
+  return JSON.stringify(
+    fromEntries(assets.sort(([a], [b]) => a.localeCompare(b))),
+    null,
+    2
+  );
 }
 
-function guessFileName(url: string, osName: OSName): string {
+function guessPlatform(url: string): string {
+  return `${guessPlatformName(url)}-${guessPlatformArch(url)}`;
+}
+
+function guessPlatformName(passedUrl: string): string {
+  const url = passedUrl.toLowerCase();
+  return url.includes("mac") || url.includes("darwin")
+    ? "darwin"
+    : url.includes("linux")
+    ? "linux"
+    : url.includes("win")
+    ? "win32"
+    : "UNKNOWN";
+}
+
+function guessPlatformArch(passedUrl: string): string {
+  const url = passedUrl.toLowerCase();
+  return url.includes("arm") || url.includes("aarch")
+    ? url.includes("32")
+      ? "arm"
+      : "arm64"
+    : "x64";
+}
+
+function guessFileName(url: string, platform: string): string {
   const match = /github\.com\/[^/]+\/([^/]+)/.exec(url);
   const name = match === null || match[1] === undefined ? "UNKNOWN" : match[1];
-  return osName === "windows" ? `${name}.exe` : name;
+  return platform.startsWith("win32-") ? `${name}.exe` : name;
 }
 
 function guessAssetType(url: string): AssetType {
-  return url.endsWith(".tgz")
-    ? "tgz"
-    : url.endsWith(".tar.gz")
+  return url.endsWith(".tgz") || url.endsWith(".tar.gz")
     ? "tgz"
     : url.endsWith(".gz")
     ? "gz"
@@ -70,16 +94,7 @@ function guessAssetType(url: string): AssetType {
 }
 
 if (require.main === module) {
-  const urls = process.argv.slice(2);
-  if (urls.length !== 3) {
-    process.stderr.write(
-      `\nExpected 3 urls (${OS_LIST.join(", ")}, in that order) but got ${
-        urls.length
-      }\n`
-    );
-    process.exit(1);
-  }
-  run(urls)
+  run(process.argv.slice(2))
     .then((json) => {
       process.stdout.write(`\n${json}\n`);
       process.exit(0);
