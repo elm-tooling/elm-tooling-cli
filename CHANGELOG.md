@@ -1,3 +1,24 @@
+### Version 1.12.0 (2023-01-16)
+
+> ℹ️ If you use macOS ARM (Apple Silicon) and have used `elm-tooling` 1.11.0 before, you need to clear previously downloaded binaries in order to get the newest macOS ARM binary. Otherwise you’ll keep using the one from 1.11.0.
+>
+> ```bash
+> # Remove downloaded binaries:
+> rm -R ~/.elm/elm-tooling/elm/0.19.1/
+> # Install new binaries:
+> cd your-project
+> npx elm-tooling install
+> ```
+
+- Changed: Different macOS ARM (Apple Silicon) binary for elm 0.19.1.
+- Changed: Different Linux ARM 64-bit binary for elm 0.19.1.
+
+Why replace the ARM 64 binaries? The ones in this release are compiled from the _same [commit](https://github.com/elm/compiler/commit/c9aefb6230f5e0bda03205ab0499f6e4af924495)_ as the official x86_64 binaries. The ones in 1.11.0 were compiled from a later commit.
+
+The ones in 1.11.0 still work, but can result in surprises. There are some unreleased Elm compiler commits that result in ever so slightly different compiled JavaScript. Many build systems hash outputs for cache busting. If you run a binary compiled from a later commit locally but an official one on a build server, you might be confused why you get different hashes locally and on the build server for example. There’s also a risk that something compiles on your local computer, but not on the build server, or someone else’s computer (who doesn’t use ARM 64).
+
+Thanks to Mario Rogic for compiling the binaries!
+
 ### Version 1.11.0 (2023-01-08)
 
 > ℹ️ If you use macOS ARM (Apple Silicon) and have used `elm-tooling` before, you need to clear previously downloaded binaries in order to get macOS ARM binaries. Otherwise you’ll keep using Rosetta.
