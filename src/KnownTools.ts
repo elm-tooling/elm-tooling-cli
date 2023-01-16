@@ -51,9 +51,9 @@ const knownTools = {
     },
     "0.19.1": {
       "darwin-arm64": {
-        hash: "c7d5322e39c938f5ba35c8a09c9f85387100d495bd0bd5011fc63c6c550b00d8",
-        url: "https://github.com/lydell/compiler/releases/download/0.19.1/binary-for-mac-arm-64-bit.gz",
-        fileSize: 14054287,
+        hash: "f33e70be12ee7db4209bf25ab96ffa8b79f4f29dfe5827542f45209a248626f1",
+        url: "https://github.com/lydell/compiler/releases/download/0.19.1/binary-for-mac-arm-64-bit-recommended.gz",
+        fileSize: 14091365,
         fileName: "elm",
         type: "gz",
       },
@@ -72,9 +72,9 @@ const knownTools = {
         type: "tgz",
       },
       "linux-arm64": {
-        hash: "a9123b40db040fc431ec8c2d275fa04ce260bc8d5eab5050ff5869477253605d",
-        url: "https://github.com/lydell/compiler/releases/download/0.19.1/binary-for-linux-arm-64-bit.gz",
-        fileSize: 4997442,
+        hash: "978ca677abc6ae27cface7468858adb782bd302730c7c564ff1b784a4a5b9235",
+        url: "https://github.com/lydell/compiler/releases/download/0.19.1/binary-for-linux-arm-64-bit-recommended.gz",
+        fileSize: 5208222,
         fileName: "elm",
         type: "gz",
       },
