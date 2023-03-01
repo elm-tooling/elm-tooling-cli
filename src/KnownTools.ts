@@ -258,20 +258,6 @@ const knownTools = {
       },
     },
     "0.8.6": {
-      "linux-x64": {
-        hash: "52ca8edb0274148215b22941aa7b0b9b23cfe73f47c0798cc8c848974d8ff6a3",
-        url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-linux-x64.tgz",
-        fileSize: 4994220,
-        fileName: "elm-format",
-        type: "tgz",
-      },
-      "linux-arm64": {
-        hash: "608f1db1266d4b262c1ea921771ada8a47230fc029193ffb24e546875c09a957",
-        url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-linux-aarch64.tgz",
-        fileSize: 5913951,
-        fileName: "elm-format",
-        type: "tgz",
-      },
       "darwin-arm64": {
         hash: "8b27a5c01c4b6fe105f05a2b2d77bc46916a000a3c097c374e75d5cc123703c9",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-mac-arm64.tgz",
@@ -283,6 +269,20 @@ const knownTools = {
         hash: "87f154a07d90663e07a6df6ce57270109096a45602eef0b90e11b718c63b2789",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-mac-x64.tgz",
         fileSize: 1543460,
+        fileName: "elm-format",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "608f1db1266d4b262c1ea921771ada8a47230fc029193ffb24e546875c09a957",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-linux-aarch64.tgz",
+        fileSize: 5913951,
+        fileName: "elm-format",
+        type: "tgz",
+      },
+      "linux-x64": {
+        hash: "52ca8edb0274148215b22941aa7b0b9b23cfe73f47c0798cc8c848974d8ff6a3",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-linux-x64.tgz",
+        fileSize: 4994220,
         fileName: "elm-format",
         type: "tgz",
       },
