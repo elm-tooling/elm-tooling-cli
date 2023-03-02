@@ -1,3 +1,7 @@
+### Version 1.13.0 (2022-03-02)
+
+- Added: elm-format 0.8.6.
+
 ### Version 1.12.0 (2023-01-16)
 
 > ℹ️ If you use macOS ARM (Apple Silicon) and have used `elm-tooling` 1.11.0 before, you need to clear previously downloaded binaries in order to get the newest macOS ARM binary. Otherwise you’ll keep using the one from 1.11.0.
