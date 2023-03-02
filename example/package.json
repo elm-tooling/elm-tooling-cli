@@ -7,9 +7,9 @@
   },
   "devDependencies": {
     "elm-review": "2.9.1",
-    "elm-test": "0.19.1-revision11",
+    "elm-test": "0.19.1-revision12",
     "elm-tooling": "file:../build",
-    "prettier": "2.8.3",
+    "prettier": "2.8.4",
     "vite": "3.2.5",
     "vite-plugin-elm": "2.7.2"
   }
