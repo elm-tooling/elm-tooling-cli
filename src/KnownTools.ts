@@ -287,9 +287,9 @@ const knownTools = {
         type: "tgz",
       },
       "win32-x64": {
-        hash: "eb5fa174af88bd04cc264d22b58d71d5a4dd7e01aeb41b9c2cde81c31bd86204",
-        url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-win-x64.zip",
-        fileSize: 6784869,
+        hash: "6ad9fa5d26d07b56d62673ee1e774033c43d984036a69bd8cd8af380a8fc13d3",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-windows-win-x64.zip",
+        fileSize: 7057586,
         fileName: "elm-format.exe",
         type: "zip",
       },
