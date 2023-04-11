@@ -109,3 +109,14 @@ TestAllDownloads/
           "elm-test-rs": "3.0.0"
         }
       }
+  6/
+    elm-tooling/
+      elm-format/
+        0.8.7/
+          elm-format
+    elm-tooling.json
+      {
+        "tools": {
+          "elm-format": "0.8.7"
+        }
+      }
