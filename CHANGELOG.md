@@ -1,8 +1,12 @@
-### Version 1.13.1 (2022-03-12)
+### Version 1.14.0 (2023-04-12)
+
+- Added: elm-format 0.8.7.
+
+### Version 1.13.1 (2023-03-12)
 
 - Fixed: elm-format 0.8.6 now works on Windows.
 
-### Version 1.13.0 (2022-03-02) – deprecated
+### Version 1.13.0 (2023-03-02) – deprecated
 
 > Note: This version has been deprecated, since it contains a broken elm-format 0.8.6 Windows binary link. Use 1.13.1 or later instead.
 
