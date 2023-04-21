@@ -62,9 +62,9 @@ Comments:
 
 ## Comparison with the `elm-format`, `elm-json` and `elm-test-rs` npm packages
 
-- elm-format: Similar to `elm`, but more dependencies (65, 6.4 MiB). 👉 [Pull request for switching to the `@lydell/elm` approach](https://github.com/avh4/elm-format/pull/781)
-- elm-json: Same as `elm-format`. 👉 [Pull request for switching to the `@lydell/elm` approach](https://github.com/zwilias/elm-json/pull/51)
-- elm-test-rs: Already uses the `@lydell/elm` approach! 🎉
+- elm-format: Version 0.8.6 and later use the `@lydell/elm` approach! 🎉
+- elm-json: Similar to `elm`, but more dependencies (65, 6.4 MiB). 👉 [Pull request for switching to the `@lydell/elm` approach](https://github.com/zwilias/elm-json/pull/51)
+- elm-test-rs: Uses the `@lydell/elm` approach! 🎉
 
 ## Why should I use `elm-tooling` to install tools?
 
