@@ -9,7 +9,7 @@ type WriteStream = Writable & {
   isTTY: boolean;
 };
 
-export default function elmToolingCli(
+declare function elmToolingCli(
   args: Array<string>,
   options?: {
     cwd?: string;
@@ -19,3 +19,5 @@ export default function elmToolingCli(
     stderr?: WriteStream;
   }
 ): Promise<number>;
+
+export = elmToolingCli;
