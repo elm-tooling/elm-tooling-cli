@@ -1,3 +1,7 @@
+### Version 1.14.1 (2023-09-09)
+
+- Fixed: The TypeScript type definitions shipped in the npm package are now more correct. Previously they used `export default`, but apparently `export =` is the correct syntax to use for packages that export a single function, which can be used both in CJS and MJS. (Read more about [Incorrect default export](https://github.com/arethetypeswrong/arethetypeswrong.github.io/blob/4706e9a84892be17888bb01a4d85c0bfed3230c2/docs/problems/FalseExportDefault.md)). It should now be possible to do `const elmToolingCli = require("elm-tooling")` in a `@ts-checked`ed JS file without TypeScript complaining.
+
 ### Version 1.14.0 (2023-04-12)
 
 - Added: elm-format 0.8.7.
