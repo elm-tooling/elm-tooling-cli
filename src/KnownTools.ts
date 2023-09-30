@@ -51,9 +51,9 @@ const knownTools = {
     },
     "0.19.1": {
       "darwin-arm64": {
-        hash: "f33e70be12ee7db4209bf25ab96ffa8b79f4f29dfe5827542f45209a248626f1",
-        url: "https://github.com/lydell/compiler/releases/download/0.19.1/binary-for-mac-arm-64-bit-recommended.gz",
-        fileSize: 14091365,
+        hash: "552c8300b55dafdf52073b095e7bc6afc1b2ea2a600fbc7654bca8a241e38689",
+        url: "https://github.com/lydell/compiler/releases/download/0.19.1/binary-for-mac-64-bit-ARM.gz",
+        fileSize: 11502530,
         fileName: "elm",
         type: "gz",
       },
