@@ -1,3 +1,19 @@
+### Version 1.15.0 (2023-09-30)
+
+> ℹ️ If you use macOS ARM (Apple Silicon) and have used `elm-tooling` 1.11.0–1.14.1 before, you need to clear previously downloaded binaries in order to get the newest macOS ARM binary. Otherwise you’ll keep using the one from 1.11.0.
+>
+> ```bash
+> # Remove downloaded binaries:
+> rm -R ~/.elm/elm-tooling/elm/0.19.1/
+> # Install new binaries:
+> cd your-project
+> npx elm-tooling install
+> ```
+
+- Changed: Different macOS ARM (Apple Silicon) binary for elm 0.19.1.
+
+The previous macOS ARM binary could sometimes segfault while installing Elm packages. This was fixed by Evan upgrading the Elm compiler to a [newer GHC version](https://github.com/elm/compiler/commit/0421dfbe48e53d880a401e201890eac0b3de5f06). He then uploaded a macOS ARM binary to [official Elm 0.19.1 release](https://github.com/elm/compiler/releases/tag/0.19.1). This version of `elm-tooling` downloads a copy of that binary.
+
 ### Version 1.14.1 (2023-09-09)
 
 - Fixed: The TypeScript type definitions shipped in the npm package are now more correct. Previously they used `export default`, but apparently `export =` is the correct syntax to use for packages that export a single function, which can be used both in CJS and MJS. (Read more about [Incorrect default export](https://github.com/arethetypeswrong/arethetypeswrong.github.io/blob/4706e9a84892be17888bb01a4d85c0bfed3230c2/docs/problems/FalseExportDefault.md)). It should now be possible to do `const elmToolingCli = require("elm-tooling")` in a `@ts-checked`ed JS file without TypeScript complaining.
