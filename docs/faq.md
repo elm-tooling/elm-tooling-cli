@@ -20,7 +20,7 @@ nav_order: 3
 | Metric | `elm` npm package (>=0.19.1-6) | [@lydell/elm](https://github.com/lydell/compiler/tree/zero-deps-arm-lydell/installers/npm) npm package | `elm-tooling` |
 | --- | --- | --- | --- |
 | Number of packages | 2 | 2 | 1 |
-| extra npm package metadata requests | 4 (one for every supported platform) | 7 (one for every supported platform) | 0 (no dependencies) |
+| extra npm package metadata requests | 4 (one for every supported platform) | 6 (one for every supported platform) | 0 (no dependencies) |
 | npm deprecation warnings | 0 | 0 | 0 |
 | `node_modules/` size, not counting binaries | 32 KiB | 32 KiB | 124 KiB |
 | Installation time | 3 s | 3 s | 2 s |
