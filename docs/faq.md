@@ -15,50 +15,30 @@ nav_order: 3
 
 ## Comparison with the `elm` and `@lydell/elm` npm packages
 
-> 👉 [Pull request for switching to the `@lydell/elm` approach officially](https://github.com/elm/compiler/pull/2287)
+> The official `elm` npm package used to have a lot of heavy dependencies and no verification of the downloaded binaries, but that has been fixed since version 0.19.1-6 of the `elm` npm package, which is amazing! This makes the below comparisons seem a bit silly.
 
-| Metric | `elm` npm package | [@lydell/elm](https://github.com/lydell/compiler/tree/zero-deps-arm-lydell/installers/npm) npm package | `elm-tooling` |
+| Metric | `elm` npm package (>=0.19.1-6) | [@lydell/elm](https://github.com/lydell/compiler/tree/zero-deps-arm-lydell/installers/npm) npm package | `elm-tooling` |
 | --- | --- | --- | --- |
-| Number of packages | 48 | 2 | 1 |
-| extra npm package metadata requests | 47 (one for every dependency) | 7 (one for every supported platform) | 0 (no dependencies) |
-| npm deprecation warnings | 3 | 0 | 0 |
-| `node_modules/` size, not counting binaries | 5.2 MiB | 32 KiB | 124 KiB |
+| Number of packages | 2 | 2 | 1 |
+| extra npm package metadata requests | 4 (one for every supported platform) | 7 (one for every supported platform) | 0 (no dependencies) |
+| npm deprecation warnings | 0 | 0 | 0 |
+| `node_modules/` size, not counting binaries | 32 KiB | 32 KiB | 124 KiB |
 | Installation time | 3 s | 3 s | 2 s |
 | Re-installation time | 0.5 s | 0.5 s | 0.3 s |
-| Download verification | None | SHA512 | SHA256 |
-| Supports macOS ARM | Via Rosetta | Yes | Yes |
-| Supports Linux ARM | No | Yes | Yes |
+| Download verification | SHA512 | SHA512 | SHA256 |
+| Supports macOS ARM | Yes | Yes | Yes |
+| Supports Linux ARM | **No** | Yes | Yes |
 | Binary location, npm | Every `node_modules/` | Every `node_modules/` | Once in `~/.elm/elm-tooling/` |
 | Binary location, [pnpm](https://pnpm.io/) | Once in a shared location | Once in a shared location | Once in `~/.elm/elm-tooling/` |
 
-In other words:
+In other words, compared to the official `elm` npm package and the unofficial `@lydell/elm` npm package, `elm-tooling` offers:
 
-- Compared to the official `elm` npm package, `elm-tooling` offers:
-  - No third party dependencies.
-  - No deprecation warnings.
-  - Security (SHA256 verification).
-  - More binaries.
-  - No duplication of the binary in every project.
-- Compared to the unofficial `@lydell/elm` npm package, `elm-tooling` offers:
-  - Faster installation in theory, but in practice no difference.
-  - No duplication of the binary in every project. But that’s up to which package manager you use. [pnpm](https://pnpm.io/) gives the same effect.
-  - Faster execution on Windows. npm packages _have_ to use a Node.js wrapper around binaries on Windows, which adds ~100 ms startup time. `elm-tooling` uses a `.cmd` file which executes instantly.
-  - Faster execution when using [Yarn 2+ (Berry)](https://yarnpkg.com/). Yarn 2+ _requires_ a Node.js wrapper around binaries, which adds ~100 ms startup time. `elm-tooling` uses a symlink or `.cmd` file which executes instantly.
-  - So in summary: Not much. `elm-tooling` even has a potential downside: There are mirrors for npmjs.com, while `elm-tooling` always downloads from github.com.
-
-Comments:
-
-- Number of packages: Why are 48 npm packages installed just to get `elm`, `elm-format` and `elm-json` onto my computer?
-
-- `node_modules/` size: How can `elm-tooling` be so much smaller? Some of the 48 npm packages are pretty heavy. `elm-tooling` has no dependencies, and instead uses the `curl` (or `wget`) and `tar` that come with basically all operating systems (even Windows!) out of the box. `@lydell/elm` wins, though, since it lets `npm` handle downloading and unpacking.
-
-- Installation time: This of course depends on your Internet speed, and also on npm cache. `npm` used to be much slower, but has stepped up their game.
-
-- Re-installation time: Note that re-installation time for `elm-tooling` includes re-installing `elm-tooling` itself with `npm`. That’s where most time is spent, while `elm-tooling install` is basically a no-op when the executables already exist in `~/.elm/elm-tooling`.
-
-- Download verification: `elm-tooling` ships with SHA256 hashes for all tools it knows about and verifies that download files match. `elm-tooling` itself is hashed in your `package-lock.json` (which you commit). The `elm` npm package on the other hand downloads stuff without verifying what it got. With the `@lydell/elm` package, the hashes in `package-lock.json` provides the same security as `elm-tooling`.
-
-- The `elm` npm package is essentially a hack – it does not contain Elm at all. It just contains some code that _downloads_ Elm using a postinstall script (or at the first run).
+- More binaries than `elm`. The same binaries as `@lydell/elm`.
+- No duplication of the binary in every project. But that’s up to which package manager you use. [pnpm](https://pnpm.io/) gives the same effect.
+- Faster installation in theory, but in practice no difference.
+- Faster execution on Windows. npm packages _have_ to use a Node.js wrapper around binaries on Windows, which adds ~100 ms startup time. `elm-tooling` uses a `.cmd` file which executes instantly.
+- Faster execution when using [Yarn 2+ (Berry)](https://yarnpkg.com/). Yarn 2+ _requires_ a Node.js wrapper around binaries, which adds ~100 ms startup time. `elm-tooling` uses a symlink or `.cmd` file which executes instantly.
+- So in summary: Not much. `elm-tooling` even has a potential downside: There are mirrors for npmjs.com, while `elm-tooling` always downloads from github.com.
 
 ## Comparison with the `elm-format`, `elm-json` and `elm-test-rs` npm packages
 
@@ -166,7 +146,7 @@ There’s no global `elm-tooling.json`. Only local, per-project ones.
 
 As long as you define the needed tools in every project, you don’t really need global installations. Use `npx elm` and `npx elm-format` etc. A benefit of _not_ having global installations is that you can never run the global version instead of the project version by mistake.
 
-If you want a global `elm` command you could try the [official installer](https://guide.elm-lang.org/install/elm.html), the [unofficial npm package](https://github.com/lydell/compiler/tree/zero-deps-arm-lydell/installers/npm) or [brew](https://formulae.brew.sh/formula/elm#default).
+If you want a global `elm` command you could try the [official installer](https://guide.elm-lang.org/install/elm.html), the [elm npm package](https://www.npmjs.com/package/elm) or [brew](https://formulae.brew.sh/formula/elm#default).
 
 On macOS and Linux, you could alternatively add symlinks in your `$PATH`. For example, on macOS:
 
