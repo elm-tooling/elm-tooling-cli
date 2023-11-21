@@ -10,7 +10,7 @@
     "elm-test": "0.19.1-revision12",
     "elm-tooling": "file:../build",
     "prettier": "2.8.4",
-    "vite": "3.2.5",
+    "vite": "3.2.7",
     "vite-plugin-elm": "2.7.2"
   }
 }
