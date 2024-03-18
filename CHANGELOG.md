@@ -1,3 +1,7 @@
+### Version 1.15.1 (2024-03-18)
+
+- Fixed: elm-tooling now works with curl 8.6.0 ([#128](https://github.com/elm-tooling/elm-tooling-cli/pull/128)).
+
 ### Version 1.15.0 (2023-09-30)
 
 > ℹ️ If you use macOS ARM (Apple Silicon) and have used `elm-tooling` 1.11.0–1.14.1 before, you need to clear previously downloaded binaries in order to get the newest macOS ARM binary. Otherwise you’ll keep using the one from 1.11.0.
