@@ -550,10 +550,14 @@ export function downloadFile(
       }
     };
 
-  // `-w ""` overrides `-w "\n"` which people might have in their .curlrc due to this:
+  // `-w "%{stderr}"` overrides `-w "\n"` which people might have in their .curlrc due to this:
   // https://stackoverflow.com/a/14614203/2010616
   // Otherwise they’ll get a byte/hash mismatch due to the extra newline.
-  const curl = spawn(env, "curl", ["-#fLw", "", url]);
+  // `%{stderr}` doesn’t print anything of itself, it just makes the rest of the
+  // `-w` string get written to stderr. “The rest of the string” is nothing in this case.
+  // Note that `-w ""` is invalid since curl 8.6.0:
+  // https://github.com/curl/curl/commit/07bcae89d5d0090f1d11866d5f9c98c3720a2838
+  const curl = spawn(env, "curl", ["-#fLw", "%{stderr}", url]);
   let toKill: { kill: () => void } = curl;
   curl.stdout.on("data", onData);
   curl.stderr.on("data", onStderr);
