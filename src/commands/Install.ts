@@ -555,8 +555,9 @@ export function downloadFile(
   // Otherwise they’ll get a byte/hash mismatch due to the extra newline.
   // `%{stderr}` doesn’t print anything of itself, it just makes the rest of the
   // `-w` string get written to stderr. “The rest of the string” is nothing in this case.
-  // Note that `-w ""` is invalid since curl 8.6.0:
+  // Note that `-w ""` is invalid in curl 8.6.0:
   // https://github.com/curl/curl/commit/07bcae89d5d0090f1d11866d5f9c98c3720a2838
+  // But has since been fixed: https://github.com/curl/curl/commit/6bd4ca0ef6da6ed38db62ac34eab502e9a582264
   const curl = spawn(env, "curl", ["-#fLw", "%{stderr}", url]);
   let toKill: { kill: () => void } = curl;
   curl.stdout.on("data", onData);
