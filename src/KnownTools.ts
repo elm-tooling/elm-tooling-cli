@@ -331,6 +331,43 @@ const knownTools = {
         type: "zip",
       },
     },
+    "0.8.8": {
+      "darwin-arm64": {
+        hash: "230bbf3777191f631bb592dfe85c06ebdcff6f56e8f5ed8b29804f8938961a79",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.8/elm-format-0.8.8-mac-arm64.tgz",
+        fileSize: 8492778,
+        fileName: "elm-format",
+        type: "tgz",
+      },
+      "darwin-x64": {
+        hash: "e2a1fcf041ee12fc5d24a99520531e98c28358c8b7e62ecdccb9dd64b51fe084",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.8/elm-format-0.8.8-mac-x64.tgz",
+        fileSize: 1614697,
+        fileName: "elm-format",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "0be0046a81432e6e16340b8093cafa35a454e84956522d53f6a28f815dceac23",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.8/elm-format-0.8.8-linux-aarch64.tgz",
+        fileSize: 2028517,
+        fileName: "elm-format",
+        type: "tgz",
+      },
+      "linux-x64": {
+        hash: "ee749898a07871e5dcbe7adf77a6c3d95de2fcde2e15de30e4fa7457faf05a71",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.8/elm-format-0.8.8-linux-x64.tgz",
+        fileSize: 1920046,
+        fileName: "elm-format",
+        type: "tgz",
+      },
+      "win32-x64": {
+        hash: "4a2d0eb0529944fbfb7974943df5a03881ec4b67501a631e1272aa9fd746bc82",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.8/elm-format-0.8.8-win-x64.zip",
+        fileSize: 8031282,
+        fileName: "elm-format.exe",
+        type: "zip",
+      },
+    },
   },
   "elm-json": {
     "0.2.8": {
