@@ -165,7 +165,7 @@ describe("init", () => {
         {
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.7",
+                "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
         }
@@ -191,7 +191,7 @@ describe("init", () => {
         {
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.7",
+                "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
         }
@@ -215,7 +215,7 @@ describe("init", () => {
         {
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.7",
+                "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
         }
@@ -239,7 +239,7 @@ describe("init", () => {
         {
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.7",
+                "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
         }
@@ -263,7 +263,7 @@ describe("init", () => {
         {
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.7",
+                "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
         }
@@ -287,7 +287,7 @@ describe("init", () => {
         {
             "tools": {
                 "elm": "0.19.1",
-                "elm-format": "0.8.7",
+                "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
         }

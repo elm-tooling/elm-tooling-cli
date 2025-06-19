@@ -170,7 +170,7 @@ describe("install", () => {
 
         ⧙tools["elm-format"]⧘
             Unknown version: 0.8
-            Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4, 0.8.5, 0.8.6, 0.8.7
+            Known versions: 0.8.1, 0.8.2, 0.8.3, 0.8.4, 0.8.5, 0.8.6, 0.8.7, 0.8.8
 
       `);
     });
@@ -200,7 +200,7 @@ describe("install", () => {
         ⧙/Users/you/project/fixtures/install/bad-json/elm-tooling.json⧘
 
         Failed to read file as JSON:
-        Unexpected end of JSON input
+        Expected property name or '}' in JSON at position 2 (line 2 column 1)
 
       `);
     });
