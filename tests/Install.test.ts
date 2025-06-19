@@ -200,7 +200,7 @@ describe("install", () => {
         ⧙/Users/you/project/fixtures/install/bad-json/elm-tooling.json⧘
 
         Failed to read file as JSON:
-        Expected property name or '}' in JSON at position 2 (line 2 column 1)
+        Unexpected end of JSON input
 
       `);
     });
