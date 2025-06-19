@@ -1,3 +1,7 @@
+### Version 1.16.0 (2025-06-19)
+
+- Added: elm-format 0.8.8.
+
 ### Version 1.15.1 (2024-03-18)
 
 - Fixed: elm-tooling now works with curl 8.6.0 ([#128](https://github.com/elm-tooling/elm-tooling-cli/pull/128)).
