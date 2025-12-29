@@ -81,7 +81,7 @@ class MemoryWriteStream extends stream.Writable implements WriteStream {
 }
 
 const cursorMoveRegex = /^\x1B\[(\d*)([AB])$/;
-const skippedRegex = /(elm[\w-]*) ([\d.]+).+Skipped/;
+const skippedRegex = /(elm[\w-]*) ([\d.]+).+Skipped/g;
 
 class CursorWriteStream extends stream.Writable implements WriteStream {
   constructor(
@@ -104,7 +104,6 @@ class CursorWriteStream extends stream.Writable implements WriteStream {
   ): void {
     const chunk = chunkBuffer.toString();
     const cursorMoveMatch = cursorMoveRegex.exec(chunk);
-    const skippedMatch = skippedRegex.exec(chunk);
     // Only care about the first line and the progress, not the “link created” lines.
     if (
       !this.hasWritten ||
@@ -121,13 +120,11 @@ class CursorWriteStream extends stream.Writable implements WriteStream {
         const dy = Number(cursorMoveMatch[1] ?? "1");
         this.y += cursorMoveMatch[2] === "A" ? -dy : dy;
       }
-    } else if (skippedMatch !== null) {
-      this.skipped.add(
-        `${skippedMatch[1] ?? "unknown-tool"} ${
-          skippedMatch[2] ?? "unknown-version"
-        }`
-      );
     }
+    chunk.replace(skippedRegex, (_, name: string, version: string) => {
+      this.skipped.add(`${name} ${version}`);
+      return "";
+    });
     callback();
   }
 }
