@@ -22,10 +22,22 @@ jobs:
           ]
         node-version: [10, 12, 14, 16, 18, 20, 22, 24]
         exclude:
+          # Not supported on macOS ARM.
           - os: macOS-latest
-            node-version: [10, 12, 14] # Not supported on macOS ARM.
+            node-version: 10
+          - os: macOS-latest
+            node-version: 12
+          - os: macOS-latest
+            node-version: 14
+          # Not supported on Linux ARM.
           - os: ubuntu-24.04-arm
-            node-version: [10, 12, 14, 16] # Not supported on Linux ARM.
+            node-version: 10
+          - os: ubuntu-24.04-arm
+            node-version: 12
+          - os: ubuntu-24.04-arm
+            node-version: 14
+          - os: ubuntu-24.04-arm
+            node-version: 16
 
     steps:
       - uses: actions/checkout@v6
