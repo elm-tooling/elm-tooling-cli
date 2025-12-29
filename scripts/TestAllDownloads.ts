@@ -80,7 +80,8 @@ class MemoryWriteStream extends stream.Writable implements WriteStream {
   }
 }
 
-const cursorMove = /^\x1B\[(\d*)([AB])$/;
+const cursorMoveRegex = /^\x1B\[(\d*)([AB])$/;
+const skippedRegex = /(elm[\w-]*) ([\d.]+).+Skipped/;
 
 class CursorWriteStream extends stream.Writable implements WriteStream {
   constructor(
@@ -92,7 +93,7 @@ class CursorWriteStream extends stream.Writable implements WriteStream {
 
   isTTY = true;
 
-  content = "";
+  skipped = new Set<string>();
 
   private hasWritten = false;
 
@@ -102,26 +103,30 @@ class CursorWriteStream extends stream.Writable implements WriteStream {
     callback: (error?: Error | null) => void
   ): void {
     const chunk = chunkBuffer.toString();
-    const cursorMoveMatch = cursorMove.exec(chunk);
+    const cursorMoveMatch = cursorMoveRegex.exec(chunk);
+    const skippedMatch = skippedRegex.exec(chunk);
     // Only care about the first line and the progress, not the “link created” lines.
     if (
       !this.hasWritten ||
       chunk.includes("%") ||
       chunk.includes("ERR!") ||
-      chunk.includes("Skipped") ||
       cursorMoveMatch !== null
     ) {
-      const line = chunk.replace(/\n[\S\s]*/, "\n");
       readline.cursorTo(process.stdout, 0, this.y);
-      process.stdout.write(line);
+      process.stdout.write(chunk);
       readline.cursorTo(process.stdout, 0, calculateHeight(this.variants));
-      this.content += line;
       this.hasWritten = true;
-      this.y += line.split("\n").length - 1;
+      this.y += chunk.split("\n").length - 1;
       if (cursorMoveMatch !== null) {
         const dy = Number(cursorMoveMatch[1] ?? "1");
         this.y += cursorMoveMatch[2] === "A" ? -dy : dy;
       }
+    } else if (skippedMatch !== null) {
+      this.skipped.add(
+        `${skippedMatch[1] ?? "unknown-tool"} ${
+          skippedMatch[2] ?? "unknown-version"
+        }`
+      );
     }
     callback();
   }
@@ -241,9 +246,7 @@ export async function run({
             }
             return Promise.all(
               tools.map(async ([name, version]) => {
-                const skipped = RegExp(`${name} ${version}.+Skipped`).test(
-                  stdout.content
-                );
+                const skipped = stdout.skipped.has(`${name} ${version}`);
                 const toolExitCode = await (skipped
                   ? 0
                   : runTool({ name, version, cwd: dir, stderr }));
