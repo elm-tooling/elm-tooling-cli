@@ -80,9 +80,10 @@ class MemoryWriteStream extends stream.Writable implements WriteStream {
   }
 }
 
-const cursorMove = /^\x1B\[(\d*)([AB])$/;
+const cursorMoveRegex = /^\x1B\[(\d*)([AB])$/;
+const skippedRegex = /(elm[\w-]*) ([\d.]+).+Skipped/g;
 
-class CurorWriteStream extends stream.Writable implements WriteStream {
+class CursorWriteStream extends stream.Writable implements WriteStream {
   constructor(
     private variants: Array<Array<readonly [string, string]>>,
     private y: number
@@ -92,6 +93,8 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
 
   isTTY = true;
 
+  skipped = new Set<string>();
+
   private hasWritten = false;
 
   override _write(
@@ -100,7 +103,7 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
     callback: (error?: Error | null) => void
   ): void {
     const chunk = chunkBuffer.toString();
-    const cursorMoveMatch = cursorMove.exec(chunk);
+    const cursorMoveMatch = cursorMoveRegex.exec(chunk);
     // Only care about the first line and the progress, not the “link created” lines.
     if (
       !this.hasWritten ||
@@ -118,6 +121,10 @@ class CurorWriteStream extends stream.Writable implements WriteStream {
         this.y += cursorMoveMatch[2] === "A" ? -dy : dy;
       }
     }
+    chunk.replace(skippedRegex, (_, name: string, version: string) => {
+      this.skipped.add(`${name} ${version}`);
+      return "";
+    });
     callback();
   }
 }
@@ -128,13 +135,15 @@ async function spawnPromise(
   stdout: WriteStream
 ): Promise<number> {
   return new Promise((resolve, reject) => {
-    const child = childProcess.spawn("npx", ["--no-install", name, "--help"], {
-      cwd,
-      shell: true,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-    child.stdout.pipe(stdout);
-    child.stderr.pipe(stdout);
+    // Using `exec` rather than `spawn` here since executing with a shell is better supported on Windows.
+    // `name` should not need escaping.
+    const child = childProcess.exec(`npx --no-install ${name} --help`, { cwd });
+    if (child.stdout !== null) {
+      child.stdout.pipe(stdout);
+    }
+    if (child.stderr !== null) {
+      child.stderr.pipe(stdout);
+    }
     child.on("error", reject);
     child.on("close", resolve);
   });
@@ -198,50 +207,62 @@ export async function run({
   // eslint-disable-next-line no-console
   console.clear();
 
-  const exitCodes: Array<Array<number>> = await Promise.all(
-    variants.map((tools, index) => {
-      const dir = path.join(WORK_DIR, index.toString());
+  const exitCodesNested: Array<Array<readonly [number, boolean]>> =
+    await Promise.all(
+      variants.map((tools, index) => {
+        const dir = path.join(WORK_DIR, index.toString());
 
-      const elmToolingJson: ElmTooling = {
-        tools: fromEntries(tools),
-      };
+        const elmToolingJson: ElmTooling = {
+          tools: fromEntries(tools),
+        };
 
-      fs.mkdirSync(path.join(dir, "node_modules"), { recursive: true });
-      fs.writeFileSync(
-        path.join(dir, "elm-tooling.json"),
-        JSON.stringify(elmToolingJson, null, 2)
-      );
+        fs.mkdirSync(path.join(dir, "node_modules"), { recursive: true });
+        fs.writeFileSync(
+          path.join(dir, "elm-tooling.json"),
+          JSON.stringify(elmToolingJson, null, 2)
+        );
 
-      return elmToolingCli(["install"], {
-        cwd: dir,
-        env: { ELM_HOME: dir },
-        stdin: process.stdin,
-        stdout: new CurorWriteStream(
+        const stdout = new CursorWriteStream(
           variants,
           calculateHeight(variants.slice(0, index))
-        ),
-        stderr,
-      })
-        .then((exitCode) => {
-          if (exitCode !== 0) {
-            stderr.write(
-              `\nPromise at index ${index}: Non-zero exit code: ${exitCode}\n`
-            );
-            return [exitCode];
-          }
-          return Promise.all(
-            tools.map(([name, version]) =>
-              runTool({ name, version, cwd: dir, stderr })
-            )
-          );
+        );
+
+        return elmToolingCli(["install"], {
+          cwd: dir,
+          env: { ELM_HOME: dir },
+          stdin: process.stdin,
+          stdout,
+          stderr,
         })
-        .catch((error: Error) => {
-          stderr.write(
-            `\nPromise at index ${index}: Error: ${error.message}\n`
-          );
-          return [10];
-        });
-    })
+          .then((exitCode) => {
+            if (exitCode !== 0) {
+              stderr.write(
+                `\nPromise at index ${index}: Non-zero exit code: ${exitCode}\n`
+              );
+              return [[exitCode, false] as const];
+            }
+            return Promise.all(
+              tools.map(async ([name, version]) => {
+                const skipped = stdout.skipped.has(`${name} ${version}`);
+                const toolExitCode = await (skipped
+                  ? 0
+                  : runTool({ name, version, cwd: dir, stderr }));
+                return [toolExitCode, skipped] as const;
+              })
+            );
+          })
+          .catch((error: Error) => {
+            stderr.write(
+              `\nPromise at index ${index}: Error: ${error.message}\n`
+            );
+            return [[10, false] as const];
+          });
+      })
+    );
+
+  const exitCodes: Array<readonly [number, boolean]> = flatMap(
+    exitCodesNested,
+    (items) => items
   );
 
   readline.cursorTo(process.stdout, 0, calculateHeight(variants));
@@ -250,9 +271,7 @@ export async function run({
     process.stderr.write(`All stderr outputs:\n${stderr.content}`);
   }
 
-  const failed = ([] as Array<number>)
-    .concat(...exitCodes)
-    .filter((exitCode) => exitCode !== 0);
+  const failed = exitCodes.filter(([exitCode]) => exitCode !== 0);
   if (failed.length > 0) {
     throw new Error(`${failed.length} exited with non-zero exit code.`);
   }
@@ -272,10 +291,16 @@ export async function run({
     process.stdout.write(`Updated ${EXPECTED_FILE}`);
   } else {
     if (actual !== expected) {
-      fs.writeFileSync(ACTUAL_FILE, actual);
-      throw new Error(
-        `Unexpected output. Run this to see the difference:\ngit diff --no-index scripts/TestAllDownloads.expected.txt scripts/TestAllDownloads.actual.txt`
-      );
+      if (exitCodes.some(([, skipped]) => skipped)) {
+        process.stdout.write(
+          "Skipped comparing with expected output since this platform does not support all tools."
+        );
+      } else {
+        fs.writeFileSync(ACTUAL_FILE, actual);
+        throw new Error(
+          `Unexpected output. Run this to see the difference:\ngit diff --no-index scripts/TestAllDownloads.expected.txt scripts/TestAllDownloads.actual.txt`
+        );
+      }
     }
   }
 }

@@ -13,31 +13,26 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [18.x]
+        node-version: [24]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
           node-version: "${{ matrix.node-version }}"
 
-      - name: Cache node_modules
-        id: cache-node_modules
-        uses: actions/cache@v3
+      - id: cache-node_modules
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('package.json', 'package-lock.json') }}
 
-      - name: npm ci
-        if: steps.cache-node_modules.outputs.cache-hit != 'true'
-        run: npm ci
+      - if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci --no-audit
 
-      - name: TypeScript
-        run: npx tsc
+      - run: npx tsc
 
-      - name: ESLint
-        run: npx eslint --report-unused-disable-directives .
+      - run: npx eslint --report-unused-disable-directives .
 
-      - name: Prettier
-        run: npx prettier --check .
+      - run: npx prettier --check .
