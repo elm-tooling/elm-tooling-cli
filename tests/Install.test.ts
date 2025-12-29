@@ -200,7 +200,7 @@ describe("install", () => {
         ⧙/Users/you/project/fixtures/install/bad-json/elm-tooling.json⧘
 
         Failed to read file as JSON:
-        Unexpected end of JSON input
+        (JSON syntax error)
 
       `);
     });

@@ -12,35 +12,41 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-        node-version: [10.x, 12.x, 14.x, 16.x, 18.x]
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            macOS-latest,
+            macos-15-intel,
+            windows-latest,
+          ]
+        node-version: [10, 12, 14, 16, 18, 20, 22, 24]
+        exclude:
+          - os: macOS-latest
+            node-version: [10, 12, 14] # Not supported on macOS ARM.
+          - os: ubuntu-24.04-arm
+            node-version: [10, 12, 14, 16] # Not supported on Linux ARM.
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v6
         with:
           node-version: "${{ matrix.node-version }}"
 
-      - name: Cache node_modules
-        id: cache-node_modules
-        uses: actions/cache@v3
+      - id: cache-node_modules
+        uses: actions/cache@v4
         with:
           path: node_modules
           key: internal-node_modules-${{ matrix.os }}-${{ matrix.node-version }}-${{ hashFiles('package.json', 'package-lock.json') }}
 
-      - name: npm ci
-        if: steps.cache-node_modules.outputs.cache-hit != 'true'
-        run: npm ci
+      - if: steps.cache-node_modules.outputs.cache-hit != 'true'
+        run: npm ci --no-audit
 
-      - name: Jest
-        run: npx jest --coverage
+      - run: npx jest --coverage
 
-      - name: TestAllDownloads.ts
-        run: npx ts-node scripts/TestAllDownloads.ts
+      - run: npx ts-node scripts/TestAllDownloads.ts
 
-      - name: TestIntegration.ts
-        run: npx ts-node scripts/TestIntegration.ts
+      - run: npx ts-node scripts/TestIntegration.ts
 
-      - name: TestGetExecutable.ts
-        run: npx ts-node scripts/TestGetExecutable.ts
+      - run: npx ts-node scripts/TestGetExecutable.ts
