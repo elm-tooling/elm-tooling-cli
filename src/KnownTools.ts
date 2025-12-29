@@ -917,7 +917,7 @@ export type KnownToolNames = keyof typeof knownTools;
 export const KNOWN_TOOLS: KnownTools = knownTools;
 
 export const KNOWN_TOOL_NAMES: NonEmptyArray<KnownToolNames> = Object.keys(
-  KNOWN_TOOLS,
+  KNOWN_TOOLS
 ) as NonEmptyArray<KnownToolNames>;
 
 export function getLastVersion(name: KnownToolNames): string {
