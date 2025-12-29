@@ -269,7 +269,7 @@ describe("install", () => {
     const elmToolingJson = {
       tools: {
         elm: "0.19.1",
-        "elm-format": "0.8.3",
+        "elm-format": "0.8.8",
       },
     };
 
@@ -323,7 +323,7 @@ describe("install", () => {
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘ link created: ⧙node_modules/.bin/elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm⧘
           To run: npx elm
-      ⧙elm-format 0.8.3⧘ link created: ⧙node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧙elm-format 0.8.8⧘ link created: ⧙node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.8/elm-format⧘
           To run: npx elm-format
 
     `);
@@ -337,15 +337,15 @@ describe("install", () => {
           
         elm-format
           #!/bin/sh
-          '/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format' "$@"
+          '/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.8/elm-format' "$@"
           
         elm-format.cmd
           @ECHO off
-          "/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format" %*
+          "/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.8/elm-format" %*
           
         elm-format.ps1
           #!/usr/bin/env pwsh
-          & '/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format' $args
+          & '/Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.8/elm-format' $args
           
         elm.cmd
           @ECHO off
@@ -363,7 +363,7 @@ describe("install", () => {
       // eslint-disable-next-line jest/no-conditional-expect
       expect(bin1).toMatchInlineSnapshot(`
         elm -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm/0.19.1/elm
-        elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format
+        elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.8/elm-format
         elmx
           not elm
           
@@ -376,7 +376,7 @@ describe("install", () => {
     expect(stdout2).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
-      ⧙elm-format 0.8.3⧘: ⧙all good⧘
+      ⧙elm-format 0.8.8⧘: ⧙all good⧘
 
     `);
 
@@ -393,7 +393,7 @@ describe("install", () => {
     expect(stdout3).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘: ⧙all good⧘
-      ⧙elm-format 0.8.3⧘ link created: ⧙/Users/you/project/fixtures/install/create-links/node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.3/elm-format⧘
+      ⧙elm-format 0.8.8⧘ link created: ⧙/Users/you/project/fixtures/install/create-links/node_modules/.bin/elm-format -> /Users/you/project/fixtures/install/create-links/elm-tooling/elm-format/0.8.8/elm-format⧘
           To run: npx elm-format
 
     `);
@@ -412,7 +412,7 @@ describe("install", () => {
     expect(stdout4).toMatchInlineSnapshot(`
       ⧙/Users/you/project/fixtures/install/create-links/elm-tooling.json⧘
       ⧙elm 0.19.1⧘ link removed: ⧙node_modules/.bin/elm⧘
-      ⧙elm-format 0.8.3⧘ link removed: ⧙node_modules/.bin/elm-format⧘
+      ⧙elm-format 0.8.8⧘ link removed: ⧙node_modules/.bin/elm-format⧘
 
     `);
 
