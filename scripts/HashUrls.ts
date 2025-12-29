@@ -45,9 +45,18 @@ async function run(urls: Array<string>): Promise<string> {
     })
   );
 
+  // The convention is to allow the Windows x86 binary on Windows ARM
+  // as well, thanks to its WoW64 compatibility layer.
+  const win32x64 = assets.find(([key]) => key === "win32-x64");
+  const hasWin32arm64 = assets.some(([key]) => key === "win32-arm64");
+  const finalAssets =
+    win32x64 !== undefined && !hasWin32arm64
+      ? [...assets, ["win32-arm64", win32x64[1]] as const]
+      : assets;
+
   process.stderr.write("\r100%");
   return JSON.stringify(
-    fromEntries(assets.sort(([a], [b]) => a.localeCompare(b))),
+    fromEntries(finalAssets.sort(([a], [b]) => a.localeCompare(b))),
     null,
     2
   );

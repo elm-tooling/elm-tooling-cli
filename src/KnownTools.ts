@@ -41,6 +41,14 @@ const knownTools = {
         fileName: "elm",
         type: "gz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "0e27d80537418896cf98326224159a45b6d36bf08e608e3a174ab6d2c572c5ae",
+        url: "https://github.com/elm/compiler/releases/download/0.19.0/binary-for-windows-64-bit.gz",
+        fileSize: 12639872,
+        fileName: "elm.exe",
+        type: "gz",
+      },
       "win32-x64": {
         hash: "0e27d80537418896cf98326224159a45b6d36bf08e608e3a174ab6d2c572c5ae",
         url: "https://github.com/elm/compiler/releases/download/0.19.0/binary-for-windows-64-bit.gz",
@@ -85,6 +93,14 @@ const knownTools = {
         fileName: "elm",
         type: "gz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "d1bf666298cbe3c5447b9ca0ea608552d750e5d232f9845c2af11907b654903b",
+        url: "https://github.com/elm/compiler/releases/download/0.19.1/binary-for-windows-64-bit.gz",
+        fileSize: 12727488,
+        fileName: "elm.exe",
+        type: "gz",
+      },
       "win32-x64": {
         hash: "d1bf666298cbe3c5447b9ca0ea608552d750e5d232f9845c2af11907b654903b",
         url: "https://github.com/elm/compiler/releases/download/0.19.1/binary-for-windows-64-bit.gz",
@@ -117,6 +133,14 @@ const knownTools = {
         fileSize: 2110405,
         fileName: "elm-format",
         type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "29b8989918e5804b538c411a92f3da8d15337ec28003b033b3be0de2d2d636d2",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.1/elm-format-0.8.1-win-i386.zip",
+        fileSize: 2281778,
+        fileName: "elm-format.exe",
+        type: "zip",
       },
       "win32-x64": {
         hash: "29b8989918e5804b538c411a92f3da8d15337ec28003b033b3be0de2d2d636d2",
@@ -156,6 +180,14 @@ const knownTools = {
         fileName: "elm-format",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "5009fd26b59a785738dd82c8d90ea8fd0bb7fe65fbd562097d906ee04061ef7f",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.2/elm-format-0.8.2-win-i386.zip",
+        fileSize: 4243045,
+        fileName: "elm-format.exe",
+        type: "zip",
+      },
       "win32-x64": {
         hash: "5009fd26b59a785738dd82c8d90ea8fd0bb7fe65fbd562097d906ee04061ef7f",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.2/elm-format-0.8.2-win-i386.zip",
@@ -186,6 +218,14 @@ const knownTools = {
         fileSize: 2137733,
         fileName: "elm-format",
         type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "da9c013e27faccd14d6395db638af111097f171a45705a8978a28e30c115778f",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.3/elm-format-0.8.3-win-i386.zip",
+        fileSize: 4136741,
+        fileName: "elm-format.exe",
+        type: "zip",
       },
       "win32-x64": {
         hash: "da9c013e27faccd14d6395db638af111097f171a45705a8978a28e30c115778f",
@@ -218,6 +258,14 @@ const knownTools = {
         fileName: "elm-format",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "0afe91bba2951c675f7484ae8d3d45792ed802d2eac9110b2afc18e3ed1a888d",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.4/elm-format-0.8.4-win-x64.zip",
+        fileSize: 2105708,
+        fileName: "elm-format.exe",
+        type: "zip",
+      },
       "win32-x64": {
         hash: "0afe91bba2951c675f7484ae8d3d45792ed802d2eac9110b2afc18e3ed1a888d",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.4/elm-format-0.8.4-win-x64.zip",
@@ -248,6 +296,14 @@ const knownTools = {
         fileSize: 3870971,
         fileName: "elm-format",
         type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "3cb6f74f24b401314480227b1ccbb2049cceb4a365ac7abb50cd3cfe0e64bbdc",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.5/elm-format-0.8.5-win-x64.zip",
+        fileSize: 1737291,
+        fileName: "elm-format.exe",
+        type: "zip",
       },
       "win32-x64": {
         hash: "3cb6f74f24b401314480227b1ccbb2049cceb4a365ac7abb50cd3cfe0e64bbdc",
@@ -286,6 +342,14 @@ const knownTools = {
         fileName: "elm-format",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "6ad9fa5d26d07b56d62673ee1e774033c43d984036a69bd8cd8af380a8fc13d3",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-windows-win-x64.zip",
+        fileSize: 7057586,
+        fileName: "elm-format.exe",
+        type: "zip",
+      },
       "win32-x64": {
         hash: "6ad9fa5d26d07b56d62673ee1e774033c43d984036a69bd8cd8af380a8fc13d3",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.6/elm-format-0.8.6-windows-win-x64.zip",
@@ -323,6 +387,14 @@ const knownTools = {
         fileName: "elm-format",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "24833297bc58f6e72708b0f95a03c73190aa22d5e789b89ba1c00796a58abf7f",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.7/elm-format-0.8.7-win-x64.zip",
+        fileSize: 7047219,
+        fileName: "elm-format.exe",
+        type: "zip",
+      },
       "win32-x64": {
         hash: "24833297bc58f6e72708b0f95a03c73190aa22d5e789b89ba1c00796a58abf7f",
         url: "https://github.com/avh4/elm-format/releases/download/0.8.7/elm-format-0.8.7-win-x64.zip",
@@ -359,6 +431,14 @@ const knownTools = {
         fileSize: 1920046,
         fileName: "elm-format",
         type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "4a2d0eb0529944fbfb7974943df5a03881ec4b67501a631e1272aa9fd746bc82",
+        url: "https://github.com/avh4/elm-format/releases/download/0.8.8/elm-format-0.8.8-win-x64.zip",
+        fileSize: 8031282,
+        fileName: "elm-format.exe",
+        type: "zip",
       },
       "win32-x64": {
         hash: "4a2d0eb0529944fbfb7974943df5a03881ec4b67501a631e1272aa9fd746bc82",
@@ -407,6 +487,14 @@ const knownTools = {
         fileName: "elm-json",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "1ae0b8e9a9717bdfb05346d0b864868e3907cb83c54d6770f6c604972296384f",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.8/elm-json-v0.2.8-x86_64-pc-windows-msvc.tar.gz",
+        fileSize: 1375556,
+        fileName: "elm-json.exe",
+        type: "tgz",
+      },
       "win32-x64": {
         hash: "1ae0b8e9a9717bdfb05346d0b864868e3907cb83c54d6770f6c604972296384f",
         url: "https://github.com/zwilias/elm-json/releases/download/v0.2.8/elm-json-v0.2.8-x86_64-pc-windows-msvc.tar.gz",
@@ -450,6 +538,14 @@ const knownTools = {
         url: "https://github.com/zwilias/elm-json/releases/download/v0.2.10/elm-json-v0.2.10-x86_64-unknown-linux-musl.tar.gz",
         fileSize: 2307188,
         fileName: "elm-json",
+        type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "721084dd90042a2b7b99a1334a9dcfa753fcf166ade458e6a3bb5d6649f8e39b",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.10/elm-json-v0.2.10-x86_64-pc-windows-msvc.tar.gz",
+        fileSize: 1415941,
+        fileName: "elm-json.exe",
         type: "tgz",
       },
       "win32-x64": {
@@ -496,6 +592,14 @@ const knownTools = {
         fileName: "elm-json",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "0494f0d813244bf43e3c6cad1d0428919e7e0a5430d21a4d8a65697af0c14527",
+        url: "https://github.com/zwilias/elm-json/releases/download/v0.2.13/elm-json-v0.2.13-x86_64-pc-windows-msvc.tar.gz",
+        fileSize: 1239097,
+        fileName: "elm-json.exe",
+        type: "tgz",
+      },
       "win32-x64": {
         hash: "0494f0d813244bf43e3c6cad1d0428919e7e0a5430d21a4d8a65697af0c14527",
         url: "https://github.com/zwilias/elm-json/releases/download/v0.2.13/elm-json-v0.2.13-x86_64-pc-windows-msvc.tar.gz",
@@ -528,6 +632,14 @@ const knownTools = {
         fileSize: 3610634,
         fileName: "elm-test-rs",
         type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "c8a35e2e0049b691e4833a6e8ccb094688cdc49aa977c437a8289c57d92a5775",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.0/elm-test-rs_windows.zip",
+        fileSize: 1939029,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
       },
       "win32-x64": {
         hash: "c8a35e2e0049b691e4833a6e8ccb094688cdc49aa977c437a8289c57d92a5775",
@@ -573,6 +685,14 @@ const knownTools = {
         fileName: "elm-test-rs",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "26add13880af484a47cd182547f41370d3bfca812a7cc9e3db6f41ce13b7fc40",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.1/elm-test-rs_windows.zip",
+        fileSize: 1880965,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
+      },
       "win32-x64": {
         hash: "26add13880af484a47cd182547f41370d3bfca812a7cc9e3db6f41ce13b7fc40",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.1/elm-test-rs_windows.zip",
@@ -616,6 +736,14 @@ const knownTools = {
         fileSize: 3629469,
         fileName: "elm-test-rs",
         type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "8469a05cdaf0be76e7cb7c9d8001a88df74a1db964a24d144554a925f8042600",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v1.2.2/elm-test-rs_windows.zip",
+        fileSize: 1891939,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
       },
       "win32-x64": {
         hash: "8469a05cdaf0be76e7cb7c9d8001a88df74a1db964a24d144554a925f8042600",
@@ -661,6 +789,14 @@ const knownTools = {
         fileName: "elm-test-rs",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "5f4ae45981750ac17cd72a2711bacc21fee763840d3f18c2e73614666f510ee8",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0/elm-test-rs_windows.zip",
+        fileSize: 1897927,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
+      },
       "win32-x64": {
         hash: "5f4ae45981750ac17cd72a2711bacc21fee763840d3f18c2e73614666f510ee8",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0/elm-test-rs_windows.zip",
@@ -705,6 +841,14 @@ const knownTools = {
         fileName: "elm-test-rs",
         type: "tgz",
       },
+      // WoW64.
+      "win32-arm64": {
+        hash: "ae2f0ec7911911e0b06f74138782b5f3874900936a66455daff0d5c4c7c2bef8",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0.1/elm-test-rs_windows.zip",
+        fileSize: 1909110,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
+      },
       "win32-x64": {
         hash: "ae2f0ec7911911e0b06f74138782b5f3874900936a66455daff0d5c4c7c2bef8",
         url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v2.0.1/elm-test-rs_windows.zip",
@@ -748,6 +892,14 @@ const knownTools = {
         fileSize: 3717002,
         fileName: "elm-test-rs",
         type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "8cb1ef9bfe3e80e12db7db7f176e3e9280c5ae3bbb54c8dcfbb4f298c3d8fc71",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.0/elm-test-rs_windows.zip",
+        fileSize: 1917553,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
       },
       "win32-x64": {
         hash: "8cb1ef9bfe3e80e12db7db7f176e3e9280c5ae3bbb54c8dcfbb4f298c3d8fc71",
