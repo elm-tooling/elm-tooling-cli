@@ -1,3 +1,7 @@
+### Version 1.17.0 (2025-12-29)
+
+- Added: elm-tooling now supports Windows ARM! There are no Windows ARM64 binaries, but the x86_64 binaries work on Windows ARM thanks to the WoW64/Prism compatibility layer, so elm-tooling simply points to the x86_64 binaries. Thanks to Eli ([@lishaduck](https://github.com/lishaduck))!
+
 ### Version 1.16.0 (2025-06-19)
 
 - Added: elm-format 0.8.8.
