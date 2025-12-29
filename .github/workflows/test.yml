@@ -20,24 +20,18 @@ jobs:
             macos-15-intel,
             windows-latest,
           ]
-        node-version: [10, 12, 14, 16, 18, 20, 22, 24]
+        # Node.js 10 is the oldest supported version.
+        # CI takes forever if we test every version, so we just test
+        # the supported, even, versions as well as Node.js 10 and
+        # assume that everything in between works too.
+        node-version: [10, 20, 22, 24]
         exclude:
           # Not supported on macOS ARM.
           - os: macOS-latest
             node-version: 10
-          - os: macOS-latest
-            node-version: 12
-          - os: macOS-latest
-            node-version: 14
           # Not supported on Linux ARM.
           - os: ubuntu-24.04-arm
             node-version: 10
-          - os: ubuntu-24.04-arm
-            node-version: 12
-          - os: ubuntu-24.04-arm
-            node-version: 14
-          - os: ubuntu-24.04-arm
-            node-version: 16
 
     steps:
       - uses: actions/checkout@v6
