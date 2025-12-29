@@ -255,6 +255,10 @@ export function clean(string: string): string {
   const cleaned = string
     .split(__dirname)
     .join(path.join(root, "Users", "you", "project"))
+    .replace(
+      /(?:Expected .+|Unexpected token .) in JSON at position \d+(?: \(line \d+ column \d+\))?|Unexpected end of JSON input/g,
+      "(JSON syntax error)"
+    )
     .replace(/(?:\x1B\[0?m)?\x1B\[(?!0)\d+m/g, "⧙")
     .replace(/\x1B\[0?m/g, "⧘");
 

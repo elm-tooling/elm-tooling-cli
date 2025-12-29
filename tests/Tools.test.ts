@@ -676,7 +676,7 @@ describe("tools", () => {
         ⧙/Users/you/project/fixtures/tools/bad-json/elm-tooling.json⧘
 
         Failed to read file as JSON:
-        Unexpected end of JSON input
+        (JSON syntax error)
 
       `);
     });
