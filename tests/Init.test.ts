@@ -164,7 +164,7 @@ describe("init", () => {
       expect(json).toMatchInlineSnapshot(`
         {
             "tools": {
-                "elm": "0.19.1",
+                "elm": "0.19.2",
                 "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
@@ -190,7 +190,7 @@ describe("init", () => {
       expect(json).toMatchInlineSnapshot(`
         {
             "tools": {
-                "elm": "0.19.1",
+                "elm": "0.19.2",
                 "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
@@ -214,7 +214,7 @@ describe("init", () => {
       expect(json).toMatchInlineSnapshot(`
         {
             "tools": {
-                "elm": "0.19.1",
+                "elm": "0.19.2",
                 "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
@@ -238,7 +238,7 @@ describe("init", () => {
       expect(json).toMatchInlineSnapshot(`
         {
             "tools": {
-                "elm": "0.19.1",
+                "elm": "0.19.2",
                 "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
@@ -262,7 +262,7 @@ describe("init", () => {
       expect(json).toMatchInlineSnapshot(`
         {
             "tools": {
-                "elm": "0.19.1",
+                "elm": "0.19.2",
                 "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
@@ -286,7 +286,7 @@ describe("init", () => {
       expect(json).toMatchInlineSnapshot(`
         {
             "tools": {
-                "elm": "0.19.1",
+                "elm": "0.19.2",
                 "elm-format": "0.8.8",
                 "elm-json": "0.2.13"
             }
@@ -330,7 +330,7 @@ describe("init", () => {
       expect(json).toMatchInlineSnapshot(`
         {
             "tools": {
-                "elm": "0.19.1"
+                "elm": "0.19.2"
             }
         }
 

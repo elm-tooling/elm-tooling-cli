@@ -109,6 +109,51 @@ const knownTools = {
         type: "gz",
       },
     },
+    "0.19.2": {
+      "darwin-arm64": {
+        hash: "8b02a7fac1643b39acb87ae2a8e10f0f1534fe61940ca08ab17dfc2ac98115c8",
+        url: "https://github.com/elm/compiler/releases/download/0.19.2/elm-0.19.2-mac-arm.gz",
+        fileSize: 14263130,
+        fileName: "elm",
+        type: "gz",
+      },
+      "darwin-x64": {
+        hash: "bcfbec1ee85bf87e29da23ea6cb597caa4613b74df77b4a3a40d881df1fa0410",
+        url: "https://github.com/elm/compiler/releases/download/0.19.2/elm-0.19.2-mac-x64.gz",
+        fileSize: 4309721,
+        fileName: "elm",
+        type: "gz",
+      },
+      "linux-arm64": {
+        hash: "a2bb23e8af8c9874ed1f700fdba4d25636699313dff04695598c41055028c8f5",
+        url: "https://github.com/elm/compiler/releases/download/0.19.2/elm-0.19.2-linux-arm.gz",
+        fileSize: 12198085,
+        fileName: "elm",
+        type: "gz",
+      },
+      "linux-x64": {
+        hash: "66320d27701654fa11bd0e8d84bdf9829694d5770c8dcee2dede6160fad58737",
+        url: "https://github.com/elm/compiler/releases/download/0.19.2/elm-0.19.2-linux-x64.gz",
+        fileSize: 11243558,
+        fileName: "elm",
+        type: "gz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "47830fe67a8cca55ce82da4e04c29d150f5725b92b0a354b83121d6903ff667a",
+        url: "https://github.com/elm/compiler/releases/download/0.19.2/elm-0.19.2-windows-x64.gz",
+        fileSize: 14500760,
+        fileName: "elm.exe",
+        type: "gz",
+      },
+      "win32-x64": {
+        hash: "47830fe67a8cca55ce82da4e04c29d150f5725b92b0a354b83121d6903ff667a",
+        url: "https://github.com/elm/compiler/releases/download/0.19.2/elm-0.19.2-windows-x64.gz",
+        fileSize: 14500760,
+        fileName: "elm.exe",
+        type: "gz",
+      },
+    },
   },
   "elm-format": {
     "0.8.1": {

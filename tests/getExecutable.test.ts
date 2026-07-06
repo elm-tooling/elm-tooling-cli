@@ -54,7 +54,7 @@ describe("getExecutable", () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
       No elm versions matching: ^1337.1.0
-      Known versions: 0.19.0, 0.19.1
+      Known versions: 0.19.0, 0.19.1, 0.19.2
     `));
 
   test("unknown exact version", () =>
@@ -66,7 +66,7 @@ describe("getExecutable", () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
       No elm versions matching: =0.1.0
-      Known versions: 0.19.0, 0.19.1
+      Known versions: 0.19.0, 0.19.1, 0.19.2
     `));
 
   test("future prereleases should not match", () => {
@@ -154,12 +154,12 @@ describe("getExecutable", () => {
     if (IS_WINDOWS) {
       // eslint-disable-next-line jest/no-conditional-expect
       return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
-        `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1'`
+        `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.2'`
       );
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
       return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
-        `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1`
+        `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.2`
       );
     }
   });
