@@ -154,7 +154,7 @@ describe("getExecutable", () => {
     if (IS_WINDOWS) {
       // eslint-disable-next-line jest/no-conditional-expect
       return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
-        `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.1'`
+        `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.2'`
       );
     } else {
       // eslint-disable-next-line jest/no-conditional-expect
