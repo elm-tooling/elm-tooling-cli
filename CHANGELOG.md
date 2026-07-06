@@ -1,3 +1,8 @@
+### Version 1.18.0 (2026-07-06)
+
+- Added: elm 0.19.2.
+- Added: elm-test-rs 3.0.1 and 3.0.2.
+
 ### Version 1.17.0 (2025-12-29)
 
 - Added: elm-tooling now supports Windows ARM! There are no Windows ARM64 binaries, but the x86_64 binaries work on Windows ARM thanks to the WoW64/Prism compatibility layer, so elm-tooling simply points to the x86_64 binaries. Thanks to Eli ([@lishaduck](https://github.com/lishaduck))!
