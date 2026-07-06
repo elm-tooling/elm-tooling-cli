@@ -15,25 +15,27 @@ nav_order: 3
 
 ## Comparison with the `elm` and `@lydell/elm` npm packages
 
-> The official `elm` npm package used to have a lot of heavy dependencies and no verification of the downloaded binaries, but that has been fixed since version 0.19.1-6 of the `elm` npm package, which is amazing! This makes the below comparisons seem a bit silly.
+> The official `elm` npm package used to have a lot of heavy dependencies and no verification of the downloaded binaries, but that has been fixed since version 0.19.1-6 of the `elm` npm package, which is amazing! Version 0.19.2-0 also added the missing Linux ARM binary. This makes the below comparisons seem a bit silly.
 
 | Metric | `elm` npm package (>=0.19.1-6) | [@lydell/elm](https://github.com/lydell/compiler/tree/zero-deps-arm-lydell/installers/npm) npm package | `elm-tooling` |
 | --- | --- | --- | --- |
 | Number of packages | 2 | 2 | 1 |
-| extra npm package metadata requests | 4 (one for every supported platform) | 6 (one for every supported platform) | 0 (no dependencies) |
+| extra npm package metadata requests | 5 (one for every supported platform) | 6 (one for every supported platform) | 0 (no dependencies) |
 | npm deprecation warnings | 0 | 0 | 0 |
 | `node_modules/` size, not counting binaries | 32 KiB | 32 KiB | 124 KiB |
 | Installation time | 3 s | 3 s | 2 s |
 | Re-installation time | 0.5 s | 0.5 s | 0.3 s |
 | Download verification | SHA512 | SHA512 | SHA256 |
 | Supports macOS ARM | Yes | Yes | Yes |
-| Supports Linux ARM | **No** | Yes | Yes |
+| Supports Linux ARM | Yes (>=0.19.2-0) | Yes | Yes |
+| Elm versions | >=0.19.0\* | _Only 0.19.1_ | >=0.19.0 |
 | Binary location, npm | Every `node_modules/` | Every `node_modules/` | Once in `~/.elm/elm-tooling/` |
 | Binary location, [pnpm](https://pnpm.io/) | Once in a shared location | Once in a shared location | Once in `~/.elm/elm-tooling/` |
 
+\* The `elm` npm package technically has versions for Elm <=0.18, but in practice they are not installable anymore. You can download binaries from [Old Elm binaries](https://github.com/lydell/elm-old-binaries/releases).
+
 In other words, compared to the official `elm` npm package and the unofficial `@lydell/elm` npm package, `elm-tooling` offers:
 
-- More binaries than `elm`. The same binaries as `@lydell/elm`.
 - No duplication of the binary in every project. But that’s up to which package manager you use. [pnpm](https://pnpm.io/) gives the same effect.
 - Faster installation in theory, but in practice no difference.
 - Faster execution on Windows. npm packages _have_ to use a Node.js wrapper around binaries on Windows, which adds ~100 ms startup time. `elm-tooling` uses a `.cmd` file which executes instantly.
@@ -46,9 +48,7 @@ In other words, compared to the official `elm` npm package and the unofficial `@
 - elm-json: Similar to `elm`, but more dependencies (65, 6.4 MiB). 👉 [Pull request for switching to the `@lydell/elm` approach](https://github.com/zwilias/elm-json/pull/51)
 - elm-test-rs: Uses the `@lydell/elm` approach! 🎉
 
-## Why should I use `elm-tooling` to install tools?
-
-In short: For the same reasons you’d install tools using `npm`.
+## Why should I install tools locally?
 
 If you’re just getting started, install Elm whatever way you think is the easiest so you can get started coding. Installing Elm globally using the official installer can be a great way. But if you’re already familiar with installing stuff with `npm` it might be just as easy to start with `elm-tooling`. It doesn’t really matter. You can always change the installation method later.
 
@@ -56,6 +56,8 @@ Don’t forget to check out the official documentation as well:
 
 - [Guide: Install](https://guide.elm-lang.org/install/elm.html)
 - [npm installer](https://github.com/elm/compiler/tree/master/installers/npm)
+
+Ok, so why install locally? Let’s go through it for applications, packages and tools.
 
 ### For Elm applications
 
