@@ -1058,6 +1058,58 @@ const knownTools = {
         type: "zip",
       },
     },
+    "3.1.0": {
+      "darwin-arm64": {
+        hash: "c2e3c3356ff34fa454a2e13c863f196fc7220343e4393a128fb16db5bed3de67",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.1.0/elm-test-rs_macos-arm.tar.gz",
+        fileSize: 2469905,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "darwin-x64": {
+        hash: "c6eea3fd24f341597bfd8669258e4ef5a0c02ad70a167182caec21be644e123b",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.1.0/elm-test-rs_macos.tar.gz",
+        fileSize: 2630053,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm": {
+        hash: "58c256726dc252dd4cc1d793256b3260e3872d9a4c51f02095b360268170813e",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.1.0/elm-test-rs_linux-arm-32.tar.gz",
+        fileSize: 2109110,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-arm64": {
+        hash: "8e3a0c058775fbaf83c1891af7d60af41f5112fad5cfc0171f8d6a7acd5630bb",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.1.0/elm-test-rs_linux-arm-64.tar.gz",
+        fileSize: 2304348,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      "linux-x64": {
+        hash: "364e3528222acbe916a679d079f583b1b4c70be9132297bb541572ce275ff95d",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.1.0/elm-test-rs_linux.tar.gz",
+        fileSize: 2956378,
+        fileName: "elm-test-rs",
+        type: "tgz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "66554f09d9e7ba74519fcc9151ca4ac15ae67bafb9123786dbc9e554766aa437",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.1.0/elm-test-rs_windows.zip",
+        fileSize: 2338825,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
+      },
+      "win32-x64": {
+        hash: "66554f09d9e7ba74519fcc9151ca4ac15ae67bafb9123786dbc9e554766aa437",
+        url: "https://github.com/mpizenberg/elm-test-rs/releases/download/v3.1.0/elm-test-rs_windows.zip",
+        fileSize: 2338825,
+        fileName: "elm-test-rs.exe",
+        type: "zip",
+      },
+    },
   },
 } as const;
 
