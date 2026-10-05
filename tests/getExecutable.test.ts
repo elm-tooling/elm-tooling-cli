@@ -144,22 +144,40 @@ describe("getExecutable", () => {
       `Version ranges must start with ^ or ~ (or = if you really need an exact version) and be followed by 3 dot-separated numbers, but got: ^0.19`
     ));
 
-  test("error finding executable", () => {
-    const promise = getExecutableHelper({
-      fixture: "folder-that-actually-is-a-file",
-      name: "elm",
-      version: "^0.19.1",
-    });
+  test("error finding executable", async () => {
+    let result: string | undefined = undefined;
+    try {
+      result = await getExecutableHelper({
+        fixture: "folder-that-actually-is-a-file",
+        name: "elm",
+        version: "^0.19.1",
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? // Replace the version number so we don’t need to update this snapshot for every new Elm release.
+            // This test in particular is annoying since it has different snapshots for Windows and other
+            // operating systems. `jest -u` only updates the snapshot for the system you ran it on.
+            error.message.replace(/\d+/g, "0")
+          : `Not an Error: ${String(error)}`;
+      if (IS_WINDOWS) {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(message).toMatchInlineSnapshot(
+          `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.0.0'`
+        );
+        return;
+      } else {
+        // eslint-disable-next-line jest/no-conditional-expect
+        expect(message).toMatchInlineSnapshot(
+          `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.0.0`
+        );
+        return;
+      }
+    }
 
-    if (IS_WINDOWS) {
-      // eslint-disable-next-line jest/no-conditional-expect
-      return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
-        `ENOTDIR: not a directory, mkdir '/Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.3'`
-      );
-    } else {
-      // eslint-disable-next-line jest/no-conditional-expect
-      return expect(promise).rejects.toThrowErrorMatchingInlineSnapshot(
-        `A part of this path exist, but is not a directory (which it needs to be): /Users/you/project/fixtures/getExecutable/folder-that-actually-is-a-file/elm-tooling/elm/0.19.3`
+    if (result !== undefined) {
+      throw new Error(
+        `Expected getExecutable to reject, but is resolved to: ${result}`
       );
     }
   });
