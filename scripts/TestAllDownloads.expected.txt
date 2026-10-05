@@ -70,6 +70,9 @@ TestAllDownloads/
       }
   3/
     elm-tooling/
+      elm/
+        0.19.3/
+          elm
       elm-format/
         0.8.4/
           elm-format
@@ -79,6 +82,7 @@ TestAllDownloads/
     elm-tooling.json
       {
         "tools": {
+          "elm": "0.19.3",
           "elm-format": "0.8.4",
           "elm-test-rs": "2.0.0"
         }
