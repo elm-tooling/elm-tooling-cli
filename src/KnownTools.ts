@@ -154,6 +154,51 @@ const knownTools = {
         type: "gz",
       },
     },
+    "0.19.3": {
+      "darwin-arm64": {
+        hash: "a426e47d14cba0588aa81475adc32ba24bbf045209d0c560d0a89a5c4f3c34d0",
+        url: "https://github.com/elm/compiler/releases/download/0.19.3/elm-0.19.3-mac-arm.gz",
+        fileSize: 15126132,
+        fileName: "elm",
+        type: "gz",
+      },
+      "darwin-x64": {
+        hash: "4a9c5578e53c4feb55b91c8ee9a0f46da9913414c6303d1c55add0d3abcd9921",
+        url: "https://github.com/elm/compiler/releases/download/0.19.3/elm-0.19.3-mac-x64.gz",
+        fileSize: 4422736,
+        fileName: "elm",
+        type: "gz",
+      },
+      "linux-arm64": {
+        hash: "4d22c4d10f89e482d3554b7af4f6527f8a05e4d82648a07b23f1f211495b5d24",
+        url: "https://github.com/elm/compiler/releases/download/0.19.3/elm-0.19.3-linux-arm.gz",
+        fileSize: 12133257,
+        fileName: "elm",
+        type: "gz",
+      },
+      "linux-x64": {
+        hash: "d11702b31577ed8b720b9d81c52c8a19a52b72b1fcfadef0fcad92f21798c58a",
+        url: "https://github.com/elm/compiler/releases/download/0.19.3/elm-0.19.3-linux-x64.gz",
+        fileSize: 11280294,
+        fileName: "elm",
+        type: "gz",
+      },
+      // WoW64.
+      "win32-arm64": {
+        hash: "02d827be1d8489dbe53aaf5f923cb1f580aed257a9a8b642ff04bbe625572507",
+        url: "https://github.com/elm/compiler/releases/download/0.19.3/elm-0.19.3-windows-x64.gz",
+        fileSize: 8474793,
+        fileName: "elm.exe",
+        type: "gz",
+      },
+      "win32-x64": {
+        hash: "02d827be1d8489dbe53aaf5f923cb1f580aed257a9a8b642ff04bbe625572507",
+        url: "https://github.com/elm/compiler/releases/download/0.19.3/elm-0.19.3-windows-x64.gz",
+        fileSize: 8474793,
+        fileName: "elm.exe",
+        type: "gz",
+      },
+    },
   },
   "elm-format": {
     "0.8.1": {
